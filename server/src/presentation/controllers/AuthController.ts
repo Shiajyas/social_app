@@ -44,7 +44,7 @@ export class AuthController {
         user instanceof mongoose.Document ? user.toObject() : user;
 
       const userWithoutPassword = { ...userObject, password: undefined };
-  setCookie(res, 'userToken', token);
+       setCookie(res, 'userToken', token);
       if (user.role !== 'admin') {
         setCookie(res, 'userToken', token);
       } else {
