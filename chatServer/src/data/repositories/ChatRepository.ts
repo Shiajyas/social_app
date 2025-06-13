@@ -2,10 +2,8 @@ import IChatRepository from '../interfaces/IChatRepository';
 import ChatModel from '../../core/domain/models/chatModel';
 import MessageModel from '../../core/domain/models/messageModel';
 import { IMessage } from '../../core/domain/interfaces/IMessage';
-import { IChat } from '../../core/domain/interfaces/IChat';
 import { INormalizedChat } from '../../core/domain/interfaces/INormalizedChat';
 import { INormalizedMessage } from '../../core/domain/interfaces/INormalizedMessage';
-import { ISUserRepository } from '../interfaces/ISUserRepository';
 import mongoose from 'mongoose';
 
 export class ChatRepository implements IChatRepository {

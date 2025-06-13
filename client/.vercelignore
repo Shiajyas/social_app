@@ -1,0 +1,7 @@
+node_modules
+.vscode
+*.log
+*.test.ts
+*.test.tsx
+coverage
+.env.local

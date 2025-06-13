@@ -4,6 +4,7 @@ import path from 'path';
 import eslint from 'vite-plugin-eslint';
 
 export default defineConfig({
+  base: '/',
   plugins: [react(), eslint()],
   server: {
     host: '0.0.0.0',
@@ -14,4 +15,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+  outDir: 'dist', 
+},
 });
