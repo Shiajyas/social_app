@@ -30,12 +30,18 @@ export class CallSocketService implements ICallSocketService {
         avatar: sender.avatar || null,
       };
 
-      socket.to(recipient.socketId).emit('incoming:call', {
+      console.log("recipient", recipient, "recipient");
+
+      socket.to(recipient?.chatSocketId ?? "").emit('incoming:call', {
         from: data.from,
         offer: data.offer,
         type: data.type,
         caller,
       });
+
+      console.log(
+        `📞 Incoming call from ${data.from} to ${data.to} (type: ${data.type})`,
+      );
     } else {
       console.warn(`⚠️ Cannot send offer — user ${data.to} not online.`);
     }
@@ -47,7 +53,7 @@ export class CallSocketService implements ICallSocketService {
     console.log(recipient, 'recipient answer>>>>>>>>>>>>>');
 
     if (recipient) {
-      socket.to(recipient.socketId).emit('call:accepted', data);
+      socket.to(recipient?.chatSocketId ?? "").emit('call:accepted', data);
     } else {
       console.warn(`⚠️ Cannot send answer — user ${data.to} not online.`);
     }
@@ -57,7 +63,7 @@ export class CallSocketService implements ICallSocketService {
     const recipient = await this.onlineUserRepository.findById(data.to);
 
     if (recipient) {
-      socket.to(recipient.socketId).emit('ice-candidated', data);
+      socket.to(recipient?.chatSocketId ?? "").emit('ice-candidated', data);
     } else {
       console.warn(`⚠️ Cannot send ICE candidate — user ${data.to} not online.`);
     }
@@ -67,7 +73,7 @@ export class CallSocketService implements ICallSocketService {
     const recipient = await this.onlineUserRepository.findById(data.to);
 
     if (recipient) {
-      socket.to(recipient.socketId).emit('call:ended', data);
+      socket.to(recipient.chatSocketId ?? '').emit('call:ended', data);
     }
 
     // Save call history
@@ -103,7 +109,7 @@ export class CallSocketService implements ICallSocketService {
         `🎤 Toggling mic for user ${data.to}: ${data.micOn ? 'ON' : 'OFF'}`,
       );
       socket
-        .to(recipient.socketId)
+        .to(recipient?.chatSocketId ?? '')
         .emit('call:toggle-mic', { micOn: data.micOn });
     } else {
       console.warn(`⚠️ Cannot toggle mic — user ${data.to} not online.`);
@@ -121,7 +127,7 @@ export class CallSocketService implements ICallSocketService {
         `🎥 Toggling video for user ${data.to}: ${data.videoOn ? 'ON' : 'OFF'}`,
       );
       socket
-        .to(recipient.socketId)
+        .to(recipient.chatSocketId ?? '')
         .emit('call:toggle-video', { videoOn: data.videoOn });
     } else {
       console.warn(`⚠️ Cannot toggle video — user ${data.to} not online.`);

@@ -26,7 +26,8 @@ const HomeLayout: React.FC = () => {
     chatSocket.emit('updateChatSocketId', {userId: user?._id});
     return () => {
       socket.emit('leaveUser', userId);
-      chatSocket.emit('updateChatSocketId', {userId: user?._id});
+      // chatSocket.emit('updateChatSocketId', {userId: user?._id});
+      chatSocket.disconnect();
     };
   }, [userId]);
 

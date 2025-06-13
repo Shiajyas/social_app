@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { socket } from '@/utils/Socket';
+import { chatSocket as socket } from '@/utils/chatSocket';
 import { useIncomingCallStore } from '@/appStore/useIncomingCallStore';
 
 interface UseWebRTCProps {
