@@ -5,18 +5,25 @@
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": false,
-    "composite": true,
+
+    // ✅ Disable problematic checks
+    "composite": false,
+    "declaration": false,
     "isolatedModules": true,
-    "skipLibCheck": true,         
-    "strict": false,            
-    "noUnusedLocals": false,      
-    "noUnusedParameters": false,  
+    "skipLibCheck": true,
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": false,
+
+    // ✅ Paths for aliases
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
+    
     "lib": ["ES2020", "DOM", "DOM.Iterable"]
   },
-  "include": ["src", "global.d.ts", "vite.config.ts"]
+  "include": ["src", "global.d.ts", "vite.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }
