@@ -134,7 +134,9 @@ const PostCard = memo(
     };
 
     return (
-      <div className="bg-white rounded-xl shadow-lg p-4 mb-4 cursor-pointer relative">
+    
+    // <div className="bg-white rounded-xl shadow-lg p-4 mb-4 cursor-pointer relative">
+           <div className=" bg-white dark:bg-gray-900 text-black dark:text-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 cursor-pointer relative outline outline-1 outline-gray-200 dark:outline-gray-700"> 
         {/* User Info */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -163,26 +165,27 @@ const PostCard = memo(
                 <MoreVertical className="w-5 h-5 text-gray-500" />
               </button>
               {menuOpen && (
-                <div className="absolute right-0 mt-2 w-28 bg-white shadow-lg rounded-lg p-2 z-10">
-                  <button
-                    className="flex items-center space-x-2 w-full p-2 hover:bg-gray-100 rounded-md"
-                    onClick={handleEditPost}
-                  >
-                    <Edit className="w-4 h-4 text-gray-600" />
-                    <span>Edit</span>
-                  </button>
-                  <button
-                    className="flex items-center space-x-2 w-full p-2 hover:bg-gray-100 rounded-md text-red-500"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteModalOpen(true);
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Delete</span>
-                  </button>
-                </div>
-              )}
+  <div className="absolute right-0 mt-2 w-28 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-2 z-10 border dark:border-gray-700">
+    <button
+      className="flex items-center space-x-2 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md text-gray-800 dark:text-gray-100"
+      onClick={handleEditPost}
+    >
+      <Edit className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+      <span>Edit</span>
+    </button>
+    <button
+      className="flex items-center space-x-2 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md text-red-600"
+      onClick={(e) => {
+        e.stopPropagation();
+        setDeleteModalOpen(true);
+      }}
+    >
+      <Trash2 className="w-4 h-4 text-red-600" />
+      <span>Delete</span>
+    </button>
+  </div>
+)}
+
             </div>
           )}
         </div>
@@ -207,9 +210,9 @@ const PostCard = memo(
         </p>
 
         {/* Media Preview */}
-        {post.mediaUrls?.length > 0 && (
+        {post?.mediaUrls?.length > 0 && (
           <div className="mt-2">
-            {post.mediaUrls[0].endsWith('.mp4') || post.mediaUrls[0].endsWith('.webm') ? (
+            {post?.mediaUrls[0].endsWith('.mp4') || post?.mediaUrls[0].endsWith('.webm') ? (
               <video
                 className="w-full h-[300px] object-cover rounded-lg"
                 controls

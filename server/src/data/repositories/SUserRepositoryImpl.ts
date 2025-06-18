@@ -91,7 +91,9 @@ export class SUserRepositoryImpl implements ISUserRepository {
 
   async getActiveUserCount(): Promise<number> {
     try {
-      return await redis.hlen(ONLINE_USERS_KEY);
+      console.log('📡 Active User Count:', await redis.hlen(ONLINE_USERS_KEY));
+      let count = await redis.hlen(ONLINE_USERS_KEY);
+      return count;
     } catch (error) {
       console.error('❌ Failed to get active user count:', error);
       return 0;

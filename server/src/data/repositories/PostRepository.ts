@@ -1,8 +1,8 @@
 import { IPostRepository } from '../interfaces/IPostRepository';
 import { IPost } from '../../core/domain/interfaces/IPost';
-import Post from '../../core/domain/models/postModel';
+import Post from '../../core/domain/models/PostModel';
 import mongoose from 'mongoose';
-import User from '../../core/domain/models/userModel';
+import User from '../../core/domain/models/UserModel';
 
 
 export class PostRepository implements IPostRepository {

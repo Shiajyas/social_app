@@ -1,18 +1,28 @@
 import { Router } from 'express';
 import userAuthMiddleware from '../../middleware/userAuthMiddleware';
-import { UserRepository } from '../../../data/repositories/userRepository';
-import { NotificationRepo } from '../../../data/repositories/notificationRepo';
-import { NotificationController } from '../../controllers/notificationController';
+import { NotificationRepo } from '../../../data/repositories/NotificationRepo';
+import { NotificationController } from '../../controllers/NotificationController';
+import { InotificationRepo } from '../../../data/interfaces/InotificationRepo';
+import { INotificationService } from '../../../useCase/interfaces/InotificationService';
+import { NotificationService } from '../../../useCase/notificationService';
+import { UserRepository } from '../../../data/repositories/UserRepository';
+import { Server } from 'socket.io';
+import { IUserRepository } from '../../../data/interfaces/IUserRepository';
+import { SUserRepositoryImpl } from '../../../data/repositories/SUserRepositoryImpl';
+import { ISUserRepository } from '../../../data/interfaces/ISUserRepository';
+const io = new Server();
 
 const router = Router();
 
-const userRepository = new UserRepository();
-const notificationRepository = new NotificationRepo();
+const notificationRepository : InotificationRepo = new NotificationRepo();
+const mainUserRepository: IUserRepository = new UserRepository();
+const SessionRepository: ISUserRepository = new SUserRepositoryImpl();
 
-const notificationController = new NotificationController(
-  userRepository,
-  notificationRepository,
-);
+const notificationService : INotificationService = new NotificationService(io,SessionRepository,mainUserRepository,notificationRepository);
+  
+
+
+const notificationController = new NotificationController(notificationService);
 
 // Fetch unread notification count
 router.get('/unreadcount/:id', userAuthMiddleware.authenticate, (req, res) =>

@@ -3,25 +3,18 @@ import { IUserService } from '../../useCase/interfaces/IUserService';
 import { getErrorMessage } from '../../infrastructure/utils/errorHelper';
 import { IUser } from '../../core/domain/interfaces/IUser';
 import { ISubscriptionUseCase } from '../../useCase/interfaces/ISubscriptionUseCase';
-import { ICallHistoryRepository } from '../../data/interfaces/ICallHistoryRepository';
-import stripePackage from 'stripe';
+import { stripe } from '../../infrastructure/utils/stripe';
 
-const stripe = new stripePackage(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2025-02-24.acacia',
-});
 
 export class UserController {
-  private userService: IUserService;
-  private SubscriptionUseCase: ISubscriptionUseCase;
-  private callHistoryRepository: ICallHistoryRepository;
+  private _UserService: IUserService;
+  private _SubscriptionUseCase: ISubscriptionUseCase;
   constructor(
     userService: IUserService,
     SubscriptionUseCase: ISubscriptionUseCase,
-    callHistoryRepository: ICallHistoryRepository,
   ) {
-    this.callHistoryRepository = callHistoryRepository;
-    this.userService = userService;
-    this.SubscriptionUseCase = SubscriptionUseCase;
+    this._UserService = userService;
+    this._SubscriptionUseCase = SubscriptionUseCase;
   }
 
   async getSuggestions(req: Request, res: Response): Promise<void> {
@@ -31,19 +24,19 @@ export class UserController {
         res.status(400).json({ message: 'User ID is missing' });
         return;
       }
-      const suggestions = await this.userService.getSuggestions(userId);
+      const suggestions = await this._UserService.getSuggestions(userId);
       res.json(suggestions);
     } catch (error) {
       res.status(500).json({ message: getErrorMessage(error) });
     }
   }
 
+
   async getFollowers(req: Request, res: Response): Promise<void> {
     console.log('reached follower');
     try {
       const { id } = req.params;
-      const followers = await this.userService.getFollowers(id);
-      // console.log(followers,">>>>>>>>>>>>>>folevers")
+      const followers = await this._UserService.getFollowers(id);
       res.json(followers);
     } catch (error) {
       res.status(500).json({ message: getErrorMessage(error) });
@@ -54,7 +47,7 @@ export class UserController {
     console.log('reached following');
     try {
       const { id } = req.params;
-      const following = await this.userService.getFollowing(id);
+      const following = await this._UserService.getFollowing(id);
       // console.log(following,">>>>>>>>>>>>>>folewing")
       res.json(following);
     } catch (error) {
@@ -72,7 +65,7 @@ export class UserController {
         return;
       }
 
-      await this.userService.unfollowUser(userId, targetUserId);
+      await this._UserService.unfollowUser(userId, targetUserId);
       res.json({ message: 'Successfully unfollowed user' });
     } catch (error) {
       res.status(500).json({ message: getErrorMessage(error) });
@@ -84,7 +77,7 @@ export class UserController {
       const { id } = req.params;
       console.log('reached profile');
 
-      const userProfile = await this.userService.getProfile(id);
+      const userProfile = await this._UserService.getProfile(id);
       // console.log(userProfile,">>>>>>>>>>>>>profile")
       res.json(userProfile);
     } catch (error) {
@@ -97,7 +90,7 @@ export class UserController {
       const { id } = req.params;
       console.log('reached profile post');
 
-      const userPost = await this.userService.getUserPost(id);
+      const userPost = await this._UserService.getUserPost(id);
       // console.log(userPost,">>>>>>>>>>>>>profile")
       res.json(userPost);
     } catch (error) {
@@ -110,7 +103,7 @@ export class UserController {
       const { id } = req.params;
       console.log('reached profile post');
 
-      const userPost = await this.userService.getUserSavedPost(id, 1, 10);
+      const userPost = await this._UserService.getUserSavedPost(id, 1, 10);
       // console.log(userPost,">>>>>>>>>>>>>profile")
       res.json(userPost);
     } catch (error) {
@@ -132,9 +125,9 @@ export class UserController {
           req.file as unknown as { location: string }
         ).location; // Store the file path in the database
       }
-      console.log(updatedData, '>>>>>>>>>>>>> profile');
+      // console.log(updatedData, '>>>>>>>>>>>>> profile');
 
-      const updatedUser = await this.userService.updateUserProfile(
+      const updatedUser = await this._UserService.updateUserProfile(
         userId,
         updatedData,
       );
@@ -155,10 +148,10 @@ export class UserController {
     console.log('try to get subscription', userId);
     try {
       const subscription =
-        await this.SubscriptionUseCase.getUserSubscription(userId);
+        await this._SubscriptionUseCase.getUserSubscription(userId);
       if (!subscription)
         return res.status(404).json({ message: 'No subscription found' });
-      console.log(subscription, '>>>>>>>>>>>>subscription');
+      // console.log(subscription, '>>>>>>>>>>>>subscription');
       res.status(200).json(subscription);
     } catch (error) {
       res.status(500).json({ message: 'Server error', error });
@@ -185,7 +178,7 @@ export class UserController {
           .json({ message: 'Failed to create PaymentIntent' });
       }
 
-      console.log('✅ PaymentIntent created:', paymentIntent.id);
+      // console.log('✅ PaymentIntent created:', paymentIntent.id);
 
       return res
         .status(200)
@@ -206,7 +199,7 @@ export class UserController {
       endDate.setMonth(startDate.getMonth() + 1);
 
       const subscription =
-        await this.SubscriptionUseCase.createOrUpdateSubscription(
+        await this._SubscriptionUseCase.createOrUpdateSubscription(
           userId,
           startDate,
           endDate,
@@ -238,7 +231,7 @@ export class UserController {
     console.log(userId, 'userId in subscription history controller');
     try {
       const subscriptionHistory =
-        await this.SubscriptionUseCase.getUserSubscriptionHistory(userId);
+        await this._SubscriptionUseCase.getUserSubscriptionHistory(userId);
       // console.log(subscriptionHistory, ">>>>>>>>>>>>subscription")
       res.status(200).json(subscriptionHistory);
     } catch (error) {
@@ -252,7 +245,7 @@ export class UserController {
     console.log(userId, 'userId in call history controller');
     try {
       const callHistory =
-        await this.callHistoryRepository.getUserCallHistory(userId);
+      await this._UserService.getCallHistory(userId);
       res.status(200).json(callHistory);
     } catch (error) {
       console.error('Error fetching call history:', error);
@@ -284,7 +277,7 @@ export class UserController {
         return res.status(400).json({ error: 'Empty search query' });
       }
 
-      const result = await this.userService.searchUsers(query);
+      const result = await this._UserService.searchUsers(query);
       console.log(result, 'result');
       res.status(200).json(result);
     } catch (error) {

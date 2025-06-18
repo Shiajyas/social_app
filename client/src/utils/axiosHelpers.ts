@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { toast } from 'react-toastify';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -34,13 +35,13 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        // const refreshResponse = await axios.post(
-        //   `${API_URL}/refresh-token`,
-        //   {},
-        //   { withCredentials: true },
-        // );
-        // accessToken = refreshResponse.data.accessToken;
-        // originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        const refreshResponse = await axios.post(
+          `${API_URL}/refresh-token`,
+          {},
+          { withCredentials: true },
+        );
+        accessToken = refreshResponse.data.accessToken;
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axiosInstance(originalRequest); // Retry original request
       } catch (refreshError) {
         console.error('❌ Token refresh failed:', refreshError);
@@ -78,6 +79,7 @@ export const fetchData = async (
   } catch (error: any) {
     const errorData = error.response?.data || error.message;
     console.error(`❌ ${errorMessage}`, errorData);
+    
     throw new Error(errorData.msg || errorData.message);
   }
 };

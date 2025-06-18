@@ -4,7 +4,7 @@ import session from "express-session";
 import morgan from "morgan";
 import corsMiddleware from "../presentation/middleware/corsMiddleware";
 import userAuthRoutes from "../presentation/routes/users/userAuthRoutes";
-import adminAuthRoutes from "../presentation/routes/admin/adminAuthRoutes";
+import adminAuthRoutes from "../presentation/routes/admin/adminRoutes";
 import notificationRoutes from "../presentation/routes/users/notificationRoutes";
 import postRoutes from "../presentation/routes/users/postRoutes";
 import { userRoutes } from "../presentation/routes/users/userRoutes";

@@ -7,29 +7,29 @@ import {
   createRefreshToken,
 } from '../infrastructure/utils/createTokens';
 import bcrypt from 'bcryptjs';
-import User from '../core/domain/models/userModel';
+import User from '../core/domain/models/UserModel';
 import { IOtpService } from '../infrastructure/services/interfaces/IOtpService';
 import jwt from 'jsonwebtoken';
 
 
 export class AuthService implements IAuthService {
-  private userRepository: IUserRepository;
-  private otpService: IOtpService;
+  private _UserRepository: IUserRepository;
+  private _OtpService: IOtpService;
 
   constructor(userRepository: IUserRepository, otpService: IOtpService) {
-    this.userRepository = userRepository;
-    this.otpService = otpService;
+    this._UserRepository = userRepository;
+    this._OtpService = otpService;
   }
 
   // Register user and initiate OTP
   async register(user: IUser): Promise<void> {
     const { email, username, password } = user;
 
-    if (await this.userRepository.findByEmail(email)) {
+    if (await this._UserRepository.findByEmail(email)) {
       throw new Error('Email is already registered.');
     }
 
-    if (await this.userRepository.findByUsername(username)) {
+    if (await this._UserRepository.findByUsername(username)) {
       throw new Error('Username is already taken.');
     }
 
@@ -37,31 +37,31 @@ export class AuthService implements IAuthService {
       throw new Error('Password must be at least 6 characters.');
     }
 
-    const otp = this.otpService.generateOtp(email);
+    const otp = this._OtpService.generateOtp(email);
     console.log('otp for register use : ', otp);
 
     const userData: IUser = { ...user, otp } as unknown as IUser;
 
-    const isOtpSent = (await this.otpService.sendOtpEmail(
+    const isOtpSent = (await this._OtpService.sendOtpEmail(
       email,
       otp,
     )) as boolean;
     if (!isOtpSent) {
       throw new Error('Failed to send OTP via email.');
     }
-    this.otpService.storeOtp(email, otp, userData);
+    this._OtpService.storeOtp(email, otp, userData);
   }
 
   async sentOtp(email: string): Promise<{ emailSend: boolean }> {
-    const otp = this.otpService.generateOtp(email);
-    const isOtpSent: boolean = (await this.otpService.sendOtpEmail(
+    const otp = this._OtpService.generateOtp(email);
+    const isOtpSent: boolean = (await this._OtpService.sendOtpEmail(
       email,
       otp,
     )) as boolean;
     return { emailSend: isOtpSent };
   }
 
-  // Create and save a new user
+  // Create and save a new useO
   async createUser(user: IUser): Promise<IUser> {
     const hashedPassword = await bcrypt.hash(user.password, 12);
     const newUser = new User({ ...user, password: hashedPassword });
@@ -103,7 +103,7 @@ export class AuthService implements IAuthService {
   }
 
   async getUser(userId: unknown): Promise<{ user: IUser }> {
-    const user = await this.userRepository.findById(userId);
+    const user = await this._UserRepository.findById(userId);
 
     if (!user) {
       throw new Error('User not found.');
@@ -118,7 +118,7 @@ export class AuthService implements IAuthService {
   ): Promise<{ token: string; user: IUser; refreshToken: string } | null> {
     try {
       // Fetch user by email and role
-      const user = await this.userRepository.findByEmailAndRole(email, role);
+      const user = await this._UserRepository.findByEmailAndRole(email, role);
 
       if (!user) {
         throw new Error('Please register with the provided email.');
@@ -169,12 +169,12 @@ export class AuthService implements IAuthService {
     enterdOtp: string,
   ): Promise<{ userData: IUser; accessToken: string; refreshToken: string }> {
     try {
-      const user = await this.userRepository.findByEmail(email);
+      const user = await this._UserRepository.findByEmail(email);
       if (!user) {
         throw new Error('User not found.');
       }
 
-      const { valid, expired } = this.otpService.verifyOtp(email, enterdOtp);
+      const { valid, expired } = this._OtpService.verifyOtp(email, enterdOtp);
 
       if (expired) {
         throw new Error('OTP has expired, please request a new one.');
@@ -215,7 +215,7 @@ export class AuthService implements IAuthService {
     enterdOtp: string,
   ): Promise<{ accessToken: string; refreshToken: string; user: IUser }> {
     console.log(enterdOtp, 'Enterd Otp');
-    const { valid, expired } = this.otpService.verifyOtp(email, enterdOtp);
+    const { valid, expired } = this._OtpService.verifyOtp(email, enterdOtp);
     console.log(valid, expired);
 
     if (expired) {
@@ -226,7 +226,7 @@ export class AuthService implements IAuthService {
       throw new Error('Invalid OTP, please try again.');
     }
 
-    const userData = this.otpService.getUserData(email);
+    const userData = this._OtpService.getUserData(email);
     if (!userData) {
       throw new Error('User data not found.');
     }
@@ -248,23 +248,23 @@ export class AuthService implements IAuthService {
   }
   async resendOtp(email: string): Promise<boolean> {
     try {
-      const user = await this.userRepository.findByEmail(email);
+      const user = await this._UserRepository.findByEmail(email);
       if (user) throw new Error('User already exists.');
 
-      const otp = this.otpService.generateOtp(email);
-      const isOtpSent = await this.otpService.sendOtpEmail(email, otp);
+      const otp = this._OtpService.generateOtp(email);
+      const isOtpSent = await this._OtpService.sendOtpEmail(email, otp);
 
       if (!isOtpSent) throw new Error('Failed to send OTP via email.');
 
       let existingUserData: Partial<IUser> = { email } as IUser;
       try {
-        const prev = this.otpService.getUserData(email);
+        const prev = this._OtpService.getUserData(email);
         existingUserData = { ...(prev as object) };
       } catch {
         console.log('No previous OTP session found.');
       }
 
-      await this.otpService.storeOtp(email, otp, existingUserData as IUser);
+      await this._OtpService.storeOtp(email, otp, existingUserData as IUser);
 
       return true;
     } catch (error) {
@@ -279,34 +279,34 @@ export class AuthService implements IAuthService {
 
       const normalizedEmail = email.trim().toLowerCase();
 
-      const user = await this.userRepository.findByEmail(normalizedEmail);
+      const user = await this._UserRepository.findByEmail(normalizedEmail);
 
       if (user) {
-        const otp = this.otpService.generateOtp(normalizedEmail);
+        const otp = this._OtpService.generateOtp(normalizedEmail);
         console.log('OTP for forgot password: ', otp);
 
         const userData: IUser = { ...user, otp } as unknown as IUser;
 
-        const isOtpSent = await this.otpService.sendOtpEmail(
+        const isOtpSent = await this._OtpService.sendOtpEmail(
           normalizedEmail,
           otp,
         );
         if (!isOtpSent) {
           throw new Error('Failed to send OTP via email.');
         }
-        this.otpService.storeOtp(normalizedEmail, otp, userData);
+        this._OtpService.storeOtp(normalizedEmail, otp, userData);
         return;
       } else {
-        const otp = this.otpService.generateOtp(email);
+        const otp = this._OtpService.generateOtp(email);
         console.log('OTP for registration: ', otp);
 
         const userData: IUser = { email: email, otp } as unknown as IUser;
 
-        const isOtpSent = await this.otpService.sendOtpEmail(email, otp);
+        const isOtpSent = await this._OtpService.sendOtpEmail(email, otp);
         if (!isOtpSent) {
           throw new Error('Failed to send OTP via email.');
         }
-        this.otpService.storeOtp(email, otp, userData);
+        this._OtpService.storeOtp(email, otp, userData);
 
         return;
       }
@@ -325,7 +325,7 @@ export class AuthService implements IAuthService {
 
       const passwordHash = await bcrypt.hash(password, 12);
 
-      const user = await this.userRepository.findByEmailAndUpdatePwd(
+      const user = await this._UserRepository.findByEmailAndUpdatePwd(
         email,
         passwordHash,
       );
@@ -354,7 +354,7 @@ export class AuthService implements IAuthService {
 
       // Fetch paginated users
       const { users, totalCount: totalUsers } =
-        await this.userRepository.findAndCount({}, page, limit);
+        await this._UserRepository.findAndCount({}, page, limit);
       // Calculate total pages
       const totalPages = Math.ceil(totalUsers / limit);
 
@@ -378,7 +378,7 @@ export class AuthService implements IAuthService {
       if (!email) {
         throw new Error('Email is required for Google authentication.');
       }
-      let user = await this.userRepository.findByEmail(email);
+      let user = await this._UserRepository.findByEmail(email);
       if (!user) {
         // If user doesn't exist, create a new one
         const randomPassword = Math.random().toString(36).slice(-8);
@@ -392,7 +392,7 @@ export class AuthService implements IAuthService {
           mobile: '',
         } as unknown as IUser;
 
-        user = await this.userRepository.save(user);
+        user = await this._UserRepository.save(user);
       }
       const { accessToken, refreshToken } = this.generateTokens({
         id: user._id,
@@ -426,7 +426,7 @@ export class AuthService implements IAuthService {
       ) as { id: string };
 
       // Find user by ID from payload
-      const user = await this.userRepository.findById(payload.id);
+      const user = await this._UserRepository.findById(payload.id);
       if (!user) {
         throw new Error('User not found');
       }
@@ -455,7 +455,7 @@ export class AuthService implements IAuthService {
   async blockUser(userId: string): Promise<IUser | null> {
     console.log(userId, 'for block');
 
-    const blockedUser = await this.userRepository.updateById(userId, {
+    const blockedUser = await this._UserRepository.updateById(userId, {
       isBlocked: true,
     });
 
@@ -467,7 +467,7 @@ export class AuthService implements IAuthService {
   }
 
   async unblockUser(userId: string): Promise<IUser | null> {
-    const unblockedUser = await this.userRepository.updateById(userId, {
+    const unblockedUser = await this._UserRepository.updateById(userId, {
       isBlocked: false,
     });
 

@@ -1,4 +1,11 @@
-import { Home, Search, MessageSquare, Bell, User, PlusCircle } from 'lucide-react';
+import {
+  Home,
+  Search,
+  MessageSquare,
+  Bell,
+  User,
+  PlusCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import useNotificationStore from '@/store/notificationStore';
@@ -27,16 +34,23 @@ const BottomNav: React.FC<BottomNavProps> = ({ selectedItem, setSelectedItem }) 
     { name: 'Profile', icon: <User className="w-6 h-6" />, path: `/home/profile/${user?._id}` },
   ];
 
-  return (
-    <div className="fixed bottom-0 left-0 w-full bg-white border-t shadow-md lg:hidden flex justify-between px-4 py-3">
+return (
+  <>
+    {/* Spacer to create distance from the above component */}
+    <div className="h-3 bg-transparent" />
+
+    <div className="fixed bottom-0 pt-2 left-0 w-full bg-white dark:bg-gray-900 border-t dark:border-gray-700 shadow-md dark:shadow-lg lg:hidden flex justify-between px-4 py-3 z-50">
       {menuItems.map((item, index) => (
         <Button
           key={index}
           variant="ghost"
           size="icon"
-          className={`relative flex flex-col items-center text-gray-600 ${
-            selectedItem === item.name ? 'text-primary font-bold' : 'hover:text-primary'
-          }`}
+          className={`relative flex flex-col items-center transition-all
+            ${
+              selectedItem === item.name
+                ? 'text-primary dark:text-yellow-400 font-bold'
+                : 'text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-yellow-400'
+            }`}
           onClick={() => {
             setSelectedItem(item.name);
             navigate(item.path);
@@ -51,7 +65,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ selectedItem, setSelectedItem }) 
         </Button>
       ))}
     </div>
-  );
+  </>
+);
+
 };
 
 export default BottomNav;

@@ -91,8 +91,8 @@ export const CallHistoryItem: React.FC<CallHistoryItemProps> = ({
           </span>
           {duration !== null && (
             <>
-              <Clock className="w-4 h-4 text-gray-400" />
-              <span>{formatDuration(duration)}</span>
+              {/* <Clock className="w-4 h-4 text-gray-400" />
+              <span>{formatDuration(duration)}</span> */}
             </>
           )}
           <span className="whitespace-nowrap text-xs">• {formatDistanceToNow(startTime)} ago</span>

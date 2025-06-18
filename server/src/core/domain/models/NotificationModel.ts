@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { INotification } from '../interfaces/INotification';
-import User from './userModel';
+import User from './UserModel';
 
 const NotificationSchema: Schema = new Schema(
   {

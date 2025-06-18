@@ -1,5 +1,6 @@
 import { IUser } from '../../core/domain/interfaces/IUser';
 import { IPost } from '../../core/domain/interfaces/IPost';
+import { ICallHistory } from '../../core/domain/interfaces/ICallHistory';
 
 export interface IUserService {
   getSuggestions(userId: string): Promise<IUser[]>;
@@ -15,4 +16,5 @@ export interface IUserService {
     limit: number,
   ): Promise<{ posts: IPost[]; nextPage: number | null }>;
   searchUsers(query: string): Promise<IUser[] | any>;
+  getCallHistory(userId: string): Promise<ICallHistory[]> 
 }

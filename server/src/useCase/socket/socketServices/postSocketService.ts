@@ -7,10 +7,10 @@ import { NotificationService } from '../../notificationService';
 import { Server } from 'socket.io';
 
 export class PostSocketService implements IPostSocketService {
-  private io: Server;
-  private userRepository: IUserRepository;
-  private postRepository: IPostRepository;
-  private notificationService: NotificationService;
+  private _Io: Server;
+  private _UserRepository: IUserRepository;
+  private _PostRepository: IPostRepository;
+  private _NotificationService: NotificationService;
 
   constructor(
     ioInstance: Server,
@@ -18,10 +18,10 @@ export class PostSocketService implements IPostSocketService {
     postRepo: IPostRepository,
     notificationService: NotificationService,
   ) {
-    this.io = ioInstance;
-    this.userRepository = userRepo;
-    this.postRepository = postRepo;
-    this.notificationService = notificationService;
+    this._Io = ioInstance;
+    this._UserRepository = userRepo;
+    this._PostRepository = postRepo;
+    this._NotificationService = notificationService;
   }
 
   async postUploaded(socket: Socket, userId: string, postId: string) {
@@ -29,13 +29,13 @@ export class PostSocketService implements IPostSocketService {
       if (!userId || !postId)
         throw new Error('Invalid request. User ID and Post ID are required.');
 
-      // console.log(`📸 Post uploaded by ${userId} (Post ID: ${postId})`);
+      // console.log(` Post uploaded by ${userId} (Post ID: ${postId})`);
 
-      let owner = await this.userRepository.findById(userId);
+      let owner = await this._UserRepository.findById(userId);
       if (!owner) throw new Error('User not found.');
 
-      let followers = await this.userRepository.findFollowers(userId);
-      let following = await this.userRepository.findFollowing(userId);
+      let followers = await this._UserRepository.findFollowers(userId);
+      let following = await this._UserRepository.findFollowing(userId);
 
       let receiverIds = [...followers, ...following].map((user) =>
         user._id.toString(),
@@ -43,7 +43,7 @@ export class PostSocketService implements IPostSocketService {
       socket.broadcast.emit('postUpload', { postId });
       if (receiverIds.length) {
         const message = `${owner.fullname} has uploaded a new post.`;
-        await this.notificationService.sendNotification(
+        await this._NotificationService.sendNotification(
           userId,
           receiverIds,
           'post',
@@ -67,33 +67,33 @@ export class PostSocketService implements IPostSocketService {
       );
 
       if (type === 'unlike') {
-        await this.postRepository.unlikePost(userId, postId);
+        await this._PostRepository.unlikePost(userId, postId);
       } else {
-        await this.postRepository.likePost(userId, postId);
+        await this._PostRepository.likePost(userId, postId);
       }
-      const updatedPost = await this.postRepository.getPost(postId);
+      const updatedPost = await this._PostRepository.getPost(postId);
       if (!updatedPost) throw new Error('Post not found or failed to update.');
 
       const likesArray = Array.isArray(updatedPost.likes)
         ? updatedPost.likes
         : [];
 
-      this.io.emit('update_like_count', { postId, likes: likesArray.length });
+      this._Io.emit('update_like_count', { postId, likes: likesArray.length });
       socket.broadcast.emit('update_like_count', {
         postId,
         likes: likesArray.length,
       });
 
       const [postOwner, likePerson] = await Promise.all([
-        this.userRepository.findById(updatedPost.userId),
-        this.userRepository.findById(userId),
+        this._UserRepository.findById(updatedPost.userId),
+        this._UserRepository.findById(userId),
       ]);
 
       if (!postOwner || !likePerson) throw new Error('User not found.');
 
       if (postOwner._id.toString() !== userId) {
         const ownerMessage = `${likePerson.fullname} ${type === 'unlike' ? 'unliked' : 'liked'} your post.`;
-        await this.notificationService.sendNotification(
+        await this._NotificationService.sendNotification(
           userId,
           [postOwner._id.toString()],
           'like',
@@ -121,7 +121,7 @@ export class PostSocketService implements IPostSocketService {
         `💬 Comment added by ${data.userId} on Post ID: ${data.postId}`,
       );
 
-      const post = await this.postRepository.getPost(data.postId);
+      const post = await this._PostRepository.getPost(data.postId);
       if (!post) throw new Error('Post not found.');
 
       const comment = {
@@ -137,12 +137,12 @@ export class PostSocketService implements IPostSocketService {
         comments: post.comments,
       });
 
-      const postOwner = await this.userRepository.findById(post.userId);
+      const postOwner = await this._UserRepository.findById(post.userId);
       if (!postOwner) throw new Error('Post owner not found.');
 
       if (postOwner._id.toString() !== data.userId) {
         const ownerMessage = `${comment.userId} commented on your post.`;
-        await this.notificationService.sendNotification(
+        await this._NotificationService.sendNotification(
           data.userId,
           [postOwner._id.toString()],
           'comment',
@@ -158,7 +158,7 @@ export class PostSocketService implements IPostSocketService {
 
   async savePost(socket: Socket, postId: string, userId: string) {
     try {
-      let res = await this.postRepository.savePost(postId, userId);
+      let res = await this._PostRepository.savePost(postId, userId);
       if (res) {
         console.log('saved post', postId);
       }
@@ -172,7 +172,7 @@ export class PostSocketService implements IPostSocketService {
   async deletePost(socket: Socket, postId: string, userId: string) {
     try {
       console.log('delete post>>>>', postId);
-      let res = await this.postRepository.deletePost(postId, userId);
+      let res = await this._PostRepository.deletePost(postId, userId);
       if (res) {
         console.log('deleted post', postId);
       }

@@ -71,4 +71,11 @@
   main {
     padding: 20px;
   }
+
+body {
+  @apply bg-white text-black dark:bg-gray-900 dark:text-white;
 }
+
+}
+
+

@@ -27,32 +27,42 @@ const MediaPreview = ({ previewUrl, onRemove }: MediaPreviewProps) => {
   }, [previewUrl]);
 
   console.log(previewUrl, '.............................');
-  return (
-    <div className="p-4 bg-white shadow-md rounded-lg flex-grow h-full flex flex-col items-center">
-      {isVideo === null ? (
-        <p>Loading preview...</p>
-      ) : isVideo ? (
-        <video src={previewUrl} controls className="w-full h-60 rounded"></video>
-      ) : (
-        <img src={previewUrl} alt="Preview" className="w-full h-96 rounded object-cover" />
-      )}
-      <div className="flex justify-center gap-4 mt-4">
-        <a
-          href={previewUrl}
-          download
-          className="bg-blue-500 text-white p-2 rounded flex items-center gap-2"
-        >
-          <FaDownload /> Download
-        </a>
-        <button
-          onClick={onRemove}
-          className="bg-red-500 text-white p-2 rounded flex items-center gap-2"
-        >
-          <FaTrash /> Remove
-        </button>
-      </div>
+return (
+  <div className="p-4 bg-white dark:bg-gray-900 shadow-md rounded-lg flex-grow h-full flex flex-col items-center">
+    {isVideo === null ? (
+      <p className="text-gray-700 dark:text-gray-300">Loading preview...</p>
+    ) : isVideo ? (
+      <video
+        src={previewUrl}
+        controls
+        className="w-full h-60 rounded object-contain bg-black dark:bg-gray-800"
+      />
+    ) : (
+      <img
+        src={previewUrl}
+        alt="Preview"
+        className="w-full h-96 rounded object-cover bg-gray-100 dark:bg-gray-800"
+      />
+    )}
+
+    <div className="flex justify-center gap-4 mt-4">
+      <a
+        href={previewUrl}
+        download
+        className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white p-2 rounded flex items-center gap-2 transition-colors"
+      >
+        <FaDownload /> Download
+      </a>
+      <button
+        onClick={onRemove}
+        className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white p-2 rounded flex items-center gap-2 transition-colors"
+      >
+        <FaTrash /> Remove
+      </button>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default MediaPreview;

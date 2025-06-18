@@ -3,10 +3,10 @@ import { IPostRepository } from '../data/interfaces/IPostRepository';
 import { IPost } from '../core/domain/interfaces/IPost';
 
 export class PostService implements IPostService {
-  private postRepository: IPostRepository;
+  private _PostRepository: IPostRepository;
 
   constructor(postRepository: IPostRepository) {
-    this.postRepository = postRepository;
+    this._PostRepository = postRepository;
   }
 
   // Create a new post
@@ -17,7 +17,7 @@ export class PostService implements IPostService {
     mediaUrls: string[],
     visibility: 'public' | 'private',
   ): Promise<IPost> {
-    return await this.postRepository.createPost(
+    return await this._PostRepository.createPost(
       userId,
       title,
       description,
@@ -32,7 +32,7 @@ export class PostService implements IPostService {
     limit: number,
   ): Promise<{ posts: IPost[]; nextPage: number | null }> {
     // console.log(userId, page, limit, ">>>>userId 2*");
-    let { posts, nextPage } = await this.postRepository.getPosts(
+    let { posts, nextPage } = await this._PostRepository.getPosts(
       userId,
       page,
       limit,
@@ -44,7 +44,7 @@ export class PostService implements IPostService {
 
   // Retrieve a single post by ID
   async getPost(postId: string): Promise<IPost | null> {
-    return await this.postRepository.getPost(postId);
+    return await this._PostRepository.getPost(postId);
   }
 
   // Update a post
@@ -55,7 +55,7 @@ export class PostService implements IPostService {
     description: string,
     mediaUrls: string[],
   ): Promise<IPost> {
-    const updatedPost = await this.postRepository.updatePost(
+    const updatedPost = await this._PostRepository.updatePost(
       postId,
       userId,
       title,
@@ -72,21 +72,21 @@ export class PostService implements IPostService {
 
   // Delete a post
   async deletePost(userId: string, postId: string): Promise<void> {
-    await this.postRepository.deletePost(userId, postId);
+    await this._PostRepository.deletePost(userId, postId);
   }
 
   // Like a post
   async likePost(userId: string, postId: string): Promise<void> {
-    await this.postRepository.likePost(userId, postId);
-    const post = await this.postRepository.getPost(postId);
+    await this._PostRepository.likePost(userId, postId);
+    const post = await this._PostRepository.getPost(postId);
     console.log('likre >>>');
     if (!post) throw new Error('Post not found');
   }
 
   // Unlike a post
   async unlikePost(userId: string, postId: string): Promise<void> {
-    await this.postRepository.unlikePost(userId, postId);
-    const post = await this.postRepository.getPost(postId);
+    await this._PostRepository.unlikePost(userId, postId);
+    const post = await this._PostRepository.getPost(postId);
     console.log('unlikre >>>');
     if (!post) throw new Error('Post not found');
   }
@@ -97,11 +97,11 @@ export class PostService implements IPostService {
     page: number,
     limit: number,
   ): Promise<IPost[]> {
-    return await this.postRepository.getUserPosts(userId, page, limit);
+    return await this._PostRepository.getUserPosts(userId, page, limit);
   }
 
   // Report a post
   async reportPost(userId: string, postId: string): Promise<void> {
-    await this.postRepository.reportPost(userId, postId);
+    await this._PostRepository.reportPost(userId, postId);
   }
 }

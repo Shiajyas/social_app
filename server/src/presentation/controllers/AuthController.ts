@@ -4,40 +4,42 @@ import { IUser } from '../../core/domain/interfaces/IUser';
 import { getErrorMessage } from '../../infrastructure/utils/errorHelper';
 import { setCookie } from '../../infrastructure/utils/setCookie';
 import { IAuthService } from '../../useCase/interfaces/IAuthService';
-
-interface AuthenticatedRequest extends Request {
-  user?: IUser;
-}
+import { AuthenticatdRequest } from '../../core/domain/interfaces/IAuthenticatedRequest';
+import { IAdminUseCase } from '../../useCase/interfaces/IAdminUseCase';
 
 declare module 'express-session' {
   interface Session {
     user?: IUser;
   }
 }
-
 export class AuthController {
-  private userService: IAuthService;
+  private _UserService: IAuthService;
+  private _AdminService: IAdminUseCase
 
-  constructor(userService: IAuthService) {
-    this.userService = userService;
+  constructor(userService: IAuthService, adminService: IAdminUseCase) {
+    this._UserService = userService;  
+    this._AdminService = adminService
   }
 
   async login(req: Request, res: Response): Promise<void> {
     try {
       const { email, password, role } = req.body;
+   
+    let loginResult;
 
-      const loginResult = await this.userService.login(email, password, role);
+    if (role === 'admin') {
+      loginResult = await this._AdminService.login(email, password);
+    } else {
+      loginResult = await this._UserService.login(email, password, role);
+    }
 
-      if (!loginResult) {
-        res.status(400).json({ message: 'Login failed.' });
-        return;
-      }
-
-      req.session.user = loginResult.user;
+    if (!loginResult) {
+      res.status(400).json({ message: 'Login failed.' });
+      return;
+    }
+      req.session.user = loginResult.user as IUser;
 
       const { token, refreshToken, user } = loginResult;
-
-      // console.log("token >>>>123", token);
 
       // Check if the user is a Mongoose document, and convert to plain object if so
       const userObject: IUser =
@@ -45,11 +47,12 @@ export class AuthController {
 
       const userWithoutPassword = { ...userObject, password: undefined };
        setCookie(res, 'userToken', token);
-      if (user.role !== 'admin') {
+     
+       if ('role' in user && user.role !== 'admin') {
         setCookie(res, 'userToken', token);
-      } else {
+       } else {
         setCookie(res, 'adminToken', token);
-      }
+          }
 
 
       setCookie(res, 'refreshToken', refreshToken);
@@ -67,7 +70,7 @@ export class AuthController {
   async requestOtp(req: Request, res: Response): Promise<void> {
     try {
       const { email } = req.body;
-      await this.userService.requestOtp(email);
+      await this._UserService.requestOtp(email);
       res.status(200).json({ msg: 'OTP sent successfully.' });
     } catch (error) {
       console.log(getErrorMessage(error), 'error');
@@ -78,7 +81,7 @@ export class AuthController {
 
   async register(req: Request, res: Response): Promise<void> {
     try {
-      await this.userService.register(req.body);
+      await this._UserService.register(req.body);
       res
         .status(201)
         .json({ message: 'OTP sent successfully.', email: req.body.email });
@@ -91,8 +94,8 @@ export class AuthController {
 
   async getUser(req: Request, res: Response): Promise<void> {
     try {
-      let userId = (req as AuthenticatedRequest).user?.id;
-
+      let userId = (req as AuthenticatdRequest).user?.id || (req as AuthenticatdRequest).admin?.id;
+       console.log(userId, 'userId');
       if (!userId) {
         res
           .status(400)
@@ -100,9 +103,12 @@ export class AuthController {
         return;
       }
 
-      const getUser = await this.userService.getUser(userId);
+      const getUser = await this._UserService.getUser(userId) || await this._AdminService.getUserById(userId);
 
-      if (!getUser) {
+      console.log(getUser, 'getUser');
+
+      if (!getUser) { 
+         console.log(userId, 'userId');
         res.status(404).json({ message: 'User not found.' });
         return;
       }
@@ -121,7 +127,7 @@ export class AuthController {
 
       // Ensure correct deconstruction
       const { userData, accessToken, refreshToken } =
-        await this.userService.verify_Otp(email, enterdOtp);
+        await this._UserService.verify_Otp(email, enterdOtp);
 
       
       setCookie(res, 'refreshToken', refreshToken);
@@ -139,7 +145,7 @@ export class AuthController {
     try {
       const { email, enterdOtp } = req.body;
       const { accessToken, refreshToken, user } =
-        await this.userService.verifyOtp(email, enterdOtp);
+        await this._UserService.verifyOtp(email, enterdOtp);
 
       setCookie(res, 'refreshToken', refreshToken);
       setCookie(res, 'userToken', accessToken);
@@ -156,7 +162,7 @@ export class AuthController {
     try {
       const { email } = req.body;
       console.log(email, 'email');
-      const success = await this.userService.resendOtp(email);
+      const success = await this._UserService.resendOtp(email);
       if (!success) {
         res.status(400).json({ message: 'Failed to send OTP.' });
         return;
@@ -175,7 +181,7 @@ export class AuthController {
       const { email, password } = req.body;
       console.log(req.body);
 
-      let success = await this.userService.resetPassword(email, password);
+      let success = await this._UserService.resetPassword(email, password);
       if (!success) {
         res.status(400).json({ message: 'Failed to reset password.' });
         return;
@@ -192,7 +198,7 @@ export class AuthController {
       const limit = parseInt(req.query.limit as string) || 10; // Default to 10 items per page
 
       const { users, totalUsers, totalPages } =
-        await this.userService.getAllUser(page, limit);
+        await this._UserService.getAllUser(page, limit);
 
       if (!users) throw new Error('User list fetching failed');
 
@@ -211,7 +217,7 @@ export class AuthController {
     try {
       const { idToken } = req.body;
 
-      const { user, token, refreshToken } = (await this.userService.googleAuth(
+      const { user, token, refreshToken } = (await this._UserService.googleAuth(
         idToken,
       )) as { user: IUser; token: string; refreshToken: string };
 
@@ -233,7 +239,7 @@ export class AuthController {
         throw new Error('No refresh token found.');
       }
       const { token, role, refreshToken } =
-        await this.userService.refreshToken(incomingRefreshToken);
+        await this._UserService.refreshToken(incomingRefreshToken);
       if (!token || !role) {
         throw new Error('Failed to refresh token.');
       }
@@ -318,7 +324,7 @@ export class AuthController {
         return;
       }
 
-      const blockedUser = await this.userService.blockUser(userId);
+      const blockedUser = await this._UserService.blockUser(userId);
 
       if (!blockedUser) {
         res.status(400).json({ message: 'Failed to block user.' });
@@ -347,7 +353,7 @@ export class AuthController {
         return;
       }
 
-      const unblockedUser = await this.userService.unblockUser(userId);
+      const unblockedUser = await this._UserService.unblockUser(userId);
 
       if (!unblockedUser) {
         res.status(400).json({ message: 'Failed to unblock user.' });

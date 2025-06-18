@@ -1,38 +1,40 @@
 import { Server, Socket } from 'socket.io';
 import { Types } from 'mongoose';
-import { AdminOverviewService } from '../../AdminOverviewService';
+import { AdminOverviewService } from '../../adminOverviewService';
 import { ISUserRepository } from '../../../data/interfaces/ISUserRepository';
 import { IReportRepository } from '../../../data/interfaces/IReportRepository';
 import { INotificationService } from '../../interfaces/InotificationService';
-import { PostRepository } from '../../../data/repositories/PostRepository';
 import { SYSTEM_ADMIN_ID } from '../../../infrastructure/config/system';
+import { IPostRepository } from '../../../data/interfaces/IPostRepository';
 
 export class AdminSocketService {
-  private io: Server;
-  private adminOverviewService: AdminOverviewService;
-  private sessionUserRepo: ISUserRepository;
-  private reportRepository: IReportRepository;
-  private notificationService?: INotificationService;
-  private postRepository = new PostRepository();
+  private _Io: Server;
+  private _AdminOverviewService: AdminOverviewService;
+  private _SessionUserRepo: ISUserRepository;
+  private _ReportRepository: IReportRepository;
+  private _NotificationService?: INotificationService;
+  private _PostRepository : IPostRepository
 
   constructor(
     io: Server,
     adminOverviewService: AdminOverviewService,
     sessionUserRepo: ISUserRepository,
     reportRepository: IReportRepository,
-    notificationService?: INotificationService,
+    notificationService: INotificationService,
+    postRepository: IPostRepository
   ) {
-    this.io = io;
-    this.adminOverviewService = adminOverviewService;
-    this.sessionUserRepo = sessionUserRepo;
-    this.reportRepository = reportRepository;
-    this.notificationService = notificationService;
+    this._Io = io;
+    this._AdminOverviewService = adminOverviewService;
+    this._SessionUserRepo = sessionUserRepo;
+    this._ReportRepository = reportRepository;
+    this._NotificationService = notificationService;
+    this._PostRepository = postRepository
   }
 
   registerAdmin(socketId: string) {
     console.log(`🛡️ Admin connected: ${socketId}`);
-    const count = this.sessionUserRepo.getActiveUserCount()
-    this.io.to('admin').emit('admin:updateOnlineCount', count);
+    const count = this._SessionUserRepo.getActiveUserCount()
+    this._Io.to('admin').emit('admin:updateOnlineCount', count);
   }
 
   unregisterAdmin(socketId: string) {
@@ -40,37 +42,46 @@ export class AdminSocketService {
   }
 
   async getOverviewData() {
-    return await this.adminOverviewService.getOverview();
+    return await this._AdminOverviewService.getOverview();
   }
+
 
   async pushOverviewUpdate() {
     const data = await this.getOverviewData();
-    this.io.to('admin').emit('admin:updateOverview', data);
+    this._Io.to('admin').emit('admin:updateOverview', data);
   }
 
-  sendOnlineUserCountTo(socket: Socket) {
-  const count = this.sessionUserRepo.getActiveUserCount()
+ async sendOnlineUserCountTo(socket: Socket) {
+  const count = await this._SessionUserRepo.getActiveUserCount()
+
+  if(typeof count === 'number'){
     socket.emit('admin:updateOnlineCount', count);
   }
+  console.log('Sending online user count to admin:', count);
 
-  broadcastOnlineUserCountToAdmins() {
-    const count = this.sessionUserRepo.getActiveUserCount()
+  }
+
+  async broadcastOnlineUserCountToAdmins() {
+    const count = await this._SessionUserRepo.getActiveUserCount()
     console.log('Broadcasting online user count to admins:', count);
-    this.io.to('admin').emit('admin:updateOnlineCount', count);
+      if(typeof count === 'number'){
+      this._Io.to('admin').emit('admin:updateOnlineCount', count);
+  }
+
   }
 
   async reportPost(postId: string, userId: string, reason: string) {
     try {
-      await this.reportRepository.create({
+      await this._ReportRepository.create({
         reporter: new Types.ObjectId(userId),
         postId: new Types.ObjectId(postId),
         reason,
       });
 
       const enrichedReport =
-        await this.reportRepository.fetchSingleReportedPost(postId, userId);
+        await this._ReportRepository.fetchSingleReportedPost(postId, userId);
       if (enrichedReport) {
-        this.io.to('admin').emit('admin:newReport', enrichedReport);
+        this._Io.to('admin').emit('admin:newReport', enrichedReport);
         console.log('🔔 Emitted admin:newReport');
       }
     } catch (error) {
@@ -80,7 +91,7 @@ export class AdminSocketService {
 
   async dismissReport(reportId: string) {
     try {
-      await this.reportRepository.deleteById(reportId);
+      await this._ReportRepository.deleteById(reportId);
       console.log(`🗑️ Report ${reportId} dismissed`);
     } catch (error) {
       console.error('❌ Error dismissing report:', error);
@@ -89,7 +100,7 @@ export class AdminSocketService {
 
   async deletePost(postId: string) {
     try {
-      const post: any = await this.postRepository.getPost(postId);
+      const post: any = await this._PostRepository.getPost(postId);
       if (!post) {
         console.warn(`⚠️ Post ${postId} not found`);
         return;
@@ -98,13 +109,13 @@ export class AdminSocketService {
       const ownerId = post?.userId?._id?.toString();
       console.log('🧾 Deleting post:', postId, 'Owner:', ownerId);
 
-      await this.reportRepository.blockPostById(postId);
-      this.io.to('admin').emit('admin:postDeleted', { postId });
+      await this._ReportRepository.blockPostById(postId);
+      this._Io.to('admin').emit('admin:postDeleted', { postId });
       console.log(`🗑️ Post ${postId} deleted and admins notified`);
 
-      if (this.notificationService && ownerId) {
+      if (this._NotificationService && ownerId) {
         console.log('📨 Sending notification to user:', ownerId);
-        await this.notificationService.sendNotification(
+        await this._NotificationService.sendNotification(
           SYSTEM_ADMIN_ID.toString(),
           [ownerId],
           'post',
@@ -113,7 +124,7 @@ export class AdminSocketService {
           'Admin',
         );
         console.log(`📩 User ${ownerId} notified`);
-      } else if (!this.notificationService) {
+      } else if (!this._NotificationService) {
         console.warn('⚠️ Notification service not available');
       } else {
         console.warn('⚠️ Owner ID is undefined; notification not sent');

@@ -1,19 +1,19 @@
 import { Request, Response } from 'express';
 import { IPostService } from '../../useCase/interfaces/IPostService';
 import { getErrorMessage } from '../../infrastructure/utils/errorHelper';
-import { AuthenticatedRequest } from '../../core/domain/interfaces/IAuthenticatedRequest';
+import { AuthenticatedPostRequest } from '../../core/domain/interfaces/IAuthenticatedPostRequest';
 import { ICommentRepository } from '../../data/interfaces/ICommentRepository';
 
 export class PostController {
-  private postService: IPostService;
-  private commentService: ICommentRepository;
+  private _PostService: IPostService;
+  private _CommentService: ICommentRepository;
 
   constructor(postService: IPostService, commentService: ICommentRepository) {
-    this.postService = postService;
-    this.commentService = commentService;
+    this._PostService = postService;
+    this._CommentService = commentService;
   }
 
-  async createPost(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async createPost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
     try {
       let mediaUrls: string[] = [];
       if (req.files) {
@@ -40,7 +40,7 @@ export class PostController {
         return;
       }
 
-      const newPost = await this.postService.createPost(
+      const newPost = await this._PostService.createPost(
         req.user.id,
         title,
         description,
@@ -55,7 +55,7 @@ export class PostController {
     }
   }
 
-  async updatePost(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async updatePost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
     try {
       let mediaUrls: string[] = [];
       if (req.files) {
@@ -76,15 +76,8 @@ export class PostController {
         res.status(401).json({ message: 'Unauthorized access.' });
         return;
       }
-      console.log(
-        postId,
-        userId,
-        title,
-        description,
-        mediaUrls,
-        '>>>>>>>32....',
-      );
-      const updatedPost = await this.postService.updatePost(
+
+      const updatedPost = await this._PostService.updatePost(
         postId,
         userId,
         title,
@@ -99,7 +92,7 @@ export class PostController {
     }
   }
 
-  async getPosts(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getPosts(req: AuthenticatedPostRequest, res: Response): Promise<void> {
     try {
       const page =
         parseInt((req as unknown as Request).query.page as string) || 1;
@@ -113,7 +106,7 @@ export class PostController {
         return;
       }
 
-      const { posts, nextPage } = await this.postService.getPosts(
+      const { posts, nextPage } = await this._PostService.getPosts(
         userId,
         page,
         limit,
@@ -127,9 +120,9 @@ export class PostController {
     }
   }
 
-  async getPost(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getPost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
     try {
-      const post = await this.postService.getPost(
+      const post = await this._PostService.getPost(
         (req as unknown as Request).params.id,
       );
 
@@ -143,14 +136,14 @@ export class PostController {
     }
   }
 
-  async deletePost(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async deletePost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
       if (!userId) {
         res.status(401).json({ message: 'Unauthorized access.' });
         return;
       }
-      await this.postService.deletePost(
+      await this._PostService.deletePost(
         userId,
         (req as unknown as Request).params.id,
       );
@@ -160,14 +153,14 @@ export class PostController {
     }
   }
 
-  async likePost(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async likePost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
       if (!userId) {
         res.status(401).json({ message: 'Unauthorized access.' });
         return;
       }
-      await this.postService.likePost(
+      await this._PostService.likePost(
         userId,
         (req as unknown as Request).params.id,
       );
@@ -177,14 +170,14 @@ export class PostController {
     }
   }
 
-  async unlikePost(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async unlikePost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
       if (!userId) {
         res.status(401).json({ message: 'Unauthorized access.' });
         return;
       }
-      await this.postService.unlikePost(
+      await this._PostService.unlikePost(
         userId,
         (req as unknown as Request).params.id,
       );
@@ -194,14 +187,14 @@ export class PostController {
     }
   }
 
-  async getUserPosts(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async getUserPosts(req: AuthenticatedPostRequest, res: Response): Promise<void> {
     try {
       const page =
         parseInt((req as unknown as Request).query.page as string) || 1;
       const limit =
         parseInt((req as unknown as Request).query.limit as string) || 10;
 
-      const posts = await this.postService.getUserPosts(
+      const posts = await this._PostService.getUserPosts(
         (req as unknown as Request).params.id,
         page,
         limit,
@@ -212,14 +205,14 @@ export class PostController {
     }
   }
 
-  async reportPost(req: AuthenticatedRequest, res: Response): Promise<void> {
+  async reportPost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
       if (!userId) {
         res.status(401).json({ message: 'Unauthorized access.' });
         return;
       }
-      await this.postService.reportPost(
+      await this._PostService.reportPost(
         userId,
         (req as unknown as Request).params.id,
       );
@@ -230,7 +223,7 @@ export class PostController {
   }
 
   async getPostComments(
-    req: AuthenticatedRequest,
+    req: AuthenticatedPostRequest,
     res: Response,
   ): Promise<void> {
     try {
@@ -244,7 +237,7 @@ export class PostController {
       const limit =
         parseInt((req as unknown as Request).query.limit as string) || 10;
 
-      const comments = await this.commentService.getCommentsForPost(
+      const comments = await this._CommentService.getCommentsForPost(
         postId,
         page,
         limit,

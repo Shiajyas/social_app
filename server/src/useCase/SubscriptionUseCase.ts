@@ -18,14 +18,7 @@ class SubscriptionUseCase implements ISubscriptionUseCase {
     startDate: Date,
     endDate: Date,
   ): Promise<ISubscription> {
-    // const existingSubscription = await SubscriptionRepository.findByUserId(userId);
-    // if (existingSubscription) {
-    //   const updatedSubscription = await SubscriptionRepository.updateSubscription(userId, startDate, endDate);
-    //   if (!updatedSubscription) {
-    //     throw new Error("Failed to update subscription");
-    //   }
-    //   return updatedSubscription;
-    // }
+
     try {
       const subscription = await SubscriptionRepository.createSubscription(
         userId,

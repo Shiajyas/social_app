@@ -1,4 +1,4 @@
-import React, { useState ,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { useAdminOverview } from "@/hooks/admin/useAdminOverview";
 import { socket } from "@/utils/Socket";
 import { useReportStore } from "@/appStore/useReportStore";
@@ -24,33 +24,28 @@ const Main = () => {
   const [range, setRange] = useState<"7d" | "1m" | "1y">("7d");
   const [likeRange, setLikeRange] = useState({ min: 0, max: 100 });
   const [onlineUserCount, setOnlineUserCount] = useState<number>(0);
-  const {reportCount} = useReportStore();
-
+  const { reportCount } = useReportStore();
   const { data, isLoading, refetch } = useAdminOverview(range, likeRange);
 
-
-   // Listen to online user updates
-useEffect(() => {
-  socket.on("admin:updateOnlineCount", (count: number) => {
-    console.log("Online users updated:", count);
-    setOnlineUserCount(count);
-  });
-
-  return () => {
-    socket.off("admin:updateOnlineCount");
-  };
-}, []);
+  useEffect(() => {
+    socket.on("admin:updateOnlineCount", (count: number) => {
+      setOnlineUserCount(count);
+    });
+    return () => {
+      socket.off("admin:updateOnlineCount");
+    };
+  }, []);
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <span className="text-gray-500 text-lg">Loading dashboard...</span>
+        <span className="text-gray-500 dark:text-gray-300 text-lg">Loading dashboard...</span>
       </div>
     );
   }
 
   if (!data) {
-    return <div className="text-center text-red-600">Failed to load data</div>;
+    return <div className="text-center text-red-600 dark:text-red-400">Failed to load data</div>;
   }
 
   const handleLikeFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,7 +61,7 @@ useEffect(() => {
     <div className="flex flex-col space-y-6">
       {/* Header and Actions */}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-semibold">Admin Dashboard</h1>
+        <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">Admin Dashboard</h1>
         <button
           onClick={() => refetch()}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
@@ -76,11 +71,11 @@ useEffect(() => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 bg-white p-4 rounded shadow">
+      <div className="flex flex-wrap gap-4 bg-white dark:bg-gray-800 p-4 rounded shadow">
         <div>
-          <label className="block text-sm font-medium">Date Range</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Date Range</label>
           <select
-            className="mt-1 border rounded px-3 py-1"
+            className="mt-1 border dark:border-gray-700 dark:bg-gray-700 dark:text-white rounded px-3 py-1"
             value={range}
             onChange={handleRangeChange}
           >
@@ -93,22 +88,22 @@ useEffect(() => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium">Min Likes</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Min Likes</label>
           <input
             type="number"
             name="min"
-            className="mt-1 border rounded px-3 py-1 w-24"
+            className="mt-1 border dark:border-gray-700 dark:bg-gray-700 dark:text-white rounded px-3 py-1 w-24"
             value={likeRange.min}
             onChange={handleLikeFilterChange}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium">Max Likes</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Max Likes</label>
           <input
             type="number"
             name="max"
-            className="mt-1 border rounded px-3 py-1 w-24"
+            className="mt-1 border dark:border-gray-700 dark:bg-gray-700 dark:text-white rounded px-3 py-1 w-24"
             value={likeRange.max}
             onChange={handleLikeFilterChange}
           />
@@ -117,15 +112,14 @@ useEffect(() => {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-      <StatsCard
-       title="Users"
-        data={[
-     `Total: ${data.users.total}`,
-    `New (last period): ${data.users.new}`,
-    `Online now: ${onlineUserCount}`,
-  ]}
-    / >
-      
+        <StatsCard
+          title="Users"
+          data={[
+            `Total: ${data.users.total}`,
+            `New (last period): ${data.users.new}`,
+            `Online now: ${onlineUserCount}`,
+          ]}
+        />
 
         <StatsCard
           title="Posts"
@@ -149,8 +143,8 @@ useEffect(() => {
         <ChartCard title="User Growth">
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={data.users.weeklyGrowth}>
-              <XAxis dataKey="_id" />
-              <YAxis />
+              <XAxis dataKey="_id" stroke="#ccc" />
+              <YAxis stroke="#ccc" />
               <Tooltip />
               <Line type="monotone" dataKey="count" stroke="#2563EB" strokeWidth={2} />
             </LineChart>
@@ -158,25 +152,24 @@ useEffect(() => {
         </ChartCard>
 
         <ChartCard title="Most Liked Posts">
-  <ResponsiveContainer width="100%" height={250}>
-    <BarChart
-      data={data.posts.mostLiked.map((post: { title: any; owner: { username: any; }; }) => ({
-        ...post,
-        displayTitle: `${post.title} (${post?.owner ?? "Unknown"})`,
-      }))}
-    >
-      <XAxis dataKey="displayTitle" tick={{ fontSize: 10 }} angle={-30} interval={0} />
-      <YAxis />
-      <Tooltip
-        formatter={(value: number) => [`${value} likes`, "Likes"]}
-        labelFormatter={(label) => `Post: ${label}`}
-      />
-      <CartesianGrid strokeDasharray="3 3" />
-      <Bar dataKey="likes" fill="#F59E0B" />
-    </BarChart>
-  </ResponsiveContainer>
-</ChartCard>
-
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart
+              data={data.posts.mostLiked.map((post: any) => ({
+                ...post,
+                displayTitle: `${post.title} (${post?.owner?.username || "Unknown"})`,
+              }))}
+            >
+              <XAxis dataKey="displayTitle" tick={{ fontSize: 10 }} angle={-30} interval={0} />
+              <YAxis />
+              <Tooltip
+                formatter={(value: number) => [`${value} likes`, "Likes"]}
+                labelFormatter={(label) => `Post: ${label}`}
+              />
+              <CartesianGrid strokeDasharray="3 3" />
+              <Bar dataKey="likes" fill="#F59E0B" />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
 
         <ChartCard title="User Posting Activity">
           <ResponsiveContainer width="100%" height={250}>
@@ -195,7 +188,7 @@ useEffect(() => {
 };
 
 const StatsCard = ({ title, data }: { title: string; data: string[] }) => (
-  <div className="bg-white shadow rounded p-5">
+  <div className="bg-white dark:bg-gray-800 dark:text-white shadow rounded p-5">
     <h2 className="text-lg font-semibold mb-2">{title}</h2>
     {data.map((text, i) => (
       <p key={i}>{text}</p>
@@ -204,7 +197,7 @@ const StatsCard = ({ title, data }: { title: string; data: string[] }) => (
 );
 
 const ChartCard = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <div className="bg-white shadow rounded p-5">
+  <div className="bg-white dark:bg-gray-800 dark:text-white shadow rounded p-5">
     <h3 className="text-xl font-semibold mb-4">{title}</h3>
     {children}
   </div>

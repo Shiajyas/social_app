@@ -3,46 +3,43 @@ import { IUserSocketService } from './Interface/IUserSocketService';
 import { ISUserRepository } from '../../../data/interfaces/ISUserRepository';
 import { IUserRepository } from '../../../data/interfaces/IUserRepository';
 import { NotificationService } from '../../notificationService';
-import { AdminSocketService } from './adminSocketService';
 import { ObjectId } from 'mongodb';
 import { Server } from 'socket.io';
 
 export class UserSocketService implements IUserSocketService {
-  private io: Server;
-  private userRepository: IUserRepository;
-  private sessionUserRepository: ISUserRepository;
-  private notificationService: NotificationService;
-  private adminSocketService: AdminSocketService;
+  private _Io: Server;
+  private _UserRepository: IUserRepository;
+  private _SessionUserRepository: ISUserRepository;
+  private _NotificationService: NotificationService;
 
   constructor(
     ioInstance: Server,
     userRepo: IUserRepository,
     sessionUserRepo: ISUserRepository,
     notificationService: NotificationService,
-    adminSocketService: AdminSocketService,
   ) {
-    this.io = ioInstance;
-    this.userRepository = userRepo;
-    this.sessionUserRepository = sessionUserRepo;
-    this.notificationService = notificationService;
-    this.adminSocketService = adminSocketService;
+    this._Io = ioInstance;
+    this._UserRepository = userRepo;
+    this._SessionUserRepository = sessionUserRepo;
+    this._NotificationService = notificationService;
   }
 
   private async broadcastOnlineUserCountToAdmins() {
-    const count = await this.sessionUserRepository.getActiveUserCount();
-    this.io.to('admin').emit('admin:updateOnlineCount', count);
+    const count = await this._SessionUserRepository.getActiveUserCount();
+    this._Io.to('admin').emit('admin:updateOnlineCount', count);
   }
+
 
   async addUser(socket: Socket, userId: string): Promise<void> {
     try {
       console.log(`🔹 Adding user ${userId} with socket ID ${socket.id}`);
 
-      await this.sessionUserRepository.addUser({ id: userId, socketId: socket.id });
+      await this._SessionUserRepository.addUser({ id: userId, socketId: socket.id });
 
       socket.emit('addUserSuccess', { userId });
 
-      const onlineUsers = (await this.sessionUserRepository.getActiveUsers()).map((user) => user.id);
-      this.io.emit('updateOnlineUsers', onlineUsers);
+      const onlineUsers = (await this._SessionUserRepository.getActiveUsers()).map((user) => user.id);
+      this._Io.emit('updateOnlineUsers', onlineUsers);
 
       await this.broadcastOnlineUserCountToAdmins();
     } catch (error) {
@@ -52,10 +49,10 @@ export class UserSocketService implements IUserSocketService {
 
   async removeUser(socket: Socket, userId: string): Promise<void> {
     try {
-      await this.sessionUserRepository.removeUser(socket.id);
+      await this._SessionUserRepository.removeUser(socket.id);
 
-      const onlineUsers = (await this.sessionUserRepository.getActiveUsers()).map((user) => user.id);
-      this.io.emit('updateOnlineUsers', onlineUsers);
+      const onlineUsers = (await this._SessionUserRepository.getActiveUsers()).map((user) => user.id);
+      this._Io.emit('updateOnlineUsers', onlineUsers);
 
       await this.broadcastOnlineUserCountToAdmins();
     } catch (error) {
@@ -65,7 +62,7 @@ export class UserSocketService implements IUserSocketService {
 
   async getOnlineUsers(socket: Socket): Promise<void> {
     try {
-      const onlineUsers = (await this.sessionUserRepository.getActiveUsers()).map((user) => user.id);
+      const onlineUsers = (await this._SessionUserRepository.getActiveUsers()).map((user) => user.id);
       socket.emit('updateOnlineUsers', onlineUsers);
     } catch (error) {
       this.handleError(socket, error, 'getOnlineUsersError');
@@ -74,7 +71,7 @@ export class UserSocketService implements IUserSocketService {
 
   async joinUser(socket: Socket, id: string): Promise<void> {
     try {
-      await this.sessionUserRepository.addUser({ id, socketId: socket.id });
+      await this._SessionUserRepository.addUser({ id, socketId: socket.id });
       socket.emit('joinSuccess', { userId: id });
     } catch (error) {
       this.handleError(socket, error, 'joinError');
@@ -86,24 +83,24 @@ export class UserSocketService implements IUserSocketService {
       throw new Error('Invalid follow request.');
     }
 
-    const sender = await this.userRepository.findById(userId);
-    const targetUser = await this.userRepository.findById(followingId);
+    const sender = await this._UserRepository.findById(userId);
+    const targetUser = await this._UserRepository.findById(followingId);
     if (!sender || !targetUser) throw new Error('User not found.');
 
     if (sender.following?.includes(new ObjectId(followingId))) {
       throw new Error('Already following this user.');
     }
 
-    await this.userRepository.update(
+    await this._UserRepository.update(
       { _id: userId },
       { $addToSet: { following: followingId } },
     );
-    await this.userRepository.update(
+    await this._UserRepository.update(
       { _id: followingId },
       { $addToSet: { followers: userId } },
     );
 
-    await this.notificationService.sendNotification(
+    await this._NotificationService.sendNotification(
       userId,
       [followingId],
       'follow',
@@ -112,19 +109,19 @@ export class UserSocketService implements IUserSocketService {
       sender.username,
     );
 
-    this.io.emit('followSuccess', { followingId });
+    this._Io.emit('followSuccess', { followingId });
   }
 
   async handleUnfollow(socket: Socket, userId: string, followingId: string): Promise<void> {
     try {
-      const success = await this.userRepository.unfollow(userId, followingId);
+      const success = await this._UserRepository.unfollow(userId, followingId);
 
       if (!success) {
         socket.emit('unfollowError', { message: 'Unfollow operation failed.' });
         return;
       }
 
-      this.io.emit('unfollowSuccess', { followingId });
+      this._Io.emit('unfollowSuccess', { followingId });
     } catch (error) {
       this.handleError(socket, error, 'unfollowError');
     }
@@ -134,20 +131,20 @@ export class UserSocketService implements IUserSocketService {
     try {
       const { userId, followingId } = data;
 
-      const sender = await this.userRepository.findById(userId);
-      const targetUser = await this.userRepository.findById(followingId);
+      const sender = await this._UserRepository.findById(userId);
+      const targetUser = await this._UserRepository.findById(followingId);
       if (!sender || !targetUser) throw new Error('User not found.');
 
-      await this.userRepository.update(
+      await this._UserRepository.update(
         { _id: userId },
         { $addToSet: { following: followingId } },
       );
-      await this.userRepository.update(
+      await this._UserRepository.update(
         { _id: followingId },
         { $addToSet: { followers: userId } },
       );
 
-      await this.notificationService.sendNotification(
+      await this._NotificationService.sendNotification(
         userId,
         [followingId],
         'follow',

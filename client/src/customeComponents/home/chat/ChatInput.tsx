@@ -131,24 +131,24 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   const isSending = files.some((f) => f.status === 'uploading');
 
-  return (
-    <div
-      className={`relative p-3 mb-2 flex items-center w-full rounded-lg ${
-        darkMode ? 'bg-gray-800' : 'bg-gray-100'
-      }`}
-    >
+return (
+  <div className="w-full px-2 sm:px-4 flex justify-center">
+    <div className="relative w-full max-w-2xl mt-10 p-3 mb-2 flex flex-wrap items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+
       {replyTo && (
-        <div className="absolute top-0 left-0 w-full bg-gray-200 text-sm px-2 py-1 flex items-center justify-between">
+        <div className="absolute -top-10 left-0 w-full bg-gray-200 dark:bg-gray-700 text-xs px-3 py-1 rounded-t-md flex items-center justify-between shadow-sm">
           <span>Replying to: {replyTo.content}</span>
           <X className="inline w-4 h-4 ml-2 cursor-pointer" onClick={() => setReplyTo(null)} />
         </div>
       )}
 
+      {/* Emoji Picker */}
       <div ref={emojiPickerRef} className="relative">
         <Button
           type="button"
           onClick={() => setShowEmojiPicker((prev) => !prev)}
           disabled={isSending}
+          className="mr-1"
         >
           <Smile />
         </Button>
@@ -162,7 +162,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
         )}
       </div>
 
-      <label className="ml-2 cursor-pointer">
+      {/* File upload */}
+      <label className="ml-1 mr-2 cursor-pointer">
         <Paperclip />
         <input
           type="file"
@@ -173,14 +174,14 @@ const ChatInput: React.FC<ChatInputProps> = ({
         />
       </label>
 
-      {/* Preview files grid */}
+      {/* File Preview Modal */}
       {files.length > 0 && (
         <>
           <div
             className="fixed inset-0 bg-black bg-opacity-30 z-10"
             onClick={() => !isSending && setFiles([])}
           />
-          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-lg bg-white dark:bg-gray-900 p-4 rounded-xl shadow-xl z-20 max-h-[80vh] overflow-auto">
+          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95vw] max-w-sm sm:max-w-lg bg-white dark:bg-gray-900 p-4 rounded-xl shadow-xl z-20 max-h-[80vh] overflow-auto">
             <div className="flex justify-between items-center mb-3">
               <span className="text-sm font-semibold">Files to send ({files.length})</span>
               {!isSending && <X className="w-5 h-5 cursor-pointer" onClick={() => setFiles([])} />}
@@ -221,7 +222,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 </div>
               ))}
             </div>
-            {/* Send button inside modal */}
             <div className="flex justify-end mt-4">
               <Button
                 onClick={onSend}
@@ -234,21 +234,25 @@ const ChatInput: React.FC<ChatInputProps> = ({
         </>
       )}
 
+      {/* Message Input */}
       <Input
         ref={inputRef}
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
         onFocus={() => setShowEmojiPicker(false)}
-        className="ml-2"
+        className="flex-1 min-w-[100px]"
         disabled={isSending}
       />
 
+      {/* Send Button */}
       <Button onClick={onSend} disabled={(!message.trim() && files.length === 0) || isSending}>
         {isSending ? 'Sending...' : <Send />}
       </Button>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default ChatInput;

@@ -1,6 +1,6 @@
 import { ICommentRepository } from '../interfaces/ICommentRepository';
-import { CommentModel } from '../../core/domain/models/commentModel';
-import Post from '../../core/domain/models/postModel';
+import { CommentModel } from '../../core/domain/models/CommentModel';
+import Post from '../../core/domain/models/PostModel';
 import mongoose from 'mongoose';
 
 export class CommentRepository implements ICommentRepository {

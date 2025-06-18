@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 import LoginPage from '../../customeComponents/auth/Login';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/appStore/AuthStore';
 
 const AdminLoginPage: React.FC = () => {
   const { loginMutation: useAdminLoginMutation } = useAdminAuth();
@@ -15,7 +16,9 @@ const AdminLoginPage: React.FC = () => {
       { email, password },
       {
         onSuccess: (data) => {
+          console.log('data', data);
           setIsLoading(false);
+          
           navigate('/admin/dashboard');
         },
         onError: () => setIsLoading(false),

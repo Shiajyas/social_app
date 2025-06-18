@@ -1,8 +1,7 @@
 import mongoose, { Document } from 'mongoose';
 
-// Make sure `id` is required
 export interface IUser extends Document {
-  _id: string; // Explicitly define `_id` as a required field
+  _id: string;
   fullname: string;
   username: string;
   email: string;

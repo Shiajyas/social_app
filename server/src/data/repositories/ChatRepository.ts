@@ -1,6 +1,6 @@
 import IChatRepository from '../interfaces/IChatRepository';
-import ChatModel from '../../core/domain/models/chatModel';
-import MessageModel from '../../core/domain/models/messageModel';
+import ChatModel from '../../core/domain/models/ChatModel';
+import MessageModel from '../../core/domain/models/MessageModel';
 import { IMessage } from '../../core/domain/interfaces/IMessage';
 import { IChat } from '../../core/domain/interfaces/IChat';
 import { INormalizedChat } from '../../core/domain/interfaces/INormalizedChat';

@@ -1,6 +1,8 @@
 import mongoose, { Document } from 'mongoose';
 
 export interface IPost extends Document {
+  
+  createdAt: any;
   userId: mongoose.Types.ObjectId | any;
   title: string;
   description: string;

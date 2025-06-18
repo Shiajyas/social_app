@@ -1,8 +1,8 @@
 import { Types } from 'mongoose';
-import { ReportModel } from '../../core/domain/models/reportModel';
+import { ReportModel } from '../../core/domain/models/ReportModel';
 import { IReport } from '../../core/domain/interfaces/IReport';
 import { IReportRepository } from '../interfaces/IReportRepository';
-import Post from '../../core/domain/models/postModel';
+import Post from '../../core/domain/models/PostModel';
 
 export class ReportRepository implements IReportRepository {
   async create(report: Omit<IReport, 'createdAt'>): Promise<IReport> {

@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import http from 'http';
 import redis from '../infrastructure/utils/redisClient';
-import { initializeSocket } from '../infrastructure/socket/SocketServer';
+import { initializeSocket } from '../presentation/socket/SocketServer';
 
 export class App {
   public app: Application;

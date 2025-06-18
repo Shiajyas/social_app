@@ -6,7 +6,7 @@ import { PostRepository } from '../../../data/repositories/PostRepository';
 import { IPostRepository } from '../../../data/interfaces/IPostRepository';
 import userAuthMiddleware from '../../middleware/userAuthMiddleware';
 import { upload } from '../../middleware/uploadMiddleware';
-import { AuthenticatedRequest } from '../../../core/domain/interfaces/IAuthenticatedRequest';
+import { AuthenticatedPostRequest } from '../../../core/domain/interfaces/IAuthenticatedPostRequest';
 import { ICommentRepository } from '../../../data/interfaces/ICommentRepository';
 import { CommentRepository } from '../../../data/repositories/CommentRepository';
 
@@ -25,7 +25,7 @@ router.post(
   upload.array('mediaUrls', 5), // Accepts both images and videos
   (req: Request, res: Response, next: NextFunction) =>
     postController
-      .createPost(req as unknown as AuthenticatedRequest, res)
+      .createPost(req as unknown as AuthenticatedPostRequest, res)
       .catch(next),
 );
 
@@ -34,12 +34,12 @@ router.get(
   userAuthMiddleware.authenticate,
   (req: Request, res: Response, next: NextFunction) =>
     postController
-      .getPosts(req as unknown as AuthenticatedRequest, res)
+      .getPosts(req as unknown as AuthenticatedPostRequest, res)
       .catch(next),
 );
 router.get('/:id', (req: Request, res: Response, next: NextFunction) =>
   postController
-    .getPost(req as unknown as AuthenticatedRequest, res)
+    .getPost(req as unknown as AuthenticatedPostRequest, res)
     .catch(next),
 );
 
@@ -49,7 +49,7 @@ router.put(
   upload.array('mediaUrls', 5), // Accepts both images and videos
   (req: Request, res: Response, next: NextFunction) =>
     postController
-      .updatePost(req as unknown as AuthenticatedRequest, res)
+      .updatePost(req as unknown as AuthenticatedPostRequest, res)
       .catch(next),
 );
 
@@ -58,7 +58,7 @@ router.delete(
   userAuthMiddleware.authenticate,
   (req: Request, res: Response, next: NextFunction) =>
     postController
-      .deletePost(req as unknown as AuthenticatedRequest, res)
+      .deletePost(req as unknown as AuthenticatedPostRequest, res)
       .catch(next),
 );
 
@@ -67,7 +67,7 @@ router.patch(
   userAuthMiddleware.authenticate,
   (req: Request, res: Response, next: NextFunction) =>
     postController
-      .likePost(req as unknown as AuthenticatedRequest, res)
+      .likePost(req as unknown as AuthenticatedPostRequest, res)
       .catch(next),
 );
 router.patch(
@@ -75,7 +75,7 @@ router.patch(
   userAuthMiddleware.authenticate,
   (req: Request, res: Response, next: NextFunction) =>
     postController
-      .unlikePost(req as unknown as AuthenticatedRequest, res)
+      .unlikePost(req as unknown as AuthenticatedPostRequest, res)
       .catch(next),
 );
 
@@ -87,11 +87,10 @@ router.post(
   userAuthMiddleware.authenticate,
   (req: Request, res: Response, next: NextFunction) =>
     postController
-      .reportPost(req as unknown as AuthenticatedRequest, res)
+      .reportPost(req as unknown as AuthenticatedPostRequest, res)
       .catch(next),
 );
 
-// router.get("/:id/comments",userAuthMiddleware.authenticate, (req: Request, res: Response, next: NextFunction) => postController.getPostComments(req as unknown as AuthenticatedRequest, res).catch(next));
 
 router.get(
   '/:id/comments',
@@ -103,7 +102,7 @@ router.get(
   (req, res, next) => {
     console.log('Authentication successful');
     postController
-      .getPostComments(req as unknown as AuthenticatedRequest, res)
+      .getPostComments(req as unknown as AuthenticatedPostRequest, res)
       .catch(next);
   },
 );

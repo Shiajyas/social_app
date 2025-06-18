@@ -70,103 +70,100 @@ const PostUpload = () => {
     });
   };
 
-  return (
-    <div className="max-w-lg mx-auto rounded-xl shadow-lg p-6 flex flex-col space-y-4 h-[calc(100vh-4rem)] md:h-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-800 flex items-center space-x-2">
-          <Camera className="h-6 w-6 text-purple-500" />
-          <span>Create a Post</span>
-        </h2>
-      </div>
-
-      {/* Media Section */}
-      <div className="bg-gray-50 rounded-lg p-4 flex-1 overflow-hidden">
-        {!preview ? (
-          <MediaCapture onMediaCaptured={handleMediaCaptured} />
-        ) : (
-          <MediaPreview previewUrl={preview} onRemove={handleRemoveMedia} />
-        )}
-        {errors.media && <p className="text-red-500 text-sm mt-2">{errors.media}</p>}
-      </div>
-
-      {/* Input Fields */}
-      <div className="space-y-4">
-        <div>
-          <input
-            type="text"
-            placeholder="Add a caption..."
-            value={caption}
-            onChange={(e) => {
-              setCaption(e.target.value);
-              if (e.target.value.trim()) setErrors((prev) => ({ ...prev, caption: undefined }));
-            }}
-            className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-          />
-          {errors.caption && <p className="text-red-500 text-sm mt-1">{errors.caption}</p>}
-        </div>
-
-        <textarea
-          placeholder="What's on your mind?"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={3}
-          className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none transition-all"
-        />
-
-        {/* Visibility Selector */}
-        <div className="relative">
-          <select
-            value={visibility}
-            onChange={(e) => setVisibility(e.target.value as 'public' | 'private')}
-            className="w-full p-3 rounded-lg border border-gray-300 bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-          </select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-            <svg
-              className="w-5 h-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      {/* Upload Button */}
-      <button
-        onClick={handleUpload}
-        disabled={status === 'pending'}
-        className={`w-full py-3 rounded-lg font-semibold text-white flex items-center justify-center space-x-2 transition-all duration-200
-          ${
-            status === 'pending'
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800'
-          }`}
-      >
-        {status === 'pending' ? (
-          <>
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <span>Uploading...</span>
-          </>
-        ) : (
-          <>
-            <Upload className="h-5 w-5" />
-            <span>Share Post</span>
-          </>
-        )}
-      </button>
+ return (
+ <div className="p-4 bg-white dark:bg-gray-900 text-black dark:text-white rounded shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-700 max-w-full">
+    {/* Header */}
+    <div className="flex items-center justify-between">
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center space-x-2">
+        <Camera className="h-6 w-6 text-purple-500" />
+        <span>Create a Post</span>
+      </h2>
     </div>
-  );
+
+    {/* Media Section */}
+    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 flex-1 overflow-hidden">
+      {!preview ? (
+        <MediaCapture onMediaCaptured={handleMediaCaptured} />
+      ) : (
+        <MediaPreview previewUrl={preview} onRemove={handleRemoveMedia} />
+      )}
+      {errors.media && <p className="text-red-500 text-sm mt-2">{errors.media}</p>}
+    </div>
+
+    {/* Input Fields */}
+    <div className="space-y-4">
+      <div>
+        <input
+          type="text"
+          placeholder="Add a caption..."
+          value={caption}
+          onChange={(e) => {
+            setCaption(e.target.value);
+            if (e.target.value.trim()) {
+              setErrors((prev) => ({ ...prev, caption: undefined }));
+            }
+          }}
+          className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+        />
+        {errors.caption && <p className="text-red-500 text-sm mt-1">{errors.caption}</p>}
+      </div>
+
+      <textarea
+        placeholder="What's on your mind?"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        rows={3}
+        className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+      />
+
+      {/* Visibility Selector */}
+      <div className="relative">
+        <select
+          value={visibility}
+          onChange={(e) => setVisibility(e.target.value as 'public' | 'private')}
+          className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+        >
+          <option value="public">Public</option>
+          <option value="private">Private</option>
+        </select>
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+          <svg
+            className="w-5 h-5 text-gray-400 dark:text-gray-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    {/* Upload Button */}
+    <button
+      onClick={handleUpload}
+      disabled={status === 'pending'}
+      className={`w-full py-3 rounded-lg font-semibold text-white flex items-center justify-center space-x-2 transition-all duration-200 ${
+        status === 'pending'
+          ? 'bg-gray-400 cursor-not-allowed'
+          : 'bg-purple-600 hover:bg-purple-700 active:bg-purple-800'
+      }`}
+    >
+      {status === 'pending' ? (
+        <>
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span>Uploading...</span>
+        </>
+      ) : (
+        <>
+          <Upload className="h-5 w-5" />
+          <span>Share Post</span>
+        </>
+      )}
+    </button>
+  </div>
+);
+
 };
 
 export default PostUpload;

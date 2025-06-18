@@ -3,6 +3,7 @@ import { Flag } from "lucide-react";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { socket } from "@/utils/Socket";
+
 const REPORT_REASONS = [
   "Spam",
   "Harassment",
@@ -31,22 +32,22 @@ export default function ReportButton({ postId, userId }: ReportButtonProps) {
     }
 
     setLoading(true);
-  socket.emit(
-  "report:post",
-  { postId, userId, reason },
-  (response: { success: boolean; message?: string }) => {
-    setLoading(false);
 
-    if (response.success) {
-      toast.success("Report submitted.");
-      setIsOpen(false);
-      setReason("");
-    } else {
-      toast.error(response.message || "Failed to submit report.");
-    }
-  }
-);
+    socket.emit(
+      "report:post",
+      { postId, userId, reason },
+      (response: { success: boolean; message?: string }) => {
+        setLoading(false);
 
+        if (response.success) {
+          toast.success("Report submitted.");
+          setIsOpen(false);
+          setReason("");
+        } else {
+          toast.error(response.message || "Failed to submit report.");
+        }
+      }
+    );
   };
 
   return (
@@ -58,23 +59,26 @@ export default function ReportButton({ postId, userId }: ReportButtonProps) {
           setIsOpen(true);
         }}
       >
-        <Flag className="w-5 h-5 mt-1 text-gray-500" />
+        <Flag className="w-5 h-5 mt-1 text-gray-500 dark:text-gray-400" />
       </Button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-[22rem] max-w-full">
-            <h2 className="text-lg font-semibold mb-4">Report Post</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-xl w-[22rem] max-w-full">
+            <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+              Report Post
+            </h2>
 
             <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
               {REPORT_REASONS.map((item) => (
                 <button
                   key={item}
-                  className={`w-full text-left px-4 py-2 rounded-md border ${
-                    reason === item
-                      ? "bg-yellow-500 text-white border-yellow-600"
-                      : "bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-800"
-                  }`}
+                  className={`w-full text-left px-4 py-2 rounded-md border transition-all duration-200
+                    ${
+                      reason === item
+                        ? "bg-yellow-500 text-white border-yellow-600"
+                        : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200"
+                    }`}
                   onClick={() => setReason(item)}
                   disabled={loading}
                 >

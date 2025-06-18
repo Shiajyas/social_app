@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../../core/domain/models/userModel';
+import User from '../../core/domain/models/UserModel';
 import { IUser } from '../../core/domain/interfaces/IUser';
+import { AdminRepository } from '../../data/repositories/AdminRepository';
 
 interface DecodedToken {
   id: string;
@@ -18,7 +19,7 @@ export class userAuthMiddleware {
       // Extract token from Authorization header
       const token = req.cookies.userToken;
       // console.log("🔹 Received UserToken:", req.cookies);
-      console.log("🔹 Received Cookies:", JSON.stringify(req.cookies, null, 2));
+      // console.log("🔹 Received Cookies:", JSON.stringify(req.cookies, null, 2));
       if (!token) {
         res.status(401).json({ msg: 'Token is missing' });
         return;
@@ -36,7 +37,7 @@ export class userAuthMiddleware {
       }
 
       // Find user by ID
-      const user = await User.findById(decoded.id);
+      const user =await User.findById(decoded.id)
 
       // console.log("🔹 Found User:", user);
       if (!user) {

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { chatSocket as socket } from '@/utils/chatSocket';
 import { useIncomingCallStore } from '@/appStore/useIncomingCallStore';
+import { ca } from 'date-fns/locale';
 
 interface UseWebRTCProps {
   userId: string;
@@ -231,7 +232,11 @@ export const useWebRTC = ({
             'Your microphone or camera is in use by another application. Please close other apps using it.',
           );
         }
-        throw err;
+        // throw err;
+        endCall();
+        callEndedRef.current = true;
+        return
+
       }
 
       setLocalStream(stream);

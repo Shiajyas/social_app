@@ -1,5 +1,5 @@
-import { INormalizedChat } from '../../core/domain/interfaces/INormalizedChat';
-import { INormalizedMessage } from '../../core/domain/interfaces/INormalizedMessage';
+import { INormalizedChat } from '../../core/domain/dto/INormalizedChatDto';
+import { INormalizedMessage } from '../../core/domain/dto/INormalizedMessageDto';
 import { IMessage } from '../../core/domain/interfaces/IMessage';
 
 export default interface IChatService {

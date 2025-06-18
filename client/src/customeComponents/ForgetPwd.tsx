@@ -127,174 +127,190 @@ const ForgotPasswordPage: React.FC = () => {
     );
   };
 
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-lg p-8 bg-white rounded-lg shadow-md">
-        {/* Logo */}
-        <div className="flex justify-center mb-6">
-          <img src="/logo.png" alt="Logo" className="h-12" />
-        </div>
+return (
+  <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
+    <div className="w-full max-w-lg p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-all">
+      {/* Logo */}
+      <div className="flex justify-center mb-6">
+        <img src="/logo.png" alt="Logo" className="h-12" />
+      </div>
 
-        {/* Step Tracker */}
-        <div className="flex items-center justify-between mb-8">
-          {[
-            { label: 'Step 1: Email', completed: step > 1 },
-            { label: 'Step 2: OTP', completed: step > 2 },
-            { label: 'Step 3: Reset', completed: step > 3 },
-          ].map((stepInfo, index) => {
-            const stepNumber = index + 1;
-            const isActive = step === stepNumber;
-            return (
-              <div key={stepInfo.label} className="flex flex-col items-center">
-                <div
-                  className={`w-10 h-10 flex items-center justify-center rounded-full ${
-                    isActive
-                      ? 'bg-blue-500 text-white'
-                      : stepInfo.completed
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-300 text-gray-700'
-                  }`}
-                >
-                  {stepInfo.completed ? '✔' : stepNumber}
-                </div>
-                <span
-                  className={`mt-2 text-sm ${
-                    isActive ? 'text-blue-500 font-bold' : 'text-gray-700 font-medium'
-                  }`}
-                >
-                  {stepInfo.label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Step Content */}
-        <div className="mb-8">
-          {step === 1 && (
-            <form onSubmit={handleSubmit(onSubmit)}>
-              {/* Email Input */}
-              <div className="mb-4">
-                <label className="block mb-1 text-sm font-medium text-gray-700">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  {...register('email', {
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
-                      message: 'Invalid email address',
-                    },
-                  })}
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-                )}
-              </div>
-              {/* Submit Button */}
-              <button
-                type="submit"
-                className="w-full py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
+      {/* Step Tracker */}
+      <div className="flex items-center justify-between mb-8">
+        {[
+          { label: 'Step 1: Email', completed: step > 1 },
+          { label: 'Step 2: OTP', completed: step > 2 },
+          { label: 'Step 3: Reset', completed: step > 3 },
+        ].map((stepInfo, index) => {
+          const stepNumber = index + 1;
+          const isActive = step === stepNumber;
+          return (
+            <div key={stepInfo.label} className="flex flex-col items-center">
+              <div
+                className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${
+                  isActive
+                    ? 'bg-blue-500 text-white'
+                    : stepInfo.completed
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200'
+                }`}
               >
-                <span className="text-black"> {loading ? 'Sending OTP...' : 'Send OTP'}</span>
-              </button>
-            </form>
-          )}
-
-          {step === 2 && (
-            <form onSubmit={handleSubmit(onSubmit)}>
-              {/* OTP Input */}
-              <div className="mb-4">
-                <label className="block mb-1 text-sm font-medium text-gray-700">OTP</label>
-                <input
-                  type="text"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none ${
-                    errors.otp ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  {...register('otp', { required: 'OTP is required', minLength: 6, maxLength: 6 })}
-                />
-                {errors.otp && <p className="mt-1 text-sm text-red-500">{errors.otp.message}</p>}
+                {stepInfo.completed ? '✔' : stepNumber}
               </div>
-              <button
-                type="submit"
-                className="w-full py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
+              <span
+                className={`mt-2 text-sm ${
+                  isActive
+                    ? 'text-blue-500 font-bold'
+                    : 'text-gray-700 dark:text-gray-300 font-medium'
+                }`}
               >
-                <span className="text-black"> {loading ? 'Verifying...' : 'Verify OTP'}</span>
-              </button>
-              <p className="mt-4 text-sm text-gray-600">
-                Didn't receive the OTP?{' '}
-                <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  disabled={!isOtpResendAvailable}
-                  className={`${
-                    !isOtpResendAvailable
-                      ? 'text-gray-400 cursor-not-allowed'
-                      : 'text-blue-500 underline hover:text-blue-600'
-                  }`}
-                >
-                  Resend OTP
-                </button>
-              </p>
-              <p className="text-xs text-gray-500 mt-2">
-                {timer > 0
-                  ? `Resend available in ${Math.floor(timer / 60)}:${(timer % 60)
-                      .toString()
-                      .padStart(2, '0')}`
-                  : 'You can resend the OTP now.'}
-              </p>
-            </form>
-          )}
+                {stepInfo.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
 
-          {step === 3 && (
-            <form onSubmit={handleSubmit(onSubmit)}>
-              {/* Password Inputs */}
-              <div className="mb-4">
-                <label className="block mb-1 text-sm font-medium text-gray-700">New Password</label>
-                <input
-                  type="password"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  {...register('password', { required: 'Password is required' })}
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1 text-sm font-medium text-gray-700">
-                  Confirm Password
-                </label>
-                <input
-                  type="password"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  {...register('confirmPassword', {
-                    validate: (value) => value === watch('password') || 'Passwords do not match',
-                  })}
-                />
-                {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>
-                )}
-              </div>
+      {/* Step Content */}
+      <div className="mb-8">
+        {step === 1 && (
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {/* Email Input */}
+            <div className="mb-4">
+              <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">
+                Email Address
+              </label>
+              <input
+                type="email"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none bg-white dark:bg-gray-700 text-black dark:text-white ${
+                  errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                }`}
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
+                    message: 'Invalid email address',
+                  },
+                })}
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="w-full py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
+            >
+              <span className="text-black">{loading ? 'Sending OTP...' : 'Send OTP'}</span>
+            </button>
+          </form>
+        )}
+
+        {step === 2 && (
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {/* OTP Input */}
+            <div className="mb-4">
+              <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">
+                OTP
+              </label>
+              <input
+                type="text"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none bg-white dark:bg-gray-700 text-black dark:text-white ${
+                  errors.otp ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                }`}
+                {...register('otp', {
+                  required: 'OTP is required',
+                  minLength: { value: 6, message: 'OTP must be 6 digits' },
+                  maxLength: { value: 6, message: 'OTP must be 6 digits' },
+                })}
+              />
+              {errors.otp && (
+                <p className="mt-1 text-sm text-red-500">{errors.otp.message}</p>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="w-full py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
+            >
+              <span className="text-black">{loading ? 'Verifying...' : 'Verify OTP'}</span>
+            </button>
+
+            <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
+              Didn't receive the OTP?{' '}
               <button
-                type="submit"
-                className="w-full py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
+                type="button"
+                onClick={handleResendOtp}
+                disabled={!isOtpResendAvailable}
+                className={`${
+                  !isOtpResendAvailable
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-blue-500 underline hover:text-blue-600'
+                }`}
               >
-                <span className="text-black">
-                  {' '}
-                  {loading ? 'Resetting Password...' : 'Reset Password'}
-                </span>
+                Resend OTP
               </button>
-            </form>
-          )}
-        </div>
+            </p>
+            <p className="text-xs mt-2 text-gray-500 dark:text-gray-400">
+              {timer > 0
+                ? `Resend available in ${Math.floor(timer / 60)}:${(timer % 60)
+                    .toString()
+                    .padStart(2, '0')}`
+                : 'You can resend the OTP now.'}
+            </p>
+          </form>
+        )}
+
+        {step === 3 && (
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {/* New Password */}
+            <div className="mb-4">
+              <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">
+                New Password
+              </label>
+              <input
+                type="password"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none bg-white dark:bg-gray-700 text-black dark:text-white ${
+                  errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                }`}
+                {...register('password', { required: 'Password is required' })}
+              />
+            </div>
+
+            {/* Confirm Password */}
+            <div className="mb-4">
+              <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none bg-white dark:bg-gray-700 text-black dark:text-white ${
+                  errors.confirmPassword ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                }`}
+                {...register('confirmPassword', {
+                  validate: (value) =>
+                    value === watch('password') || 'Passwords do not match',
+                })}
+              />
+              {errors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
+            >
+              <span className="text-black">
+                {loading ? 'Resetting Password...' : 'Reset Password'}
+              </span>
+            </button>
+          </form>
+        )}
       </div>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default ForgotPasswordPage;

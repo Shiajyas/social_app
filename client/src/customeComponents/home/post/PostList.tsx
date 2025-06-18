@@ -126,7 +126,7 @@ const PostList: React.FC = () => {
             key={post._id}
             post={post}
             isLiked={post.likes.includes(userId)}
-            onLike={() => handleLike(post._id, post.likes.includes(userId))}
+            onLike={() => handleLike(post?._id, post?.likes?.includes(userId))}
             onToggleComments={() => handleToggleComments(post._id)}
             isCommentsOpen={openPostId === post._id}
             onClick={() => handlePostClick(post._id)}

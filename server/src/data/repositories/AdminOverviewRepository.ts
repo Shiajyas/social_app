@@ -1,14 +1,21 @@
-import Post from '../../core/domain/models/postModel';
-import User from '../../core/domain/models/userModel';
-import { CommentModel } from '../../core/domain/models/commentModel';
+import Post from '../../core/domain/models/PostModel';
+import User from '../../core/domain/models/UserModel';
+import { CommentModel } from '../../core/domain/models/CommentModel';
 import SubscriptionModel from '../../core/domain/models/SubscriptionModel';
 import dayjs from 'dayjs';
+import {
+  IAdminOverviewRepository,
+  AdminOverview,
+  LikeRange,
+  MostLikedPost,
+  RangeType,
+} from "../interfaces/IAdminOverviewRepository";
 
-export class AdminOverviewRepository {
+export class AdminOverviewRepository implements IAdminOverviewRepository {
   async fetchOverview(
-    range: '7d' | '1m' | '1y' = '7d',
-    likeRange: { min: number; max: number } = { min: 0, max: Infinity },
-  ) {
+    range: RangeType = '7d',
+    likeRange: LikeRange = { min: 0, max: Infinity },
+  ): Promise<AdminOverview> {
     const now = new Date();
     const startDate = dayjs(now)
       .subtract(
@@ -97,12 +104,10 @@ export class AdminOverviewRepository {
     };
   }
 
-  // ✅ New Method: fetch most liked posts with filtering
-
   async fetchMostLikedPosts(
-    range: '7d' | '1m' | '1y' = '7d',
-    likeRange: { min: number; max: number } = { min: 0, max: Infinity },
-  ) {
+    range: RangeType = '7d',
+    likeRange: LikeRange = { min: 0, max: Infinity },
+  ): Promise<MostLikedPost[]> {
     const now = new Date();
     const startDate = dayjs(now)
       .subtract(
@@ -111,19 +116,15 @@ export class AdminOverviewRepository {
       )
       .toDate();
 
-    // Step 1: Filter and sort in-memory
     const posts = await Post.find({
       createdAt: { $gte: startDate },
     })
       .populate({
         path: 'userId',
-        select: 'username fullname avatar', // or any user fields you want
+        select: 'username fullname avatar',
       })
-      .lean(); // makes it a plain JS object (faster if you're just reading)
+      .lean();
 
-    // console.log(posts, "posts");
-
-    // Step 2: Filter and sort manually (since we can't use $size directly with populate)
     const filteredPosts = posts
       .map((post) => ({
         ...post,
@@ -135,12 +136,11 @@ export class AdminOverviewRepository {
       )
       .sort((a, b) => b.likesCount - a.likesCount)
       .slice(0, 5);
-    // console.log(filteredPosts, "filteredPosts");
-    // Optional: format to return minimal fields
-    return filteredPosts.map((post) => ({
-      title: post.title,
-      likes: post.likesCount,
-      owner: post.userId?.fullname, // or username
-    }));
+
+ return filteredPosts.map((post) => ({
+  title: post.title,
+  likes: post.likesCount,
+  owner: post.userId.toString() || 'Unknown',
+}));
   }
 }

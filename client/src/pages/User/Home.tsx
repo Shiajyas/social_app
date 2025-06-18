@@ -46,9 +46,7 @@ const HomeLayout: React.FC = () => {
     <div className="w-full h-screen flex flex-col overflow-hidden">
       <Header
         unreadCount={unreadCount}
-        openRightSidebar={() => {
-          /* Add logic to open the right sidebar */
-        }}
+      
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -67,10 +65,8 @@ const HomeLayout: React.FC = () => {
           <CardContent className="flex-1 flex flex-col overflow-hidden">
             {/* ✅ Show Status only on Home Page */}
             {selectedItem === 'Home' && (
-              <div className="m-2 border-b">
-                {/* <Status /> */}
-
-           
+              <div className="flex items-center justify-between">
+                {/* <h2 className="text-2xl font-bold">Home</h2> */}
               </div>
             )}
 

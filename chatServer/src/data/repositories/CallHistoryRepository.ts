@@ -13,7 +13,7 @@ export class CallHistoryRepository implements ICallHistoryRepository {
       $or: [{ callerId: userId }, { receiverId: userId }],
     })
       .sort({ startedAt: -1 })
-      .populate('callerId', 'username fullname avatar') // Select only useful fields
+      .populate('callerId', 'username fullname avatar') 
       .populate('receiverId', 'username fullname avatar');
   }
 }

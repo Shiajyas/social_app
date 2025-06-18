@@ -106,86 +106,91 @@ const Notification: React.FC = () => {
     [isFetchingNextPage, fetchNextPage, hasNextPage],
   );
 
-  return (
-    <div className="p-4 bg-white shadow-md rounded-lg flex-grow h-full flex flex-col">
-      {/* Sticky Header */}
-      <div className="sticky top-0 bg-white shadow-md p-3 z-10 border-b">
-        <h2 className="text-lg font-semibold text-center">Notifications</h2>
-      </div>
+return (
+  <div className="p-4 bg-white dark:bg-gray-900 shadow-md rounded-lg flex-grow h-full flex flex-col">
+    
+    {/* Sticky Header */}
+    <div className="sticky top-0 z-20 bg-white dark:bg-gray-900 shadow-md p-3 border-b border-gray-200 dark:border-gray-700">
+      <h2 className="text-lg font-semibold text-center text-gray-800 dark:text-white">Notifications</h2>
+    </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 p-4">
-        {isLoading ? (
-          <div className="flex justify-center items-center h-full">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          </div>
-        ) : data?.pages?.flatMap((page) => page.notifications).length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            <Bell className="h-12 w-12 mx-auto text-gray-400 mb-2" />
-            <p>No notifications yet</p>
-          </div>
-        ) : (
-          <ul className="space-y-3">
-            {data?.pages
-              ?.flatMap((page) => page.notifications)
-              .map((notification, index, arr) => (
-                <li
-                  key={notification._id}
-                  ref={index === arr.length - 1 ? lastNotificationRef : null}
-                  onClick={() => handleNotificationClick(notification)}
-                  className={`relative flex items-start p-4 rounded-lg shadow-sm transition-all duration-200 cursor-pointer
-                  ${notification.read ? 'bg-gray-200' : 'bg-gray-50 border-l-4 border-gray-300'}
-                  hover:bg-gray-100 hover:shadow-md`}
-                >
-                  <div className="flex-1">
-                    <p className="text-sm">
+    {/* Scrollable Content */}
+    <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-gray-100 dark:scrollbar-track-gray-800 p-4 space-y-4">
+      {isLoading ? (
+        <div className="flex justify-center items-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        </div>
+      ) : data?.pages?.flatMap((page) => page.notifications).length === 0 ? (
+        <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+          <Bell className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+          <p>No notifications yet</p>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {data?.pages
+            ?.flatMap((page) => page.notifications)
+            .map((notification, index, arr) => (
+              <li
+                key={notification._id}
+                ref={index === arr.length - 1 ? lastNotificationRef : null}
+                onClick={() => handleNotificationClick(notification)}
+                className={`relative flex items-start p-4 rounded-lg transition-all duration-200 cursor-pointer group
+                ${notification.read
+                  ? 'bg-gray-100 dark:bg-gray-800'
+                  : 'bg-white dark:bg-gray-900 border-l-4 border-blue-400 shadow-sm'} 
+                hover:bg-gray-50 dark:hover:bg-gray-800 hover:shadow-md`}
+              >
+                <div className="flex-1">
+                  <p className="text-sm text-gray-800 dark:text-gray-200">
+                    <span
+                      className="font-semibold text-blue-600 hover:underline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/home/profile/${notification.senderId}`);
+                      }}
+                    >
+                      {notification.senderName}
+                    </span>{' '}
+                    {notification.message.replace(notification.senderName, '')}{' '}
+                    {notification.postId && (
                       <span
                         className="font-semibold text-blue-600 hover:underline"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/home/profile/${notification.senderId}`);
+                          navigate(`/home/post/${notification.postId}`);
                         }}
                       >
-                        {notification.senderName}
-                      </span>{' '}
-                      {notification.message.replace(notification.senderName, '')}{' '}
-                      {notification.postId && (
-                        <span
-                          className="font-semibold text-blue-600 hover:underline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/home/post/${notification.postId}`);
-                          }}
-                        >
-                          Post
-                        </span>
-                      )}
-                    </p>
-                    <span className="text-xs text-gray-400">
-                      {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                    </span>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteMutation.mutate(notification._id);
-                    }}
-                    className="ml-3 text-gray-400 hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                </li>
-              ))}
-          </ul>
-        )}
-        {isFetchingNextPage && (
-          <div className="flex justify-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-          </div>
-        )}
-      </div>
+                        Post
+                      </span>
+                    )}
+                  </p>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                    {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                  </span>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteMutation.mutate(notification._id);
+                  }}
+                  className="ml-3 text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
+              </li>
+            ))}
+        </ul>
+      )}
+
+      {isFetchingNextPage && (
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
+
 };
 
 export default Notification;

@@ -2,21 +2,27 @@ import { Router } from 'express';
 import { AuthController } from '../../controllers/AuthController';
 import { OtpService } from '../../../infrastructure/services/otpService';
 import { IOtpService } from '../../../infrastructure/services/interfaces/IOtpService';
-import { UserRepository } from '../../../data/repositories/userRepository';
+import { UserRepository } from '../../../data/repositories/UserRepository';
 import { IUserRepository } from '../../../data/interfaces/IUserRepository';
 import { AuthService } from '../../../useCase/authOperations';
 import { IAuthService } from '../../../useCase/interfaces/IAuthService';
 import userAuthMiddleware from '../../middleware/userAuthMiddleware';
 import { loginRateLimiter } from '../../middleware/rateLimitMiddleware';
+import { IAdminUseCase } from '../../../useCase/interfaces/IAdminUseCase';
+import { AdminUseCaseImpl } from '../../../useCase/adminUseCaseImpl';
+import { IAdminRepository } from '../../../data/interfaces/IAdminRepository';
+import { AdminRepository } from '../../../data/repositories/AdminRepository';
 
 const router = Router();
 
 const userRepository: IUserRepository = new UserRepository();
 const otpService: IOtpService = new OtpService();
-
 const userService: IAuthService = new AuthService(userRepository, otpService);
 
-const authController = new AuthController(userService);
+const adminRepository: IAdminRepository = new AdminRepository();
+
+const adminService: IAdminUseCase = new AdminUseCaseImpl(adminRepository);
+const authController = new AuthController(userService,adminService);
 
 router.post('/register', authController.register.bind(authController));
 router.post('/verify_otp', authController.verifyOtp.bind(authController));

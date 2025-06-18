@@ -1,24 +1,9 @@
 import SubscriptionModel from '../core/domain/models/SubscriptionModel';
-import User from '../core/domain/models/userModel';
+import User from '../core/domain/models/UserModel';
+import { IAdminSubscriptionService, QueryParams, AllQueryParams, SubscriptionResult } from './interfaces/IAdminSubscriptionService';
 import { Types } from 'mongoose';
 
-interface QueryParams {
-  search: string;
-  status: string;
-  startDate: string;
-  endDate: string;
-  page: number;
-  limit: number;
-}
-
-interface AllQueryParams {
-  search: string;
-  status: string;
-  startDate: string;
-  endDate: string;
-}
-
-export const adminSubscriptionService = {
+export const adminSubscriptionService: IAdminSubscriptionService = {
   async getSubscriptions({
     search,
     status,
@@ -26,7 +11,7 @@ export const adminSubscriptionService = {
     endDate,
     page,
     limit,
-  }: QueryParams) {
+  }: QueryParams): Promise<SubscriptionResult> {
     const filters: any = {};
 
     if (search) {
@@ -73,7 +58,7 @@ export const adminSubscriptionService = {
     status,
     startDate,
     endDate,
-  }: AllQueryParams) {
+  }: AllQueryParams): Promise<{ subscriptions: Array<any> }> {
     const filters: any = {};
 
     if (search) {
@@ -97,14 +82,17 @@ export const adminSubscriptionService = {
     }
 
     const subscriptions = await SubscriptionModel.find(filters)
-      .populate('userId', 'username email') // Exclude avatar
+      .populate('userId', 'username email')
       .sort({ createdAt: -1 })
       .lean();
 
     return { subscriptions };
   },
 
-  async toggleSubscriptionStatus(subscriptionId: string) {
+  async toggleSubscriptionStatus(subscriptionId: string): Promise<{
+    message: string;
+    isSubscribed: boolean;
+  }> {
     if (!Types.ObjectId.isValid(subscriptionId)) {
       throw new Error('Invalid subscription ID');
     }

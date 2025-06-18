@@ -2,21 +2,27 @@ import { Notification } from '../core/domain/models/NotificationModel';
 import { INotificationService } from './interfaces/InotificationService';
 import { ISUserRepository } from '../data/interfaces/ISUserRepository';
 import { IUserRepository } from '../data/interfaces/IUserRepository';
+import { InotificationRepo } from '../data/interfaces/InotificationRepo';
+import { INotification } from '../core/domain/interfaces/INotification';
+
 import { Server } from 'socket.io';
 
 export class NotificationService implements INotificationService {
-  private io: Server;
-  private userRepository: ISUserRepository;
-  private mainRepo: IUserRepository;
+  private _Io: Server;
+  private _OnlineUserRepository: ISUserRepository;
+  private _MainUserRepo: IUserRepository;
+  private _NotificationRepo : InotificationRepo
 
   constructor(
     io: Server,
     userRepository: ISUserRepository,
     mainRepo: IUserRepository,
+    notificationRepo : InotificationRepo
   ) {
-    this.io = io;
-    this.userRepository = userRepository;
-    this.mainRepo = mainRepo;
+    this._Io = io;
+    this._OnlineUserRepository = userRepository;
+    this._MainUserRepo = mainRepo;
+    this._NotificationRepo = notificationRepo
   }
 
   async sendNotification(
@@ -51,8 +57,8 @@ export class NotificationService implements INotificationService {
             id = (id as any)._id.toString(); // Extract `_id` from object and convert to string
           }
 
-          const user = await this.mainRepo.findById(id.toString());
-          const onlineUser = await this.userRepository.findById(id.toString());
+          const user = await this._MainUserRepo.findById(id.toString());
+          const onlineUser = await this._OnlineUserRepository.findById(id.toString());
           console.log(user, 'formm save');
           if (!user) return null; // Ensure user exists
 
@@ -104,7 +110,7 @@ export class NotificationService implements INotificationService {
       // Emit real-time notifications **only to online users**
       validReceivers.forEach((receiver) => {
         if (receiver?.socketId) {
-          this.io.to(receiver.socketId).emit('newNotification', {
+          this._Io.to(receiver.socketId).emit('newNotification', {
             type,
             message,
             senderId,
@@ -128,4 +134,22 @@ export class NotificationService implements INotificationService {
       console.error('❌ Error in sendNotification:', error);
     }
   }
+
+getUnreadCount(userId: string): Promise<number> {
+  return this._NotificationRepo.getUnreadCount(userId);
+  }
+
+markNotificationsAsRead(userId: string): Promise<void> {
+  return this._NotificationRepo.markNotificationsAsRead(userId);  
+
+  }
+
+  getNotifications(userId: string, page: number, limit: number): Promise<{ notifications: INotification[]; nextPage: number | null }> {
+    return this._NotificationRepo.getNotifications(userId, page, limit);
+  }
+
+  deleteNotification(notificationId: string): Promise<void> {
+    return this._NotificationRepo.deleteNotification(notificationId);
+  }
+
 }

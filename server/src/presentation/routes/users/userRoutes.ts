@@ -2,26 +2,30 @@ import express from 'express';
 import { UserController } from '../../controllers/UserController';
 import userAuthMiddleware from '../../middleware/userAuthMiddleware';
 import { UserService } from '../../../useCase/UserService';
-import { UserRepository } from '../../../data/repositories/userRepository';
+import { UserRepository } from '../../../data/repositories/UserRepository';
 import { PostRepository } from '../../../data/repositories/PostRepository';
 import SubscriptionUseCase from '../../../useCase/SubscriptionUseCase';
 import { CallHistoryRepository } from '../../../data/repositories/CallHistoryRepository';
 import { upload } from '../../middleware/uploadMiddleware';
+import { IUserRepository } from '../../../data/interfaces/IUserRepository';
+import { IPostRepository } from '../../../data/interfaces/IPostRepository';
+import { ICallHistoryRepository } from '../../../data/interfaces/ICallHistoryRepository';
+import { ISubscriptionUseCase } from '../../../useCase/interfaces/ISubscriptionUseCase';
 
 const router = express.Router();
-const userRepositoryInstance = new UserRepository();
-const postRepositoryInstance = new PostRepository();
-const callHistoryRepositoryInstance = new CallHistoryRepository();
-const subscriptionUseCaseInstance = SubscriptionUseCase;
+const userRepositoryInstance: IUserRepository = new UserRepository();
+const postRepositoryInstance :IPostRepository = new PostRepository();
+const callHistoryRepositoryInstance : ICallHistoryRepository= new CallHistoryRepository();
+const subscriptionUseCaseInstance : ISubscriptionUseCase = SubscriptionUseCase;
 export function userRoutes() {
   const userServiceInstance = new UserService(
     userRepositoryInstance,
     postRepositoryInstance,
+    callHistoryRepositoryInstance
   );
   const userController = new UserController(
     userServiceInstance,
     subscriptionUseCaseInstance,
-    callHistoryRepositoryInstance,
   );
 
   router.get(

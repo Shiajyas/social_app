@@ -2,27 +2,29 @@ import { Server, Socket } from 'socket.io';
 import { createServer } from 'http';
 
 // Repositories
-import { UserRepository } from '../../data/repositories/userRepository';
+import { UserRepository } from '../../data/repositories/UserRepository';
 import { SUserRepositoryImpl } from '../../data/repositories/SUserRepositoryImpl';
 import { PostRepository } from '../../data/repositories/PostRepository';
 import { CommentRepository } from '../../data/repositories/CommentRepository';
-import { ChatRepository } from '../../data/repositories/ChatRepository';
-import { CallHistoryRepository } from '../../data/repositories/CallHistoryRepository';
-
 // Services
 import { NotificationService } from '../../useCase/notificationService';
 import { UserSocketService } from '../../useCase/socket/socketServices/userSocketService';
 import { PostSocketService } from '../../useCase/socket/socketServices/postSocketService';
-import { CommentSocketService } from '../../useCase/socket/socketServices/CommentSocketService';
+import { CommentSocketService } from '../../useCase/socket/socketServices/commentSocketService';
 import { AdminSocketService } from '../../useCase/socket/socketServices/adminSocketService';
-import { AdminOverviewService } from '../../useCase/AdminOverviewService';
+import { AdminOverviewService } from '../../useCase/adminOverviewService';
 import { ReportRepository } from '../../data/repositories/ReportRepository';
-
+import { IAdminOverviewRepository } from '../../data/interfaces/IAdminOverviewRepository';
+import { AdminOverviewRepository } from '../../data/repositories/AdminOverviewRepository';
+import { InotificationRepo } from '../../data/interfaces/InotificationRepo';
+import { INotificationService } from '../../useCase/interfaces/InotificationService';
+import { NotificationRepo } from '../../data/repositories/NotificationRepo';
 // Handlers
 import { postHandlers } from './socketHandlers/postHandlers';
 import { commentHandlers } from './socketHandlers/commentHandlers';
 import { userHandlers } from './socketHandlers/userHandlers';
 import { adminHandlers } from './socketHandlers/adminHandlers';
+import { IPostRepository } from '../../data/interfaces/IPostRepository';
 
 let io: Server | null = null;
 
@@ -48,17 +50,19 @@ export const initializeSocket = (
   // Instantiate repositories
   const userRepository = new UserRepository();
   const mainUserRepository = new SUserRepositoryImpl();
-  const postRepository = new PostRepository();
+  const postRepository: IPostRepository = new PostRepository();
   const commentRepository = new CommentRepository();
-  const chatRepository = new ChatRepository();
-  const callHistoryRepository = new CallHistoryRepository();
   const reportRepository = new ReportRepository();
+  const adminOverviewRepository: IAdminOverviewRepository = new AdminOverviewRepository();
+  const adminOverviewService = new AdminOverviewService(adminOverviewRepository, reportRepository);
+  const notificationRepository : InotificationRepo = new NotificationRepo();
 
   // Instantiate services
-  const notificationService = new NotificationService(
+  const notificationService  = new NotificationService(
     io,
     mainUserRepository,
     userRepository,
+    notificationRepository
   );
   const postSocketService = new PostSocketService(
     io,
@@ -75,17 +79,18 @@ export const initializeSocket = (
   );
   const adminSocketService = new AdminSocketService(
     io,
-    new AdminOverviewService(),
+    adminOverviewService,
     mainUserRepository,
     reportRepository,
     notificationService,
+    postRepository
   );
   const userSocketService = new UserSocketService(
     io,
     userRepository,
     mainUserRepository,
     notificationService,
-    adminSocketService,
+   
   );
 
   // Handle socket connection

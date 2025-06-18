@@ -1,6 +1,8 @@
 import { IUser } from './IUser';
+import { Request} from 'express';
 
-export interface AuthenticatedRequest extends Request {
+
+export interface AuthenticatdRequest extends Request {
+  admin: any;
   user?: IUser;
-  files?: Express.Multer.File;
 }

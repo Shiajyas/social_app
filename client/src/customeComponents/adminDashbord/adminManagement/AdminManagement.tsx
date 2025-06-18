@@ -19,7 +19,7 @@ interface Subscription {
   amount: number;
 }
 
-const AdminManagement: React.FC = () => {
+const SubscriptionManagement: React.FC = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateRange, setDateRange] = useState<{ start?: string; end?: string }>({});
@@ -90,158 +90,161 @@ const AdminManagement: React.FC = () => {
     doc.save("subscriptions.pdf");
   };
 
-  return (
-    <div className="p-4 max-w-7xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Subscription Management</h2>
+return (
+  <div className="p-4 max-w-7xl mx-auto text-gray-800 dark:text-gray-100 transition-colors">
+    <h2 className="text-2xl font-bold mb-6">Subscription Management</h2>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-4">
-        <input
-          type="text"
-          placeholder="Search by User ID or Email"
-          className="border p-2 rounded w-64"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-        />
-        <select
-          className="border p-2 rounded"
-          value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="all">All Status</option>
-          <option value="active">Subscribed</option>
-          <option value="inactive">Unsubscribed</option>
-        </select>
-        <input
-          type="date"
-          className="border p-2 rounded"
-          onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
-        />
-        <input
-          type="date"
-          className="border p-2 rounded"
-          onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
-        />
-        <button
-          className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-          onClick={() => setPreviewOpen(true)}
-        >
-          Preview PDF
-        </button>
-      </div>
-
-      {/* Table */}
-      <div className="overflow-x-auto shadow rounded-lg">
-        {isLoading ? (
-          <div className="text-center p-4">Loading...</div>
-        ) : (
-          <table className="min-w-full bg-white divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50 text-left">
-              <tr>
-                <th className="px-6 py-3">Username</th>
-                <th className="px-6 py-3">Email</th>
-                <th className="px-6 py-3">User ID</th>
-                <th className="px-6 py-3">Subscribed</th>
-                <th className="px-6 py-3">Start Date</th>
-                <th className="px-6 py-3">End Date</th>
-                <th className="px-6 py-3">Amount</th>
-                <th className="px-6 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {data?.subscriptions?.map((sub: Subscription) => (
-                <tr key={sub._id}>
-                  <td className="px-6 py-4 font-medium">{sub.userId.username}</td>
-                  <td className="px-6 py-4 text-gray-600">{sub.userId.email}</td>
-                  <td className="px-6 py-4 text-xs">{sub.userId._id}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        sub.isSubscribed ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {sub.isSubscribed ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    {sub.startDate ? format(new Date(sub.startDate), "PP") : "N/A"}
-                  </td>
-                  <td className="px-6 py-4">
-                    {sub.endDate ? format(new Date(sub.endDate), "PP") : "N/A"}
-                  </td>
-                  <td className="px-6 py-4">${sub.amount.toFixed(2)}</td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => handleToggle(sub._id, sub.isSubscribed)}
-                      className="text-sm px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
-                    >
-                      Toggle
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {/* Pagination */}
-      <div className="flex justify-between items-center mt-4">
-        <button
-          disabled={page === 1}
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-        >
-          Previous
-        </button>
-        <span className="text-sm">Page {page}</span>
-        <button
-          disabled={!data?.hasMore}
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-          onClick={() => setPage((p) => p + 1)}
-        >
-          Next
-        </button>
-      </div>
-
-      {/* Preview Modal */}
-      <Modal
-        isOpen={previewOpen}
-        onRequestClose={() => setPreviewOpen(false)}
-        contentLabel="PDF Preview"
-        className="bg-white p-6 rounded-lg max-w-2xl mx-auto my-20 outline-none"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center"
+    {/* Filters */}
+    <div className="flex flex-wrap gap-4 mb-4">
+      <input
+        type="text"
+        placeholder="Search by User ID or Email"
+        className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded w-64"
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
+      />
+      <select
+        className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded"
+        value={statusFilter}
+        onChange={(e) => {
+          setStatusFilter(e.target.value);
+          setPage(1);
+        }}
       >
-        <h3 className="text-xl font-bold mb-4">PDF Export Preview</h3>
-        <p className="text-sm text-gray-600 mb-6">
-          This will generate a complete subscription report with your filters and all pages.
-        </p>
-        <div className="flex gap-4 justify-end">
-          <button
-            onClick={() => setPreviewOpen(false)}
-            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              generatePDF();
-              setPreviewOpen(false);
-            }}
-            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-          >
-            Download PDF
-          </button>
-        </div>
-      </Modal>
+        <option value="all">All Status</option>
+        <option value="active">Subscribed</option>
+        <option value="inactive">Unsubscribed</option>
+      </select>
+      <input
+        type="date"
+        className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded"
+        onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
+      />
+      <input
+        type="date"
+        className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded"
+        onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
+      />
+      <button
+        className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
+        onClick={() => setPreviewOpen(true)}
+      >
+        Preview PDF
+      </button>
     </div>
-  );
+
+    {/* Table */}
+    <div className="overflow-x-auto shadow rounded-lg">
+      {isLoading ? (
+        <div className="text-center p-4">Loading...</div>
+      ) : (
+        <table className="min-w-full bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+          <thead className="bg-gray-50 dark:bg-gray-700 text-left">
+            <tr>
+              <th className="px-6 py-3">Username</th>
+              <th className="px-6 py-3">Email</th>
+              <th className="px-6 py-3">User ID</th>
+              <th className="px-6 py-3">Subscribed</th>
+              <th className="px-6 py-3">Start Date</th>
+              <th className="px-6 py-3">End Date</th>
+              <th className="px-6 py-3">Amount</th>
+              <th className="px-6 py-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+            {data?.subscriptions?.map((sub: Subscription) => (
+              <tr key={sub._id}>
+                <td className="px-6 py-4 font-medium">{sub.userId.username}</td>
+                <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{sub.userId.email}</td>
+                <td className="px-6 py-4 text-xs">{sub.userId._id}</td>
+                <td className="px-6 py-4">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      sub.isSubscribed
+                        ? 'bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200'
+                        : 'bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-200'
+                    }`}
+                  >
+                    {sub.isSubscribed ? 'Active' : 'Inactive'}
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  {sub.startDate ? format(new Date(sub.startDate), 'PP') : 'N/A'}
+                </td>
+                <td className="px-6 py-4">
+                  {sub.endDate ? format(new Date(sub.endDate), 'PP') : 'N/A'}
+                </td>
+                <td className="px-6 py-4">${sub.amount.toFixed(2)}</td>
+                <td className="px-6 py-4">
+                  <button
+                    onClick={() => handleToggle(sub._id, sub.isSubscribed)}
+                    className="text-sm px-3 py-1 rounded bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 transition"
+                  >
+                    Toggle
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+
+    {/* Pagination */}
+    <div className="flex justify-between items-center mt-4">
+      <button
+        disabled={page === 1}
+        className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded disabled:opacity-50"
+        onClick={() => setPage((p) => Math.max(1, p - 1))}
+      >
+        Previous
+      </button>
+      <span className="text-sm">Page {page}</span>
+      <button
+        disabled={!data?.hasMore}
+        className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded disabled:opacity-50"
+        onClick={() => setPage((p) => p + 1)}
+      >
+        Next
+      </button>
+    </div>
+
+    {/* Preview Modal */}
+    <Modal
+      isOpen={previewOpen}
+      onRequestClose={() => setPreviewOpen(false)}
+      contentLabel="PDF Preview"
+      className="bg-white dark:bg-gray-900 dark:text-white p-6 rounded-lg max-w-2xl mx-auto my-20 outline-none shadow-lg"
+      overlayClassName="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center"
+    >
+      <h3 className="text-xl font-bold mb-4">PDF Export Preview</h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+        This will generate a complete subscription report with your filters and all pages.
+      </p>
+      <div className="flex gap-4 justify-end">
+        <button
+          onClick={() => setPreviewOpen(false)}
+          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            generatePDF();
+            setPreviewOpen(false);
+          }}
+          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+        >
+          Download PDF
+        </button>
+      </div>
+    </Modal>
+  </div>
+);
+
 };
 
-export default AdminManagement;
+export default SubscriptionManagement;

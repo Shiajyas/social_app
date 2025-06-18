@@ -3,21 +3,26 @@ import { IUserRepository } from '../data/interfaces/IUserRepository';
 import { IUser } from '../core/domain/interfaces/IUser';
 import { IPostRepository } from '../data/interfaces/IPostRepository';
 import { IPost } from '../core/domain/interfaces/IPost';
+import { ICallHistoryRepository } from '../data/interfaces/ICallHistoryRepository';
+import { ICallHistory } from '../core/domain/interfaces/ICallHistory';
 
 export class UserService implements IUserService {
-  private userRepository: IUserRepository;
-  private postRepository: IPostRepository;
+  private _UserRepository: IUserRepository;
+  private _PostRepository: IPostRepository;
+  private _CallHistoryRepository: ICallHistoryRepository
 
   constructor(
     userRepository: IUserRepository,
     postRepository: IPostRepository,
+    callHistoryRepository: ICallHistoryRepository
   ) {
-    this.userRepository = userRepository;
-    this.postRepository = postRepository;
+    this._UserRepository = userRepository;
+    this._PostRepository = postRepository;
+    this._CallHistoryRepository = callHistoryRepository
   }
 
   async getSuggestions(userId: string): Promise<IUser[]> {    
-    const currentUser = await this.userRepository.findById(userId);     
+    const currentUser = await this._UserRepository.findById(userId);     
     if (!currentUser) {
       throw new Error('User not found');
     }     
@@ -26,27 +31,27 @@ export class UserService implements IUserService {
       ...(currentUser.followers || []),   
       userId,    
     ];
-    return this.userRepository.find({ _id: { $nin: excludedUserIds } });   
+    return this._UserRepository.find({ _id: { $nin: excludedUserIds } });   
   }           
 
   async getFollowers(userId: string): Promise<IUser[]> {
-    return this.userRepository.findFollowers(userId);
+    return this._UserRepository.findFollowers(userId);
   } 
 
   async getFollowing(userId: string): Promise<IUser[]> {
-    return this.userRepository.findFollowing(userId);
+    return this._UserRepository.findFollowing(userId);
   }
 
   async unfollowUser(userId: string, targetUserId: string): Promise<void> {
-    await this.userRepository.unfollow(userId, targetUserId);
+    await this._UserRepository.unfollow(userId, targetUserId);
   }
 
   async getProfile(userId: string): Promise<IUser | null> {
-    return this.userRepository.findById(userId);
+    return this._UserRepository.findById(userId);
   }
 
   async getUserPost(userId: string): Promise<any> {
-    return this.postRepository.getUserPosts(userId, 1, 50);
+    return this._PostRepository.getUserPosts(userId, 1, 50);
   }
 
   async updateUserProfile(
@@ -54,7 +59,7 @@ export class UserService implements IUserService {
     updatedData: any,
   ): Promise<IUser | null> {
     try {
-      const updatedUser = await this.userRepository.updateUserById(
+      const updatedUser = await this._UserRepository.updateUserById(
         userId,
         updatedData,
       );
@@ -75,7 +80,7 @@ export class UserService implements IUserService {
     limit: number,
   ): Promise<{ posts: IPost[]; nextPage: number | null }> {
     // console.log(userId, page, limit, ">>>>userId 2*");
-    let { posts, nextPage } = await this.postRepository.getSavedPosts(
+    let { posts, nextPage } = await this._PostRepository.getSavedPosts(
       userId,
       page,
       limit,
@@ -89,11 +94,15 @@ export class UserService implements IUserService {
     query: string,
   ): Promise<{ users: IUser[]; posts: IPost[] }> {
     console.log(query, 'searchquery 2');
-    const users = await this.userRepository.searchUsers(query);
-    const posts = await this.postRepository.searchPosts(query);
+    const users = await this._UserRepository.searchUsers(query);
+    const posts = await this._PostRepository.searchPosts(query);
 
     console.log(users, posts, 'users and posts');
 
     return { users, posts };
+  }
+
+  getCallHistory(userId: string): Promise<ICallHistory[]> {
+    return this._CallHistoryRepository.getUserCallHistory(userId);
   }
 }
