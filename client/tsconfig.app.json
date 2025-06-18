@@ -7,8 +7,8 @@
     "allowImportingTsExtensions": false,
 
     // ✅ Disable problematic checks
-    "composite": false,
-    "declaration": false,
+    "composite": true,
+    "declaration": true,
     "isolatedModules": true,
     "skipLibCheck": true,
     "strict": false,
