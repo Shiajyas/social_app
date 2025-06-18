@@ -1,18 +1,18 @@
-import { useState } from "react";
-import { Flag } from "lucide-react";
-import { toast } from "react-toastify";
-import { Button } from "@/components/ui/button";
-import { socket } from "@/utils/Socket";
+import { useState } from 'react';
+import { Flag } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { Button } from '@/components/ui/button';
+import { socket } from '@/utils/Socket';
 
 const REPORT_REASONS = [
-  "Spam",
-  "Harassment",
-  "Hate Speech",
-  "Inappropriate Content",
-  "Misinformation",
-  "Nudity or Sexual Content",
-  "Violence",
-  "Other",
+  'Spam',
+  'Harassment',
+  'Hate Speech',
+  'Inappropriate Content',
+  'Misinformation',
+  'Nudity or Sexual Content',
+  'Violence',
+  'Other',
 ];
 
 interface ReportButtonProps {
@@ -22,31 +22,31 @@ interface ReportButtonProps {
 
 export default function ReportButton({ postId, userId }: ReportButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [reason, setReason] = useState("");
+  const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
     if (!reason.trim()) {
-      toast.error("Please select a reason.");
+      toast.error('Please select a reason.');
       return;
     }
 
     setLoading(true);
 
     socket.emit(
-      "report:post",
+      'report:post',
       { postId, userId, reason },
       (response: { success: boolean; message?: string }) => {
         setLoading(false);
 
         if (response.success) {
-          toast.success("Report submitted.");
+          toast.success('Report submitted.');
           setIsOpen(false);
-          setReason("");
+          setReason('');
         } else {
-          toast.error(response.message || "Failed to submit report.");
+          toast.error(response.message || 'Failed to submit report.');
         }
-      }
+      },
     );
   };
 
@@ -76,8 +76,8 @@ export default function ReportButton({ postId, userId }: ReportButtonProps) {
                   className={`w-full text-left px-4 py-2 rounded-md border transition-all duration-200
                     ${
                       reason === item
-                        ? "bg-yellow-500 text-white border-yellow-600"
-                        : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200"
+                        ? 'bg-yellow-500 text-white border-yellow-600'
+                        : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-200'
                     }`}
                   onClick={() => setReason(item)}
                   disabled={loading}
@@ -88,19 +88,11 @@ export default function ReportButton({ postId, userId }: ReportButtonProps) {
             </div>
 
             <div className="flex justify-end gap-2 mt-4">
-              <Button
-                variant="outline"
-                onClick={() => setIsOpen(false)}
-                disabled={loading}
-              >
+              <Button variant="outline" onClick={() => setIsOpen(false)} disabled={loading}>
                 Cancel
               </Button>
-              <Button
-                variant="default"
-                onClick={handleSubmit}
-                disabled={loading}
-              >
-                {loading ? "Submitting..." : "Submit"}
+              <Button variant="default" onClick={handleSubmit} disabled={loading}>
+                {loading ? 'Submitting...' : 'Submit'}
               </Button>
             </div>
           </div>

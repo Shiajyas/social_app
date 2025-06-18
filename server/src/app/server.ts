@@ -8,9 +8,11 @@ import adminAuthRoutes from "../presentation/routes/admin/adminRoutes";
 import notificationRoutes from "../presentation/routes/users/notificationRoutes";
 import postRoutes from "../presentation/routes/users/postRoutes";
 import { userRoutes } from "../presentation/routes/users/userRoutes";
+import { errorHandler } from "../presentation/middleware/errorHandler";
 import http from "http";
 import cookieParser from "cookie-parser";
 import redis from "../infrastructure/utils/redisClient";
+
 
 // === SocketIO Chat/Call ===
 import { initializeSocket } from "../infrastructure/socket/SocketServer";
@@ -50,6 +52,7 @@ export class App {
     this.app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
     this.app.use(cookieParser());
     this.app.use(morgan("dev"));
+    this.app.use(errorHandler)
 
     this.app.use(
       session({

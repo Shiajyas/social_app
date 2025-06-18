@@ -9,14 +9,7 @@ import { useReportStore } from '@/appStore/useReportStore';
 import { adminReportService } from '@/services/adminReportService';
 import { socket } from '@/utils/Socket';
 
-import {
-  UserCircle,
-  ChevronDown,
-  ChevronUp,
-  AlertTriangle,
-  Sun,
-  Moon,
-} from 'lucide-react';
+import { UserCircle, ChevronDown, ChevronUp, AlertTriangle, Sun, Moon } from 'lucide-react';
 
 type Report = {
   _id: string;
@@ -35,13 +28,11 @@ const Header = () => {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [onlineCount, setOnlineCount] = useState(0);
-  const [isDark, setIsDark] = useState(
-    () => localStorage.getItem('theme') === 'dark'
-  );
+  const [isDark, setIsDark] = useState(() => localStorage.getItem('theme') === 'dark');
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  const toggleDropdown = () => setIsDropdownOpen(prev => !prev);
+  const toggleDropdown = () => setIsDropdownOpen((prev) => !prev);
 
   const toggleTheme = () => {
     const newTheme = isDark ? 'light' : 'dark';
@@ -70,7 +61,7 @@ const Header = () => {
 
     const handleNewReport = (report: Report) => {
       queryClient.setQueryData<Report[]>(['reports', 1], (prev = []) => {
-        if (prev.some(r => r._id === report._id)) return prev;
+        if (prev.some((r) => r._id === report._id)) return prev;
         return [report, ...prev];
       });
       increment();
@@ -84,7 +75,7 @@ const Header = () => {
       socket.off('admin:updateOnlineCount', updateOnlineCount);
       socket.off('admin:newReport', handleNewReport);
     };
-  }, [queryClient, increment, setReportCount,admin]);
+  }, [queryClient, increment, setReportCount, admin]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -145,11 +136,7 @@ const Header = () => {
 
         {/* Admin Dropdown */}
         <div className="relative" ref={dropdownRef}>
-          <div
-            className="flex items-center cursor-pointer"
-            onClick={toggleDropdown}
-          >
-      
+          <div className="flex items-center cursor-pointer" onClick={toggleDropdown}>
             <span className="ml-2 text-sm md:text-base text-black dark:text-white">
               {admin?.userName}
             </span>

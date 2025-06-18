@@ -36,19 +36,17 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     // ✅ Correct event name
-    socket.on("chatUpdated", handleMessage);
+    socket.on('chatUpdated', handleMessage);
     return () => {
-    socket.off("chatUpdated", handleMessage);
+      socket.off('chatUpdated', handleMessage);
     };
   }, []);
 
-
   useEffect(() => {
-socket.onAny((event, ...args) => {
-    console.log(`[📡 GlobalSocket] Event: ${event}`, args);
-  });
-}, []);
-
+    socket.onAny((event, ...args) => {
+      console.log(`[📡 GlobalSocket] Event: ${event}`, args);
+    });
+  }, []);
 
   return (
     <SocketContext.Provider value={{ unreadNotifications, setUnreadNotifications }}>

@@ -66,8 +66,8 @@ const UsersManagement = () => {
 
   // Filter users based on search term
   const filteredUsers = allUsers?.filter((user: User) =>
-    [user.username, user.email, user.fullname].some(
-      (field) => field?.toLowerCase()?.includes(searchTerm.toLowerCase()),
+    [user.username, user.email, user.fullname].some((field) =>
+      field?.toLowerCase()?.includes(searchTerm.toLowerCase()),
     ),
   );
 
@@ -111,114 +111,123 @@ const UsersManagement = () => {
     }
   };
 
-return (
-  <div className="bg-white dark:bg-gray-900 shadow rounded p-4 overflow-x-auto">
-    <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">User List</h2>
+  return (
+    <div className="bg-white dark:bg-gray-900 shadow rounded p-4 overflow-x-auto">
+      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">User List</h2>
 
-    {/* Search Input */}
-    <div className="mb-4">
-      <input
-        type="text"
-        placeholder="Search by username, email, or full name..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded"
-      />
-    </div>
-
-    {/* User Table */}
-    <div className="overflow-x-auto">
-      <table className="min-w-full table-auto border-collapse border border-gray-300 dark:border-gray-700">
-        <thead>
-          <tr className="bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-            {['username', 'fullname', 'email', 'isBlocked'].map((col) => (
-              <th
-                key={col}
-                className="border border-gray-300 dark:border-gray-700 px-4 py-2 cursor-pointer"
-                onClick={() => handleSort(col)}
-              >
-                {col === 'isBlocked' ? 'Blocked' : col.charAt(0).toUpperCase() + col.slice(1)}{' '}
-                {sortBy.column === col && (sortBy.order === 'asc' ? '↑' : '↓')}
-              </th>
-            ))}
-            <th className="border border-gray-300 dark:border-gray-700 px-4 py-2">Gender</th>
-            <th className="border border-gray-300 dark:border-gray-700 px-4 py-2">Role</th>
-            <th className="border border-gray-300 dark:border-gray-700 px-4 py-2">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {displayedUsers?.map((user) => (
-            <tr key={user._id} className="hover:bg-gray-100 dark:hover:bg-gray-700">
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">{user.username}</td>
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">{user.fullname}</td>
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">{user.email}</td>
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">
-                {user.isBlocked ? 'Yes' : 'No'}
-              </td>
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">{user.gender}</td>
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">{user.role}</td>
-              <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
-                <button
-                  onClick={() => toggleBlockStatus(user._id, user.isBlocked)}
-                  className={`px-4 py-2 rounded ${
-                    user.isBlocked ? 'bg-red-500' : 'bg-green-500'
-                  } text-white`}
-                  disabled={
-                    (user.isBlocked && unblockUserMutation.status === 'pending') ||
-                    (!user.isBlocked && blockUserMutation.status === 'pending')
-                  }
-                >
-                  {user.isBlocked ? 'Unblock' : 'Block'}
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-
-    {/* Pagination Controls */}
-    <div className="flex flex-col md:flex-row justify-between items-center mt-4 space-y-2 md:space-y-0">
-      <button
-        onClick={() => paginate(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="px-4 py-2 bg-gray-200 dark:bg-gray-800 dark:text-gray-100 rounded disabled:opacity-50"
-      >
-        Previous
-      </button>
-
-      <div className="flex gap-2 flex-wrap justify-center">
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            key={index + 1}
-            onClick={() => paginate(index + 1)}
-            className={`px-4 py-2 rounded ${
-              currentPage === index + 1
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-800 dark:text-gray-100'
-            }`}
-          >
-            {index + 1}
-          </button>
-        ))}
+      {/* Search Input */}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search by username, email, or full name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded"
+        />
       </div>
 
-      <button
-        onClick={() => paginate(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="px-4 py-2 bg-gray-200 dark:bg-gray-800 dark:text-gray-100 rounded disabled:opacity-50"
-      >
-        Next
-      </button>
-    </div>
+      {/* User Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full table-auto border-collapse border border-gray-300 dark:border-gray-700">
+          <thead>
+            <tr className="bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+              {['username', 'fullname', 'email', 'isBlocked'].map((col) => (
+                <th
+                  key={col}
+                  className="border border-gray-300 dark:border-gray-700 px-4 py-2 cursor-pointer"
+                  onClick={() => handleSort(col)}
+                >
+                  {col === 'isBlocked' ? 'Blocked' : col.charAt(0).toUpperCase() + col.slice(1)}{' '}
+                  {sortBy.column === col && (sortBy.order === 'asc' ? '↑' : '↓')}
+                </th>
+              ))}
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2">Gender</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2">Role</th>
+              <th className="border border-gray-300 dark:border-gray-700 px-4 py-2">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {displayedUsers?.map((user) => (
+              <tr key={user._id} className="hover:bg-gray-100 dark:hover:bg-gray-700">
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">
+                  {user.username}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">
+                  {user.fullname}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">
+                  {user.email}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">
+                  {user.isBlocked ? 'Yes' : 'No'}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">
+                  {user.gender}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">
+                  {user.role}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
+                  <button
+                    onClick={() => toggleBlockStatus(user._id, user.isBlocked)}
+                    className={`px-4 py-2 rounded ${
+                      user.isBlocked ? 'bg-red-500' : 'bg-green-500'
+                    } text-white`}
+                    disabled={
+                      (user.isBlocked && unblockUserMutation.status === 'pending') ||
+                      (!user.isBlocked && blockUserMutation.status === 'pending')
+                    }
+                  >
+                    {user.isBlocked ? 'Unblock' : 'Block'}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-    {/* Total Users */}
-    <div className="mt-4 text-sm text-gray-600 dark:text-gray-300 text-center md:text-left">
-      Total Users: {totalUsers}
-    </div>
-  </div>
-);
+      {/* Pagination Controls */}
+      <div className="flex flex-col md:flex-row justify-between items-center mt-4 space-y-2 md:space-y-0">
+        <button
+          onClick={() => paginate(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-gray-200 dark:bg-gray-800 dark:text-gray-100 rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
 
+        <div className="flex gap-2 flex-wrap justify-center">
+          {Array.from({ length: totalPages }, (_, index) => (
+            <button
+              key={index + 1}
+              onClick={() => paginate(index + 1)}
+              className={`px-4 py-2 rounded ${
+                currentPage === index + 1
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-200 dark:bg-gray-800 dark:text-gray-100'
+              }`}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={() => paginate(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 bg-gray-200 dark:bg-gray-800 dark:text-gray-100 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+
+      {/* Total Users */}
+      <div className="mt-4 text-sm text-gray-600 dark:text-gray-300 text-center md:text-left">
+        Total Users: {totalUsers}
+      </div>
+    </div>
+  );
 };
 
 export default UsersManagement;

@@ -10,4 +10,5 @@ export interface IPostSocketService {
   ): Promise<void>;
   savePost(socket: Socket, postId: any, userId: string): Promise<void>;
   deletePost(socket: Socket, postId: any, userId: string): Promise<void>;
+  
 }

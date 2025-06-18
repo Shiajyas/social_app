@@ -1,9 +1,8 @@
   import { IAdminRepository } from '../interfaces/IAdminRepository';
   import { AdminModel } from '../../core/domain/models/AdminModel';
   import { IAdmin } from '../../core/domain/interfaces/IAdmin';
-
   import { AdminDTO } from '../../core/domain/dto/AdminDTO';
-import { toAdminDTO } from '../../core/domain/dto/toAdminDTO';
+  import { toAdminDTO } from '../../core/domain/dto/toAdminDTO';
 
 export class AdminRepository implements IAdminRepository {
   // static findById(id: string) {

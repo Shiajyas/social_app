@@ -158,11 +158,7 @@ const Header: React.FC<HeaderProps> = ({ unreadCount }) => {
                 >
                   Cancel
                 </Button>
-                <Button
-                  variant="destructive"
-                  className="px-4 py-2"
-                  onClick={handleLogout}
-                >
+                <Button variant="destructive" className="px-4 py-2" onClick={handleLogout}>
                   Logout
                 </Button>
               </div>

@@ -72,7 +72,6 @@ const CheckoutForm = ({
 
     if (result.error) {
       setMessage(`❌ ${result.error.message}`);
-    } else if (result.paymentIntent?.status === 'succeeded') {
     } else {
       setMessage('⚠️ Payment was not successful.');
     }
@@ -134,3 +133,7 @@ const StripePayment: React.FC<StripePaymentProps> = ({
 };
 
 export default StripePayment;
+function confirmSubscription() {
+console.log('confirmSubscription');
+}
+

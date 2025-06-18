@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useAdminOverview } from "@/hooks/admin/useAdminOverview";
-import { socket } from "@/utils/Socket";
-import { useReportStore } from "@/appStore/useReportStore";
+import React, { useState, useEffect } from 'react';
+import { useAdminOverview } from '@/hooks/admin/useAdminOverview';
+import { socket } from '@/utils/Socket';
+import { useReportStore } from '@/appStore/useReportStore';
 import {
   LineChart,
   Line,
@@ -12,27 +12,27 @@ import {
   BarChart,
   Bar,
   CartesianGrid,
-} from "recharts";
+} from 'recharts';
 
 const dateRanges = [
-  { label: "Last 7 Days", value: "7d" },
-  { label: "Last Month", value: "1m" },
-  { label: "Last Year", value: "1y" },
+  { label: 'Last 7 Days', value: '7d' },
+  { label: 'Last Month', value: '1m' },
+  { label: 'Last Year', value: '1y' },
 ];
 
 const Main = () => {
-  const [range, setRange] = useState<"7d" | "1m" | "1y">("7d");
+  const [range, setRange] = useState<'7d' | '1m' | '1y'>('7d');
   const [likeRange, setLikeRange] = useState({ min: 0, max: 100 });
   const [onlineUserCount, setOnlineUserCount] = useState<number>(0);
   const { reportCount } = useReportStore();
   const { data, isLoading, refetch } = useAdminOverview(range, likeRange);
 
   useEffect(() => {
-    socket.on("admin:updateOnlineCount", (count: number) => {
+    socket.on('admin:updateOnlineCount', (count: number) => {
       setOnlineUserCount(count);
     });
     return () => {
-      socket.off("admin:updateOnlineCount");
+      socket.off('admin:updateOnlineCount');
     };
   }, []);
 
@@ -50,11 +50,11 @@ const Main = () => {
 
   const handleLikeFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setLikeRange(prev => ({ ...prev, [name]: Number(value) }));
+    setLikeRange((prev) => ({ ...prev, [name]: Number(value) }));
   };
 
   const handleRangeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRange(e.target.value as "7d" | "1m" | "1y");
+    setRange(e.target.value as '7d' | '1m' | '1y');
   };
 
   return (
@@ -73,7 +73,9 @@ const Main = () => {
       {/* Filters */}
       <div className="flex flex-wrap gap-4 bg-white dark:bg-gray-800 p-4 rounded shadow">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Date Range</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+            Date Range
+          </label>
           <select
             className="mt-1 border dark:border-gray-700 dark:bg-gray-700 dark:text-white rounded px-3 py-1"
             value={range}
@@ -88,7 +90,9 @@ const Main = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Min Likes</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+            Min Likes
+          </label>
           <input
             type="number"
             name="min"
@@ -99,7 +103,9 @@ const Main = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Max Likes</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+            Max Likes
+          </label>
           <input
             type="number"
             name="max"
@@ -123,18 +129,12 @@ const Main = () => {
 
         <StatsCard
           title="Posts"
-          data={[
-            `Total: ${data.posts.total}`,
-            `Reported: ${reportCount}`,
-          ]}
+          data={[`Total: ${data.posts.total}`, `Reported: ${reportCount}`]}
         />
         <StatsCard title="Comments" data={[`Total: ${data.comments.total}`]} />
         <StatsCard
           title="Subscriptions"
-          data={[
-            `Active: ${data.subscriptions.active}`,
-            `New: ${data.subscriptions.new}`,
-          ]}
+          data={[`Active: ${data.subscriptions.active}`, `New: ${data.subscriptions.new}`]}
         />
       </div>
 
@@ -156,13 +156,13 @@ const Main = () => {
             <BarChart
               data={data.posts.mostLiked.map((post: any) => ({
                 ...post,
-                displayTitle: `${post.title} (${post?.owner?.username || "Unknown"})`,
+                displayTitle: `${post.title} (${post?.owner?.username || 'Unknown'})`,
               }))}
             >
               <XAxis dataKey="displayTitle" tick={{ fontSize: 10 }} angle={-30} interval={0} />
               <YAxis />
               <Tooltip
-                formatter={(value: number) => [`${value} likes`, "Likes"]}
+                formatter={(value: number) => [`${value} likes`, 'Likes']}
                 labelFormatter={(label) => `Post: ${label}`}
               />
               <CartesianGrid strokeDasharray="3 3" />

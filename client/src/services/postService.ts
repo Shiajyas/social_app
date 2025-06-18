@@ -13,7 +13,7 @@ export const postService = {
       'Failed to create post',
     ),
 
-  updatePost: (id: String, content: FormData) =>
+  updatePost: (id: string, content: FormData) =>
     fetchData(
       `/users/posts/update/${id}`,
       {

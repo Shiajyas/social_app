@@ -12,15 +12,6 @@ const defaultPermissions = {
 
 type Permissions = typeof defaultPermissions;
 
-type AdminEntry = {
-  _id: string;
-  email: string;
-  userName: string;
-  roleName: string;
-  createdAt: string;
-  permissions: Permissions;
-};
-
 const RoleManagement: React.FC = () => {
   const [email, setEmail] = useState('');
   const [userName, setUserName] = useState('');
@@ -73,7 +64,7 @@ const RoleManagement: React.FC = () => {
 
   useEffect(() => {
     const isAllChecked = Object.entries(permissions).every(
-      ([key, value]) => key === 'dashboard' || value
+      ([key, value]) => key === 'dashboard' || value,
     );
     setAllPermissions(isAllChecked);
   }, [permissions]);
@@ -109,12 +100,16 @@ const RoleManagement: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-gray-900 p-6 rounded shadow max-w-6xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">Create Admin Role</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">
+        Create Admin Role
+      </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 min-w-[250px]">
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Email</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+              Email
+            </label>
             <input
               type="email"
               className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-black dark:text-white"
@@ -124,7 +119,9 @@ const RoleManagement: React.FC = () => {
             />
           </div>
           <div className="flex-1 min-w-[250px]">
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Username</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+              Username
+            </label>
             <input
               type="text"
               className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-black dark:text-white"
@@ -134,7 +131,9 @@ const RoleManagement: React.FC = () => {
             />
           </div>
           <div className="flex-1 min-w-[250px]">
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Role Name</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+              Role Name
+            </label>
             <input
               type="text"
               className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-black dark:text-white"
@@ -147,7 +146,9 @@ const RoleManagement: React.FC = () => {
 
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 min-w-[250px]">
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Password</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+              Password
+            </label>
             <input
               type="password"
               className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-black dark:text-white"
@@ -157,7 +158,9 @@ const RoleManagement: React.FC = () => {
             />
           </div>
           <div className="flex-1 min-w-[250px]">
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Confirm Password</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+              Confirm Password
+            </label>
             <input
               type="password"
               className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-800 text-black dark:text-white"
@@ -171,7 +174,9 @@ const RoleManagement: React.FC = () => {
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
         <div>
-          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Permissions</label>
+          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            Permissions
+          </label>
           <div className="flex flex-wrap gap-4">
             <label className="flex items-center w-full md:w-[250px] cursor-pointer">
               <input
@@ -227,13 +232,11 @@ const RoleManagement: React.FC = () => {
             </thead>
             <tbody>
               {fetchedAdmins.length > 0 ? (
-                fetchedAdmins.map((admin) => (
+                fetchedAdmins.map((admin: any) => (
                   <tr key={admin._id} className="border-t dark:border-gray-600">
                     <td className="p-2 border">{admin.email}</td>
                     <td className="p-2 border">{admin.roleName}</td>
-                    <td className="p-2 border">
-                      {new Date(admin.createdAt).toLocaleString()}
-                    </td>
+                    <td className="p-2 border">{new Date(admin.createdAt).toLocaleString()}</td>
                     <td className="p-2 border text-sm">
                       {Object.entries(admin.permissions)
                         .filter(([_, v]) => v)

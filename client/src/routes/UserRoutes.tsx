@@ -26,7 +26,7 @@ const UserRoutes = () => (
     <Route path="create/:userId" element={<PostUpload />} />
     <Route path="edit-post/:postId" element={<EditPost />} />
     <Route path="messages" element={<ChatSection />} />
-    <Route path='search' element={<SearchSection/>} />
+    <Route path="search" element={<SearchSection />} />
   </Route>
 );
 

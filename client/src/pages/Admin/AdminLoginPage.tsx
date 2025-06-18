@@ -18,7 +18,7 @@ const AdminLoginPage: React.FC = () => {
         onSuccess: (data) => {
           console.log('data', data);
           setIsLoading(false);
-          
+
           navigate('/admin/dashboard');
         },
         onError: () => setIsLoading(false),

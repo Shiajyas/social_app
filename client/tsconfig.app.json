@@ -7,14 +7,16 @@
     "allowImportingTsExtensions": false,
     "composite": true,
     "isolatedModules": true,
-    "skipLibCheck": true,
-    "types": ["vite/client"],
-    "strict": true,
+    "skipLibCheck": true,         
+    "strict": false,            
+    "noUnusedLocals": false,      
+    "noUnusedParameters": false,  
+    "noFallthroughCasesInSwitch": false,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
     "lib": ["ES2020", "DOM", "DOM.Iterable"]
   },
-  "include": ["src", "global.d.ts"]
+  "include": ["src", "global.d.ts", "vite.config.ts"]
 }

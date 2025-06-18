@@ -37,11 +37,9 @@ const FriendsListModal: React.FC<FriendsListModalProps> = ({
   const filteredUsers = useMemo(
     () =>
       searchTerm.trim()
-        ? users.filter((user) =>
-            user.username.toLowerCase().includes(searchTerm.toLowerCase())
-          )
+        ? users.filter((user) => user.username.toLowerCase().includes(searchTerm.toLowerCase()))
         : users,
-    [searchTerm, users]
+    [searchTerm, users],
   );
 
   if (!isOpen) return null;

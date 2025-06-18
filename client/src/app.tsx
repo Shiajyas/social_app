@@ -5,10 +5,8 @@ import IncomingCallUI from '@/customeComponents/common/IncomingCallUI';
 import AppRoutes from '@/routes/AppRoutes';
 import RouteWatcher from '@/utils/RouteWatcher';
 import GlobalSocketListener from './hooks/chatHooks/GlobalSocketListener';
-import AdminRoutes from './routes/AdminRoutes';
 // import MediaSocketInitializer from './utils/MediaSocketProvider';
 // App.tsx or _app.tsx
-
 
 const queryClient = new QueryClient();
 
@@ -29,7 +27,7 @@ const App = () => {
             pauseOnFocusLoss
             draggable
             pauseOnHover
-            theme="light" // Optional: change to "auto" if you want it to follow dark mode
+            theme="auto"
           />
 
           <IncomingCallUI />
@@ -39,6 +37,5 @@ const App = () => {
     </div>
   );
 };
-
 
 export default App;

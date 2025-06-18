@@ -24,8 +24,6 @@ import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/appStore/AuthStore';
 
-
-
 interface ProfileHeaderProps {
   user:
     | {
@@ -83,10 +81,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, userId, refetch, pa
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [searchParams] = useSearchParams();
 
-  const { updateUserFields,user: authUser} = useAuthStore();
+  const { updateUserFields, user: authUser } = useAuthStore();
 
   console.log('authUser>>>>>>>>>', authUser);
-const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   const {
     data: subscription,
@@ -99,7 +97,9 @@ const queryClient = useQueryClient();
       await userService.confirmSubscription(userId);
 
       refreshSubscription(); // refresh only here
-    } catch (err) {}
+    } catch (err) {
+      console.error('Error confirming subscription:', err);
+    }
   };
 
   useEffect(() => {
@@ -159,7 +159,7 @@ const queryClient = useQueryClient();
   }, [user]);
 
   const validateForm = () => {
-    let newErrors: Record<string, string> = {};
+    const newErrors: Record<string, string> = {};
 
     if (!profileData.fullname.trim()) newErrors.fullname = 'Full name is required.';
     if (!profileData.username.trim()) newErrors.username = 'Username is required.';
@@ -179,38 +179,37 @@ const queryClient = useQueryClient();
   };
 
   const updateProfile = useMutation({
-  mutationFn: async () => {
-    setLoading(true);
-    const formData = new FormData();
-    Object.entries(profileData).forEach(([key, value]) => formData.append(key, value));
-    if (avatarFile) formData.append('avatar', avatarFile);
-    const updatedUser = await userService.updateUserProfile(userId, formData);
-    return updatedUser; // Make sure your service returns updated user data
-  },
-  onSuccess: (data) => {
-    setLoading(false);
-    setEditing(false);
+    mutationFn: async () => {
+      setLoading(true);
+      const formData = new FormData();
+      Object.entries(profileData).forEach(([key, value]) => formData.append(key, value));
+      if (avatarFile) formData.append('avatar', avatarFile);
+      const updatedUser = await userService.updateUserProfile(userId, formData);
+      return updatedUser; // Make sure your service returns updated user data
+    },
+    onSuccess: (data) => {
+      setLoading(false);
+      setEditing(false);
 
-    // Update the React Query cache with the new user data
-    queryClient.setQueryData(['user', data.id], data);
+      // Update the React Query cache with the new user data
+      queryClient.setQueryData(['user', data.id], data);
 
-    console.log('Updated user data>>>>>>>>>:', data);
+      console.log('Updated user data>>>>>>>>>:', data);
 
-    // Update your auth store's user state
-   updateUserFields({
-    avatar: data.user.avatar,
-    username: data.user.username,
-    fullname: data.user.fullname,
+      // Update your auth store's user state
+      updateUserFields({
+        avatar: data.user.avatar,
+        username: data.user.username,
+        fullname: data.user.fullname,
+      });
+      // Navigate after update
+      // navigate('/home');
+
+      // Optionally, if you want to refetch or invalidate:
+      // queryClient.invalidateQueries(['user']);
+    },
+    onError: () => setLoading(false),
   });
-    // Navigate after update
-    // navigate('/home');
-
-    // Optionally, if you want to refetch or invalidate:
-    // queryClient.invalidateQueries(['user']);
-  },
-  onError: () => setLoading(false),
-});
-
 
   // const updateProfile = useMutation({
   //   mutationFn: async () => {

@@ -24,7 +24,7 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
     debounce((val: string) => {
       setDebouncedQuery(val);
     }, 300),
-    []
+    [],
   );
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
     (userId: string) => {
       navigate(`/home/profile/${userId}`);
     },
-    [navigate]
+    [navigate],
   );
 
   return (
@@ -58,9 +58,7 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
         />
       )}
 
-      {(isLoading || isFetching) && (
-        <p className="text-sm text-gray-500">Searching...</p>
-      )}
+      {(isLoading || isFetching) && <p className="text-sm text-gray-500">Searching...</p>}
 
       {isError && (
         <p className="text-sm text-red-500">
@@ -72,18 +70,16 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
         <>
           {data.users.length === 0 && data.posts.length === 0 ? (
             <div className="flex flex-col items-center justify-center mt-8">
-              <img
-                src="/image.png"
-                alt="No results"
-                className="w-48 h-48 object-contain mb-3"
-              />
+              <img src="/image.png" alt="No results" className="w-48 h-48 object-contain mb-3" />
               <p className="text-gray-600 text-sm">No users or posts found.</p>
             </div>
           ) : (
             <>
               {data.users.length > 0 && (
                 <div className="mb-6">
-                  <h4 className="font-semibold mb-3 text-lg text-gray-900 dark:text-white">Users</h4>
+                  <h4 className="font-semibold mb-3 text-lg text-gray-900 dark:text-white">
+                    Users
+                  </h4>
                   <div className="space-y-2">
                     {data.users.map((user: IUser) => (
                       <div
@@ -97,8 +93,12 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
                           className="h-10 w-10 rounded-full object-cover ring-2 ring-offset-2 ring-blue-500/20"
                         />
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">@{user.username}</span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">View Profile</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            @{user.username}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            View Profile
+                          </span>
                         </div>
                       </div>
                     ))}

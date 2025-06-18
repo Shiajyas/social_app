@@ -93,7 +93,11 @@ const PostList: React.FC = () => {
   });
 
   const handleLike = (postId: string, isLiked: boolean) => {
-    isLiked ? unlikeMutation.mutate(postId) : likeMutation.mutate(postId);
+    if (isLiked) {
+      unlikeMutation.mutate(postId);
+    } else {
+      likeMutation.mutate(postId);
+    }
   };
 
   const handleToggleComments = (postId: string) => {

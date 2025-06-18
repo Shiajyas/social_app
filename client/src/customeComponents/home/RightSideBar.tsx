@@ -52,8 +52,7 @@ const RightSideBar = () => {
   }, [queryClient, isUserAuthenticated]);
 
   return (
-  <div className="w-[320px] h-[calc(100vh-4rem)] flex flex-col border-l bg-white dark:bg-gray-900 text-black dark:text-white">
-
+    <div className="w-[320px] h-[calc(100vh-4rem)] flex flex-col border-l bg-white dark:bg-gray-900 text-black dark:text-white">
       {/* User Card */}
       {user && (
         <Card className="w-full p-4">
@@ -81,8 +80,7 @@ const RightSideBar = () => {
       )}
 
       {/* Sticky Suggestions Header */}
-   <div className="sticky top-0 bg-white dark:bg-gray-900 z-10 flex justify-center py-2 border-b dark:border-gray-700 border-b shadow-sm text-black dark:text-white">
-
+      <div className="sticky top-0 bg-white dark:bg-gray-900 z-10 flex justify-center py-2 border-b dark:border-gray-700 border-b shadow-sm text-black dark:text-white">
         <h5 className="text-lg font-semibold text-center">Suggestions</h5>
       </div>
 

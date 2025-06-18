@@ -20,7 +20,7 @@ export const useAdminOverview = (range: "7d" | "1m" | "1y", likeRange: LikeRange
     refetchOnWindowFocus: false,
   });
 
-  let {admin} = useAdminAuth();
+  const {admin} = useAdminAuth();
 
   // console.log(admin?.user?._id,">>admin  ");  
 

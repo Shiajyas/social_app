@@ -40,7 +40,7 @@ export const useFetchChats = () => {
     const handleNewChat = (newChat: any) => {
       console.log('📥 Received new chat:', newChat);
 
-      let actualChat = newChat.chat || newChat;
+      const actualChat = newChat.chat || newChat;
 
       const normalizedChat = normalizeChat(actualChat);
       queryClient.setQueryData(['chats', userId], (prevChats: NormalizedChat[] = []) => [

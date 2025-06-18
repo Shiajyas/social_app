@@ -51,35 +51,35 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
       onClick={(e) => e.stopPropagation()}
     >
       {/* Mobile View */}
-{/* Mobile View */}
-<div className="md:hidden fixed bottom-0 left-0 w-full h-[90vh] bg-white dark:bg-gray-800 shadow-lg rounded-t-lg z-50 flex flex-col">
-  {/* Header */}
-  <div className="flex justify-between items-center p-2 border-b bg-gray-100 dark:bg-gray-700">
-    <span className="font-semibold text-gray-800 dark:text-gray-100">Comments</span>
-    <button
-      onClick={() => setVisible(false)}
-      className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white p-1"
-    >
-      <X size={24} />
-    </button>
-  </div>
+      {/* Mobile View */}
+      <div className="md:hidden fixed bottom-0 left-0 w-full h-[90vh] bg-white dark:bg-gray-800 shadow-lg rounded-t-lg z-50 flex flex-col">
+        {/* Header */}
+        <div className="flex justify-between items-center p-2 border-b bg-gray-100 dark:bg-gray-700">
+          <span className="font-semibold text-gray-800 dark:text-gray-100">Comments</span>
+          <button
+            onClick={() => setVisible(false)}
+            className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white p-1"
+          >
+            <X size={24} />
+          </button>
+        </div>
 
-  {/* Scrollable Comment List */}
-  <div className="flex-grow overflow-y-auto p-2">
-    {comments.length > 0 ? (
-      <CommentList comments={comments} />
-    ) : (
-      <p className="text-gray-500 dark:text-gray-400 text-center mt-4">
-        Be the first to comment!
-      </p>
-    )}
-  </div>
+        {/* Scrollable Comment List */}
+        <div className="flex-grow overflow-y-auto p-2">
+          {comments.length > 0 ? (
+            <CommentList comments={comments} />
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400 text-center mt-4">
+              Be the first to comment!
+            </p>
+          )}
+        </div>
 
-  {/* Input Box */}
-  <div className="my-20 border-t bg-gray-100 dark:bg-gray-700">
-    <CommentInput postId={postId} />
-  </div>
-</div>
+        {/* Input Box */}
+        <div className="my-20 border-t bg-gray-100 dark:bg-gray-700">
+          <CommentInput postId={postId} />
+        </div>
+      </div>
 
       {/* Desktop View */}
       <div className="hidden md:block p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md w-full">

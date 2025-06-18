@@ -1,6 +1,7 @@
 import mongoose, { Document } from 'mongoose';
 
 export interface IPost extends Document {
+  updatedAt: any;
   
   createdAt: any;
   userId: mongoose.Types.ObjectId | any;

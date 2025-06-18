@@ -49,7 +49,7 @@ const CommentInput: React.FC<CommentInputProps> = ({ postId, parentId, onReplySe
           queryClient.invalidateQueries({ queryKey: ['comments', postId] });
           if (onReplySent) onReplySent();
         }
-      }
+      },
     );
 
     setComment('');

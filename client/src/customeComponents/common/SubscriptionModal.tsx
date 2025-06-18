@@ -78,7 +78,7 @@ const SubscriptionStatus: React.FC<Props> = ({
                   <span
                     className={clsx(
                       'font-semibold',
-                      sub.isSubscribed ? 'text-green-500' : 'text-red-500'
+                      sub.isSubscribed ? 'text-green-500' : 'text-red-500',
                     )}
                   >
                     {sub.isSubscribed ? 'Active' : 'Expired'}

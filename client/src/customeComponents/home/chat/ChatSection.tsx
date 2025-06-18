@@ -152,147 +152,155 @@ const ChatSection = () => {
     setShowChatList(true);
   };
 
-return (
- <div className="p-4 bg-white dark:bg-gray-900 text-black dark:text-white rounded shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-700 max-w-full">
-    
-    {/* Header */}
-    <div className="p-2 flex justify-between items-center border-b border-gray-300 dark:border-gray-700">
-      {isMobileView && selectedChat && !showChatList && (
-        <button onClick={handleBackToList} className="mr-2">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-      )}
+  return (
+    <div className="p-4 bg-white dark:bg-gray-900 text-black dark:text-white rounded shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-700 max-w-full">
+      {/* Header */}
+      <div className="p-2 flex justify-between items-center border-b border-gray-300 dark:border-gray-700">
+        {isMobileView && selectedChat && !showChatList && (
+          <button onClick={handleBackToList} className="mr-2">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        )}
 
-      {/* Search Box */}
-      <div className="mr-2 p-2 flex items-center justify-end flex-grow">
-        <div
-          className="flex items-center bg-gray-200 dark:bg-gray-800 rounded-md px-2 cursor-pointer w-full max-w-xs"
-          onClick={() => setShowFriendsList(true)}
-        >
-          <Search className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
-          <p className="ml-1 text-gray-500 dark:text-gray-400 truncate">Search friends...</p>
+        {/* Search Box */}
+        <div className="mr-2 p-2 flex items-center justify-end flex-grow">
+          <div
+            className="flex items-center bg-gray-200 dark:bg-gray-800 rounded-md px-2 cursor-pointer w-full max-w-xs"
+            onClick={() => setShowFriendsList(true)}
+          >
+            <Search className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+            <p className="ml-1 text-gray-500 dark:text-gray-400 truncate">Search friends...</p>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          {selectedChat && otherUser && (!isMobileView || !showChatList) && (
+            <div className="hidden sm:flex flex-col items-end mr-2">
+              <p className="text-sm font-medium">{otherUser.username}</p>
+              <p className={`text-xs ${isOtherUserOnline ? 'text-green-500' : 'text-gray-400'}`}>
+                {isOtherUserOnline ? 'Active' : 'Inactive'}
+              </p>
+            </div>
+          )}
+
+          {selectedChat && (!isMobileView || !showChatList) && (
+            <>
+              <button
+                onClick={() => handleStartCall('voice')}
+                className="p-2 rounded-full hover:bg-blue-500 hover:text-white transition"
+                title="Start Voice Call"
+              >
+                <Phone className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => handleStartCall('video')}
+                className="p-2 rounded-full hover:bg-green-500 hover:text-white transition"
+                title="Start Video Call"
+              >
+                <Video className="w-5 h-5" />
+              </button>
+            </>
+          )}
+
+          <button
+            onClick={() => setShowCallHistory(true)}
+            className="p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-white transition"
+            title="Call History"
+          >
+            <History className="text-gray-800 dark:text-gray-200 w-5 h-5" />
+          </button>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex items-center gap-2">
-        {selectedChat && otherUser && (!isMobileView || !showChatList) && (
-          <div className="hidden sm:flex flex-col items-end mr-2">
-            <p className="text-sm font-medium">{otherUser.username}</p>
-            <p className={`text-xs ${isOtherUserOnline ? 'text-green-500' : 'text-gray-400'}`}>
-              {isOtherUserOnline ? 'Active' : 'Inactive'}
-            </p>
+      {/* Friends Modal */}
+      <FriendsListModal
+        isOpen={showFriendsList}
+        onClose={() => setShowFriendsList(false)}
+        users={allUsers}
+        onSelectUser={handleUserSelect}
+        darkMode={darkMode} // Optional: if you still need for modal logic
+      />
+
+      {/* Main Content */}
+      <div className="flex flex-grow overflow-hidden">
+        {(showChatList || !isMobileView) && (
+          <div
+            className={`${isMobileView ? 'w-full' : 'w-[300px] md:w-[350px] lg:w-[280px] xl:w-[250px]'} flex-none overflow-y-hidden`}
+          >
+            <ChatList
+              chats={chats}
+              selectedChat={selectedChat}
+              setSelectedChat={(chat) => {
+                setSelectedChat(chat);
+                if (isMobileView) setShowChatList(false);
+              }}
+            />
           </div>
         )}
 
-        {selectedChat && (!isMobileView || !showChatList) && (
-          <>
-            <button
-              onClick={() => handleStartCall('voice')}
-              className="p-2 rounded-full hover:bg-blue-500 hover:text-white transition"
-              title="Start Voice Call"
-            >
-              <Phone className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => handleStartCall('video')}
-              className="p-2 rounded-full hover:bg-green-500 hover:text-white transition"
-              title="Start Video Call"
-            >
-              <Video className="w-5 h-5" />
-            </button>
-          </>
-        )}
-
-        <button
-          onClick={() => setShowCallHistory(true)}
-          className="p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-white transition"
-          title="Call History"
-        >
-          <History className="text-gray-800 dark:text-gray-200 w-5 h-5" />
-        </button>
-      </div>
-    </div>
-
-    {/* Friends Modal */}
-    <FriendsListModal
-      isOpen={showFriendsList}
-      onClose={() => setShowFriendsList(false)}
-      users={allUsers}
-      onSelectUser={handleUserSelect}
-      darkMode={darkMode} // Optional: if you still need for modal logic
-    />
-
-    {/* Main Content */}
-    <div className="flex flex-grow overflow-hidden">
-      {(showChatList || !isMobileView) && (
-        <div className={`${isMobileView ? 'w-full' : 'w-[300px] md:w-[350px] lg:w-[280px] xl:w-[250px]'} flex-none overflow-y-hidden`}>
-          <ChatList
-            chats={chats}
-            selectedChat={selectedChat}
-            setSelectedChat={(chat) => {
-              setSelectedChat(chat);
-              if (isMobileView) setShowChatList(false);
-            }}
-          />
-        </div>
-      )}
-
-      {selectedChat && (!showChatList || !isMobileView) && (
-        <div className="flex-grow border-l border-gray-200 dark:border-gray-700 overflow-y-auto w-full">
-          {isMobileView && !showChatList && (
-            <div className="p-2 border-b flex items-center border-gray-200 dark:border-gray-700">
-              <div className="flex items-center">
-                {otherUser?.avatar ? (
-                  <img src={otherUser.avatar} alt={otherUser.username} className="w-8 h-8 rounded-full mr-2" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 mr-2 flex items-center justify-center">
-                    {otherUser?.username.charAt(0).toUpperCase()}
+        {selectedChat && (!showChatList || !isMobileView) && (
+          <div className="flex-grow border-l border-gray-200 dark:border-gray-700 overflow-y-auto w-full">
+            {isMobileView && !showChatList && (
+              <div className="p-2 border-b flex items-center border-gray-200 dark:border-gray-700">
+                <div className="flex items-center">
+                  {otherUser?.avatar ? (
+                    <img
+                      src={otherUser.avatar}
+                      alt={otherUser.username}
+                      className="w-8 h-8 rounded-full mr-2"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 mr-2 flex items-center justify-center">
+                      {otherUser?.username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-medium">{otherUser?.username}</p>
+                    <p
+                      className={`text-xs ${isOtherUserOnline ? 'text-green-500' : 'text-gray-400'}`}
+                    >
+                      {isOtherUserOnline ? 'Active' : 'Inactive'}
+                    </p>
                   </div>
-                )}
-                <div>
-                  <p className="font-medium">{otherUser?.username}</p>
-                  <p className={`text-xs ${isOtherUserOnline ? 'text-green-500' : 'text-gray-400'}`}>
-                    {isOtherUserOnline ? 'Active' : 'Inactive'}
-                  </p>
                 </div>
               </div>
-            </div>
-          )}
-          <ChatMessages chatId={selectedChat._id} userId={userId} />
-        </div>
+            )}
+            <ChatMessages chatId={selectedChat._id} userId={userId} />
+          </div>
+        )}
+      </div>
+
+      {/* Call UI */}
+      {inCall && callType && (
+        <CallUI
+          callType={callType}
+          localStream={localStream}
+          remoteStream={remoteStream}
+          onClose={endCall}
+          isMicOn={isMicOn}
+          isVideoOn={isVideoOn}
+          onToggleMic={toggleMic}
+          onToggleVideo={toggleVideo}
+          otherUser={
+            otherUser ? { username: otherUser.username, avatar: otherUser.avatar } : undefined
+          }
+          callActive={callActive}
+          incomingCall={!!incomingCall}
+          isRemoteMicOn={isRemoteMicOn}
+          isRemoteVideoOn={isRemoteVideoOn}
+        />
+      )}
+
+      {showCallHistory && (
+        <CallHistoryList
+          isOpen={showCallHistory}
+          onClose={() => setShowCallHistory(false)}
+          chatId={selectedChat?._id}
+        />
       )}
     </div>
-
-    {/* Call UI */}
-    {inCall && callType && (
-      <CallUI
-        callType={callType}
-        localStream={localStream}
-        remoteStream={remoteStream}
-        onClose={endCall}
-        isMicOn={isMicOn}
-        isVideoOn={isVideoOn}
-        onToggleMic={toggleMic}
-        onToggleVideo={toggleVideo}
-        otherUser={otherUser ? { username: otherUser.username, avatar: otherUser.avatar } : undefined}
-        callActive={callActive}
-        incomingCall={!!incomingCall}
-        isRemoteMicOn={isRemoteMicOn}
-        isRemoteVideoOn={isRemoteVideoOn}
-      />
-    )}
-
-    {showCallHistory && (
-      <CallHistoryList
-        isOpen={showCallHistory}
-        onClose={() => setShowCallHistory(false)}
-        chatId={selectedChat?._id}
-      />
-    )}
-  </div>
-);
-
+  );
 };
 
 export default ChatSection;

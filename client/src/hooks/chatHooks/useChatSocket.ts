@@ -73,7 +73,7 @@ const useChatSockets = (chatId: string, userId: string) => {
 
         const chatIndex = prevChats.findIndex((chat) => chat._id === newMessage.chatId);
 
-        let updatedChats = [...prevChats];
+        const updatedChats = [...prevChats];
 
         if (chatIndex > -1) {
           const updatedChat = { ...updatedChats[chatIndex], lastMessage: newMessage };

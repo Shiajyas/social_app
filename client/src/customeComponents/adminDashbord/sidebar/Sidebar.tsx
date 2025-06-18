@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAdminAuth } from '../../../hooks/useAdminAuth';
 import { useAuthStore } from '@/appStore/AuthStore';
 
 type MenuItem = {
@@ -12,7 +11,6 @@ type MenuItem = {
 
 const Sidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { isLoading } = useAdminAuth();
   const { logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();

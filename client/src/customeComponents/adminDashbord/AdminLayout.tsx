@@ -1,4 +1,3 @@
-
 import Sidebar from './sidebar/Sidebar';
 import Header from './Header';
 import { Outlet } from 'react-router-dom';
@@ -11,7 +10,7 @@ const AdminLayout = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
         <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-950 p-4">
-              <PermissionDeniedModal />
+          <PermissionDeniedModal />
           <Outlet />
         </div>
       </div>

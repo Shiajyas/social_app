@@ -23,7 +23,7 @@ const HomeLayout: React.FC = () => {
   useEffect(() => {
     if (!userId) return;
     socket.emit('joinUser', userId);
-    chatSocket.emit('updateChatSocketId', {userId: user?._id});
+    chatSocket.emit('updateChatSocketId', { userId: user?._id });
     return () => {
       socket.emit('leaveUser', userId);
       // chatSocket.emit('updateChatSocketId', {userId: user?._id});
@@ -44,10 +44,7 @@ const HomeLayout: React.FC = () => {
 
   return (
     <div className="w-full h-screen flex flex-col overflow-hidden">
-      <Header
-        unreadCount={unreadCount}
-      
-      />
+      <Header unreadCount={unreadCount} />
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Hidden on small screens */}
