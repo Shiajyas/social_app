@@ -11,9 +11,8 @@ import { ChatService } from '../../useCase/socket/socketServices/chatService';
 import { CallSocketService } from '../../useCase/socket/socketServices/callSocketService';
 
 import { chatHandlers } from './socketHandlers/chatHandlers';
-import { callHandlers } from './socketHandlers/callHandlers';
 import { userHandlers } from './socketHandlers/userHandlers';
-
+import { callHandlers } from './socketHandlers/callHandlers';
 
 let io: Server | null = null;
 
@@ -50,6 +49,7 @@ export const initializeSocket = (
     mainUserRepository,
     userRepository,
     callHistoryRepository,
+    io
   );
 
     const userSocketService = new UserSocketService(

@@ -16,7 +16,7 @@ export const callHandlers = (
 
   socket.on('call:answer', async (data) => {
     try {
-      console.log(data,">>>>")
+      // console.log(data,">>>>")
       console.log(`✅ Answer sent from ${data.from} to ${data.to}`);
       await callSocketService.handleAnswer(socket, data);
     } catch (error) {
