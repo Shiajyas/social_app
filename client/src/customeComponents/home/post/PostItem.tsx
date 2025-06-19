@@ -135,10 +135,10 @@ const PostCard = memo(
 
     return (
       // <div className="bg-white rounded-xl shadow-lg p-4 mb-4 cursor-pointer relative">
-      <div className=" bg-white dark:bg-gray-900 text-black dark:text-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 cursor-pointer relative outline outline-1 outline-gray-200 dark:outline-gray-700">
+      <div className="  bg-white dark:bg-gray-900 text-black dark:text-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 cursor-pointer relative outline outline-1 outline-gray-200 dark:outline-gray-700">
         {/* User Info */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+        <div className="flex items-center justify-between ">
+          <div className="flex items-center space-x-3 ">
             <img
               src={post.userId?.avatar}
               alt={post.userId?.fullname}

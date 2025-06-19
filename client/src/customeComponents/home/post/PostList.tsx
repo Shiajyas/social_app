@@ -93,11 +93,7 @@ const PostList: React.FC = () => {
   });
 
   const handleLike = (postId: string, isLiked: boolean) => {
-    if (isLiked) {
-      unlikeMutation.mutate(postId);
-    } else {
-      likeMutation.mutate(postId);
-    }
+    isLiked ? unlikeMutation.mutate(postId) : likeMutation.mutate(postId);
   };
 
   const handleToggleComments = (postId: string) => {
@@ -123,7 +119,7 @@ const PostList: React.FC = () => {
   }, [handleObserver]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4">
+    <div className="w-full max-w-2xl mx-0 md:mx-auto px-0 md:px-4">
       {data?.pages.map((page) =>
         page.posts.map((post) => (
           <PostCard

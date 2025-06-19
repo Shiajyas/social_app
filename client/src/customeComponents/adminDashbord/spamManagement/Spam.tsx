@@ -165,12 +165,12 @@ export default function Spam() {
         <p className="text-gray-500 italic dark:text-gray-400">No reports found.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reports.map((report) => {
-            const isSel = selected.has(report._id);
+          {reports?.map((report) => {
+            const isSel = selected?.has(report?._id);
             return (
               <Card
-                key={report._id}
-                onClick={() => toggleSelect(report._id)}
+                key={report?._id}
+                onClick={() => toggleSelect(report?._id)}
                 className={`shadow-sm border-2 cursor-pointer transition-all duration-200 ${
                   isSel
                     ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900'
@@ -182,9 +182,9 @@ export default function Spam() {
                     <div className="text-sm text-gray-500 dark:text-gray-300">
                       Reported by{' '}
                       <strong className="text-gray-800 dark:text-gray-100">
-                        {report.reporter.username}
+                        {report?.reporter?.username}
                       </strong>{' '}
-                      · {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}
+                      · {formatDistanceToNow(new Date(report?.createdAt), { addSuffix: true })}
                     </div>
                     <div className="text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 px-2 py-0.5 rounded">
                       {report.reason}
@@ -212,7 +212,7 @@ export default function Spam() {
                   <div className="text-sm text-gray-600 dark:text-gray-300">
                     Owner:{' '}
                     <strong className="text-gray-800 dark:text-gray-100">
-                      {report.post.owner.username}
+                      {report?.post?.owner?.username}
                     </strong>
                   </div>
                 </CardContent>

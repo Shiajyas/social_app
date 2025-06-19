@@ -67,7 +67,7 @@ const HomeLayout: React.FC = () => {
               </div>
             )}
 
-            <ScrollArea className="flex-1 mt-2 overflow-y-auto m-0">
+            <ScrollArea className=" mt-2 overflow-y-auto m-0">
               <Outlet />
             </ScrollArea>
           </CardContent>
