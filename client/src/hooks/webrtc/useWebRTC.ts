@@ -33,11 +33,11 @@ export const useWebRTC = ({
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [offer, setOffer] = useState<RTCSessionDescriptionInit | null>(null);
   const [callPartnerId, setCallPartnerId] = useState<string | null>(null);
-
   const [isRemoteMicOn, setIsRemoteMicOn] = useState(true);
   const [isRemoteVideoOn, setIsRemoteVideoOn] = useState(true);
 
   const { incomingCall, clearIncomingCall, setIncomingCall } = useIncomingCallStore();
+
   const callEndedRef = useRef(false);
   const pendingCandidates = useRef<RTCIceCandidateInit[]>([]);
   const remoteDescSetRef = useRef(false);
@@ -58,7 +58,7 @@ export const useWebRTC = ({
 
       if (remoteAudioRef.current) {
         remoteAudioRef.current.srcObject = inboundStream;
-        remoteAudioRef.current.play().catch((err) => console.warn('🔇 Could not auto-play remote audio:', err));
+        remoteAudioRef.current.play().catch((err) => console.warn('🔇 Could not play remote audio:', err));
       }
     };
 
@@ -95,13 +95,14 @@ export const useWebRTC = ({
       setPeerConnection(pc);
 
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
       socket.emit('call:offer', {
         from: userId,
         to: chatId,
-        offer,
+        offer: pc.localDescription, // ✅ Use actual local description
         type,
       });
 
@@ -132,16 +133,16 @@ export const useWebRTC = ({
 
       const pc = createPeerConnection();
       setPeerConnection(pc);
-      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
       remoteDescSetRef.current = true;
 
-      for (const c of pendingCandidates.current) {
+      for (const candidate of pendingCandidates.current) {
         try {
-          await pc.addIceCandidate(new RTCIceCandidate(c));
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
         } catch (err) {
-          console.warn('❄ Failed to add queued ICE candidate:', err);
+          console.warn('❄ Skipped ICE candidate:', err);
         }
       }
       pendingCandidates.current = [];
@@ -152,7 +153,7 @@ export const useWebRTC = ({
       socket.emit('call:answer', {
         from: userId,
         to: incomingCall.caller._id,
-        answer,
+        answer: pc.localDescription,
       });
 
       setCallActive(true);
@@ -183,8 +184,9 @@ export const useWebRTC = ({
 
     peerConnection?.close();
     setPeerConnection(null);
-    localStream?.getTracks().forEach((track) => track.stop());
-    remoteStream?.getTracks().forEach((track) => track.stop());
+
+    localStream?.getTracks().forEach((t) => t.stop());
+    remoteStream?.getTracks().forEach((t) => t.stop());
     setLocalStream(null);
     setRemoteStream(null);
 
@@ -194,7 +196,6 @@ export const useWebRTC = ({
 
     setIsMicOn(true);
     setIsVideoOn(true);
-    setOffer(null);
     setCallPartnerId(null);
     setIsRemoteMicOn(true);
     setIsRemoteVideoOn(true);
@@ -202,14 +203,13 @@ export const useWebRTC = ({
     clearIncomingCall();
     remoteDescSetRef.current = false;
     pendingCandidates.current = [];
-
     onCallEnd();
   }, [peerConnection, localStream, remoteStream, userId, callType, activeChatId]);
 
   const toggleMic = () => {
     if (!localStream) return;
     const newState = !isMicOn;
-    localStream.getAudioTracks().forEach((track) => (track.enabled = newState));
+    localStream.getAudioTracks().forEach((t) => (t.enabled = newState));
     socket.emit('call:toggle-mic', { to: callPartnerId, micOn: newState });
     setIsMicOn(newState);
   };
@@ -217,7 +217,7 @@ export const useWebRTC = ({
   const toggleVideo = () => {
     if (!localStream) return;
     const newState = !isVideoOn;
-    localStream.getVideoTracks().forEach((track) => (track.enabled = newState));
+    localStream.getVideoTracks().forEach((t) => (t.enabled = newState));
     socket.emit('call:toggle-video', { to: callPartnerId, videoOn: newState });
     setIsVideoOn(newState);
   };
@@ -235,29 +235,31 @@ export const useWebRTC = ({
         await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
         remoteDescSetRef.current = true;
 
-        for (const c of pendingCandidates.current) {
-          await peerConnection.addIceCandidate(new RTCIceCandidate(c));
+        for (const candidate of pendingCandidates.current) {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
         }
         pendingCandidates.current = [];
         setCallActive(true);
       } catch (err) {
-        console.error('Error setting remote description:', err);
+        console.error('❌ Error setting remote description:', err);
       }
     };
 
     const handleRemoteCandidate = ({ candidate }: any) => {
       if (!peerConnection) return;
-      const iceCandidate = new RTCIceCandidate(candidate);
-
       if (!remoteDescSetRef.current) {
         pendingCandidates.current.push(candidate);
       } else {
-        peerConnection.addIceCandidate(iceCandidate).catch((err) => console.warn('❄ Error adding ICE candidate:', err));
+        peerConnection
+          .addIceCandidate(new RTCIceCandidate(candidate))
+          .catch((err) => console.warn('❄ Error adding ICE candidate:', err));
       }
     };
 
     const handleCallEnd = () => endCall();
+
     const handlePartnerMicToggle = ({ micOn }: { micOn: boolean }) => setIsRemoteMicOn(micOn);
+
     const handlePartnerVideoToggle = ({ videoOn }: { videoOn: boolean }) => {
       setIsRemoteVideoOn(videoOn);
       const tracks = remoteStream?.getVideoTracks();
