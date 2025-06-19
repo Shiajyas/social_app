@@ -132,7 +132,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const isSending = files.some((f) => f.status === 'uploading');
 
   return (
-    <div className="w-full px-2 sm:px-4 flex justify-center">
+    <div className="w-full sm:px-4 flex justify-center mb-6">
       <div className="relative w-full max-w-2xl mt-10 p-3 mb-2 flex flex-wrap items-center gap-2 rounded-lg bg-gray-100 dark:bg-gray-800">
         {replyTo && (
           <div className="absolute -top-10 left-0 w-full bg-gray-200 dark:bg-gray-700 text-xs px-3 py-1 rounded-t-md flex items-center justify-between shadow-sm">

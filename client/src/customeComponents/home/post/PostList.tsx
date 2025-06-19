@@ -118,9 +118,9 @@ const PostList: React.FC = () => {
     return () => observer.disconnect();
   }, [handleObserver]);
 
-  return (
- <div className="min-h-screen bg-white flex justify-center px-0">
-  <div className="w-full max-w-2xl px-0">
+return (
+  <div className="min-h-screen my-2 flex justify-center px-2 sm:px-4 transition-colors duration-300 bg-white dark:bg-gray-900">
+    <div className="w-full max-w-2xl text-black dark:text-white">
       {data?.pages.map((page) =>
         page.posts.map((post) => (
           <PostCard
@@ -132,14 +132,20 @@ const PostList: React.FC = () => {
             isCommentsOpen={openPostId === post._id}
             onClick={() => handlePostClick(post._id)}
           />
-        )),
+        ))
       )}
 
-      <div ref={observerRef} className="h-10"></div>
-      {isFetchingNextPage && <p className="text-center text-gray-500">Loading more posts...</p>}
+      <div ref={observerRef} className="h-10" />
+      {isFetchingNextPage && (
+        <p className="text-center text-gray-500 dark:text-gray-400">
+          Loading more posts...
+        </p>
+      )}
     </div>
-    </div>
-  );
+  </div>
+);
+
+
 };
 
 export default PostList;

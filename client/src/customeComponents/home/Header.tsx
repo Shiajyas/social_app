@@ -49,7 +49,12 @@ const Header: React.FC<HeaderProps> = ({ unreadCount }) => {
         className={`sticky top-0 z-50 w-full px-6 py-4 border shadow-md hidden lg:flex justify-between items-center transition-all
         ${isDark ? 'bg-gray-900 text-white border-gray-700' : 'bg-white text-gray-900 border-gray-200'}`}
       >
-        <h1 className="text-xl font-bold">VConnect</h1>
+        <button
+          onClick={() => navigate('/home')}
+          className="text-xl font-bold hover:underline focus:outline-none"
+        >
+          VConnect
+        </button>
 
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
@@ -85,7 +90,12 @@ const Header: React.FC<HeaderProps> = ({ unreadCount }) => {
         className={`sticky top-0 z-50 w-full px-4 py-3 border shadow-md flex lg:hidden justify-between items-center transition-all
         ${isDark ? 'bg-gray-900 text-white border-gray-700' : 'bg-white text-gray-900 border-gray-200'}`}
       >
-        <h1 className="text-lg font-bold">VConnect</h1>
+        <button
+          onClick={() => navigate('/home')}
+          className="text-lg font-bold hover:underline focus:outline-none"
+        >
+          VConnect
+        </button>
 
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={toggleTheme}>

@@ -155,10 +155,10 @@ const PostDetails: React.FC = () => {
   console.log('🎉 Rendering PostItem with post data:', data);
 
   return (
-    <div className="w-full min-w-full max-w-2xl mx-auto p-4 sm:max-w-full sm:px-2">
+    <div className="w-full min-w-full max-w-2xl mx-auto px-0 sm:max-w-full sm:px-2">
       <button
         onClick={() => navigate(-1)}
-        className="mb-4 px-4 py-2 text-sm font-semibold text-white bg-gray-700 rounded-md hover:bg-gray-900 transition"
+        className="m-4 px-4 py-2 text-sm font-semibold text-white bg-gray-700 rounded-md hover:bg-gray-900 transition"
       >
         ← Back
       </button>

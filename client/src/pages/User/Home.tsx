@@ -43,7 +43,7 @@ const HomeLayout: React.FC = () => {
   }, [location.pathname]);
 
   return (
-    <div className="w-full h-screen flex flex-col overflow-hidden">
+    <div className="w-full h-screen flex flex-col border overflow-hidden">
       <Header unreadCount={unreadCount} />
 
       <div className="flex flex-1 overflow-hidden">
@@ -58,8 +58,8 @@ const HomeLayout: React.FC = () => {
         </div>
 
         {/* Main Content - Full Width on small screens */}
-        <Card className="flex-1 w-full px-1 flex flex-col overflow-hidden">
-          <CardContent className="flex-1 px-1 flex flex-col overflow-hidden">
+        <Card className="flex-1 w-full p-0 flex flex-col overflow-hidden border ">
+          <CardContent className="flex-1 flex flex-col p-0 overflow-hidden ">
             {/* ✅ Show Status only on Home Page */}
             {selectedItem === 'Home' && (
               <div className="flex items-center justify-between">
@@ -67,7 +67,7 @@ const HomeLayout: React.FC = () => {
               </div>
             )}
 
-            <ScrollArea className=" mt-2 overflow-y-auto overflow-x-hidden px-0 m-0">
+            <ScrollArea className="flex-1  mt-2 overflow-y-auto m-0">
               <Outlet />
             </ScrollArea>
           </CardContent>
