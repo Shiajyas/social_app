@@ -43,13 +43,24 @@ export const useWebRTC = ({
   const remoteDescSetRef = useRef(false);
 
   const createPeerConnection = () => {
+// const pc = new RTCPeerConnection({
+//   iceServers: [
+//     { urls: 'stun:stun.l.google.com:19302' }, // STUN (fallback)
+//     {
+//       urls: 'turn:15.207.66.184:3478',
+//       username: 'myuser', // must match your Coturn config
+//       credential: 'mypassword', // must match your Coturn config
+//     },
+//   ],
+// });
+
 const pc = new RTCPeerConnection({
+  iceTransportPolicy: 'relay', // ⛔ Forces TURN relay, avoids direct/STUN-only paths
   iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' }, // STUN (fallback)
     {
       urls: 'turn:15.207.66.184:3478',
-      username: 'myuser', // must match your Coturn config
-      credential: 'mypassword', // must match your Coturn config
+      username: 'myuser',
+      credential: 'mypassword',
     },
   ],
 });
