@@ -64,7 +64,6 @@ const ChatSection = () => {
     incomingCall,
     isRemoteMicOn,
     isRemoteVideoOn,
-    remoteAudioRef
   } = useWebRTC({
     userId,
     chatId: selectedChat?.users.find((u) => u._id !== userId)?._id,
@@ -154,7 +153,7 @@ const ChatSection = () => {
   };
 
   return (
-    <div className="p-4 m-0 bg-white dark:bg-gray-900 text-black dark:text-white rounded shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-700 max-w-full">
+    <div className="p-4 bg-white dark:bg-gray-900 text-black dark:text-white rounded shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-700 max-w-full">
       {/* Header */}
       <div className="p-2 flex justify-between items-center border-b border-gray-300 dark:border-gray-700">
         {isMobileView && selectedChat && !showChatList && (
@@ -290,7 +289,6 @@ const ChatSection = () => {
           incomingCall={!!incomingCall}
           isRemoteMicOn={isRemoteMicOn}
           isRemoteVideoOn={isRemoteVideoOn}
-          remoteAudioRef={remoteAudioRef}
         />
       )}
 
