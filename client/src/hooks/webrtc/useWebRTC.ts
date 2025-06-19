@@ -43,9 +43,17 @@ export const useWebRTC = ({
   const remoteDescSetRef = useRef(false);
 
   const createPeerConnection = () => {
-    const pc = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    });
+  const pc = new RTCPeerConnection({
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    {
+      urls: 'turn:<your-ec2-public-ip>:3478',
+      username: 'myuser',
+      credential: 'mypassword',
+    },
+  ],
+});
+
 
     pc.ontrack = (event) => {
       const inboundStream = new MediaStream();
