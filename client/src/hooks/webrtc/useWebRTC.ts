@@ -40,6 +40,10 @@ export const useWebRTC = ({
   const { incomingCall, clearIncomingCall, setIncomingCall } = useIncomingCallStore();
   const callEndedRef = useRef(false);
 
+  // Candidate queuing
+  const pendingCandidates = useRef<RTCIceCandidateInit[]>([]);
+  const remoteDescSetRef = useRef(false);
+
   const createPeerConnection = () => {
     const pc = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -82,10 +86,7 @@ export const useWebRTC = ({
         callEndedRef.current = false;
         setCallPartnerId(chatId);
 
-        const constraints = type === 'video'
-          ? { audio: true, video: true }
-          : { audio: true, video: false };
-
+        const constraints = type === 'video' ? { audio: true, video: true } : { audio: true, video: false };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         setLocalStream(stream);
         setIsMicOn(true);
@@ -126,10 +127,8 @@ export const useWebRTC = ({
       setCallPartnerId(incomingCall.caller._id);
       callStartTimeRef.current = new Date();
 
-      const constraints = incomingCall.callType === 'video'
-        ? { audio: true, video: true }
-        : { audio: true, video: false };
-
+      const constraints =
+        incomingCall.callType === 'video' ? { audio: true, video: true } : { audio: true, video: false };
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       setLocalStream(stream);
       setIsMicOn(true);
@@ -144,6 +143,18 @@ export const useWebRTC = ({
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
+      remoteDescSetRef.current = true;
+
+      // flush pending candidates
+      for (const c of pendingCandidates.current) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(c));
+        } catch (err) {
+          console.warn('❄ Failed to add queued ICE candidate:', err);
+        }
+      }
+      pendingCandidates.current = [];
+
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
 
@@ -199,6 +210,11 @@ export const useWebRTC = ({
     setIsRemoteVideoOn(true);
     setCallActive(false);
     clearIncomingCall();
+
+    // cleanup flags
+    remoteDescSetRef.current = false;
+    pendingCandidates.current = [];
+
     onCallEnd();
   }, [peerConnection, localStream, remoteStream, userId, callType, activeChatId]);
 
@@ -229,6 +245,14 @@ export const useWebRTC = ({
       if (!peerConnection) return;
       try {
         await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        remoteDescSetRef.current = true;
+
+        // flush pending
+        for (const c of pendingCandidates.current) {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(c));
+        }
+        pendingCandidates.current = [];
+
         setCallActive(true);
       } catch (err) {
         console.error('Error setting remote description:', err);
@@ -237,7 +261,15 @@ export const useWebRTC = ({
 
     const handleRemoteCandidate = ({ candidate }: any) => {
       if (!peerConnection) return;
-      peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      const iceCandidate = new RTCIceCandidate(candidate);
+
+      if (!remoteDescSetRef.current) {
+        pendingCandidates.current.push(candidate);
+      } else {
+        peerConnection
+          .addIceCandidate(iceCandidate)
+          .catch((err) => console.warn('❄ Error adding ICE candidate:', err));
+      }
     };
 
     const handleCallEnd = () => endCall();
