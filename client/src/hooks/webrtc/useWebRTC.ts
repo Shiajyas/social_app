@@ -65,6 +65,7 @@ export const useWebRTC = ({
     pc.onicecandidate = (event) => {
       if (event.candidate && callPartnerId) {
         socket.emit('call:ice-candidate', {
+          from: userId,
           to: callPartnerId,
           candidate: event.candidate,
         });
@@ -147,6 +148,7 @@ export const useWebRTC = ({
       await pc.setLocalDescription(answer);
 
       socket.emit('call:answer', {
+        from: userId,
         to: incomingCall.caller._id,
         answer,
       });
