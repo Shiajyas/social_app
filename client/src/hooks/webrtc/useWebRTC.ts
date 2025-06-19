@@ -40,88 +40,89 @@ export const useWebRTC = ({
 
   const [isRemoteMicOn, setIsRemoteMicOn] = useState(true); // Default: mic is on
   const [isRemoteVideoOn, setIsRemoteVideoOn] = useState(true); // Default: video is on
-const remoteAudioRef = useRef<HTMLAudioElement | null>(null); // ✅ New ref for playing remote audio
 
-const createPeerConnection = () => {
-  console.log('📡 Creating RTCPeerConnection...');
-  const pc = new RTCPeerConnection({
-    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-  });
+  const createPeerConnection = () => {
+    console.log('📡 Creating RTCPeerConnection...');
+    const pc = new RTCPeerConnection({
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    });
 
-  pc.ontrack = (event) => {
-    console.log('🎥 Received remote track');
-    const inboundStream = new MediaStream();
-    event.streams[0].getTracks().forEach((track) => inboundStream.addTrack(track));
-    setRemoteStream(inboundStream);
-
-    if (callType === 'video' && remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = inboundStream;
-    }
-
-    if (remoteAudioRef.current) {
-      remoteAudioRef.current.srcObject = inboundStream; // ✅ Ensure audio plays in both video and voice call
-    }
-  };
-
-  pc.onicecandidate = (event) => {
-    if (event.candidate && callPartnerId) {
-      console.log('❄️ Sending ICE candidate');
-      socket.emit('call:ice-candidate', {
-        to: callPartnerId,
-        candidate: event.candidate,
-      });
-    }
-  };
-
-  return pc;
-};
-
-
-const startCall = useCallback(
-  async (type: 'voice' | 'video') => {
-    try {
-      if (!chatId) throw new Error('chatId is undefined');
-      callEndedRef.current = false;
-      setCallPartnerId(chatId);
-
-      console.log(callStartTimeRef.current, 'call start time 1');
-
-      const constraints =
-        type === 'video' ? { audio: true, video: true } : { audio: true, video: false };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log('📡 Got local stream');
-
-      setLocalStream(stream);
-      setIsMicOn(true);
-      setIsVideoOn(type === 'video');
-
-      if (localVideoRef.current && type === 'video') {
-        localVideoRef.current.srcObject = stream;
+    pc.ontrack = (event) => {
+      console.log('🎥 Received remote track');
+      const inboundStream = new MediaStream();
+      event.streams[0].getTracks().forEach((track) => inboundStream.addTrack(track));
+      setRemoteStream(inboundStream);
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = inboundStream;
       }
+    };
 
-      const pc = createPeerConnection();
-      setPeerConnection(pc);
-      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+    pc.onicecandidate = (event) => {
+      if (event.candidate && callPartnerId) {
+        console.log('❄️ Sending ICE candidate');
+        socket.emit('call:ice-candidate', {
+          to: callPartnerId,
+          candidate: event.candidate,
+        });
+      }
+    };
 
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      console.log('📤 Sending offer');
+    return pc;
+  };
 
-      socket.emit('call:offer', {
-        from: userId,
-        to: chatId,
-        offer,
-        type,
-      });
+  const startCall = useCallback(
+    async (type: 'voice' | 'video') => {
+      try {
+        if (!chatId) throw new Error('chatId is undefined');
+        callEndedRef.current = false;
+        setCallPartnerId(chatId);
+        // console.log("📞 Starting call with", chatId);
 
-      onCallStart();
-    } catch (err) {
-      console.error('❌ Error starting call:', err);
-      onCallEnd();
-    }
-  },
-  [userId, chatId, onCallStart, onCallEnd, setCallActive],
-);
+        // callStartTimeRef.current = new Date();
+
+        console.log(callStartTimeRef.current, 'call start time 1');
+
+        const constraints =
+          type === 'video' ? { audio: true, video: true } : { audio: true, video: false };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        console.log('📡 Got local stream');
+
+        setLocalStream(stream);
+        setIsMicOn(true);
+        setIsVideoOn(type === 'video');
+
+        if (localVideoRef.current && type === 'video') {
+          localVideoRef.current.srcObject = stream;
+        }
+
+        // Set local audio for voice call
+        if (localAudioRef.current && type === 'voice') {
+          localAudioRef.current.srcObject = stream;
+        }
+
+        const pc = createPeerConnection();
+        setPeerConnection(pc);
+        stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        console.log('📤 Sending offer');
+
+        socket.emit('call:offer', {
+          from: userId,
+          to: chatId,
+          offer,
+          type,
+        });
+
+        onCallStart();
+      } catch (err) {
+        console.error('❌ Error starting call:', err);
+        onCallEnd();
+      }
+    },
+    [userId, chatId, onCallStart, onCallEnd, setCallActive],
+  );
 
   const endCall = useCallback(() => {
     callEndedRef.current = true;
@@ -191,84 +192,96 @@ const startCall = useCallback(
     activeChatId,
   ]);
 
-const acceptCall = useCallback(async () => {
-  if (!incomingCall || !offer) return;
+  const acceptCall = useCallback(async () => {
+    if (!incomingCall || !offer) return;
 
-  try {
-    callEndedRef.current = false;
-    setCallPartnerId(incomingCall.caller._id);
-    callStartTimeRef.current = new Date();
-
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const audioDevices = devices.filter((d) => d.kind === 'audioinput');
-    const videoDevices = devices.filter((d) => d.kind === 'videoinput');
-
-    if (!audioDevices.length || (incomingCall.callType === 'video' && !videoDevices.length)) {
-      throw new Error('No available media devices');
-    }
-
-    const selectedAudioDevice = audioDevices[0];
-    const selectedVideoDevice =
-      incomingCall.callType === 'video' ? videoDevices[0] : null;
-
-    const constraints = {
-      audio: { deviceId: selectedAudioDevice.deviceId },
-      video: selectedVideoDevice ? { deviceId: selectedVideoDevice.deviceId } : false,
-    };
-
-    let stream;
     try {
-      stream = await navigator.mediaDevices.getUserMedia(constraints);
+      callEndedRef.current = false;
+      setCallPartnerId(incomingCall.caller._id);
+
+      callStartTimeRef.current = new Date();
+
+      console.log(callStartTimeRef.current, 'call start time 2');
+
+      // Get the available media devices
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioDevices = devices.filter((device) => device.kind === 'audioinput');
+      const videoDevices = devices.filter((device) => device.kind === 'videoinput');
+
+      if (!audioDevices.length || (incomingCall.callType === 'video' && !videoDevices.length)) {
+        throw new Error('No available media devices');
+      }
+
+      // Dynamically select devices for each browser
+      const selectedAudioDevice = audioDevices[0]; // Use the first available audio device
+      const selectedVideoDevice = incomingCall.callType === 'video' ? videoDevices[0] : null; // Use first video device if it's a video call
+
+      const constraints = {
+        audio: {
+          deviceId: selectedAudioDevice.deviceId,
+        },
+        video: selectedVideoDevice ? { deviceId: selectedVideoDevice.deviceId } : false,
+      };
+
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (err) {
+        if ((err as any)?.name === 'NotReadableError') {
+          alert(
+            'Your microphone or camera is in use by another application. Please close other apps using it.',
+          );
+        }
+        // throw err;
+        endCall();
+        callEndedRef.current = true;
+        return
+
+      }
+
+      setLocalStream(stream);
+      setIsMicOn(true);
+      setIsVideoOn(incomingCall.callType === 'video');
+
+      if (localVideoRef.current && incomingCall.callType === 'video') {
+        localVideoRef.current.srcObject = stream;
+      }
+
+      if (localAudioRef.current && incomingCall.callType === 'voice') {
+        localAudioRef.current.srcObject = stream;
+      }
+
+      const pc = createPeerConnection();
+      setPeerConnection(pc);
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+
+      await pc.setRemoteDescription(new RTCSessionDescription(offer));
+      // console.log("📩 Set remote description with offer");
+
+      socket.on('ice-candidate', ({ candidate }: any) => {
+        if (pc && candidate) {
+          pc.addIceCandidate(new RTCIceCandidate(candidate));
+        }
+      });
+
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      // console.log("📤 Sending answer");
+
+      socket.emit('call:answer', {
+        to: incomingCall.caller._id,
+        answer,
+      });
+
+      setCallActive(true);
+      onCallStart();
+      clearIncomingCall();
+      setOffer(null);
     } catch (err) {
-      if ((err as any)?.name === 'NotReadableError') {
-        alert(
-          'Your microphone or camera is in use by another application. Please close other apps using it.',
-        );
-      }
-      endCall();
-      callEndedRef.current = true;
-      return;
+      console.error('❌ Error accepting call:', err);
+      onCallEnd();
     }
-
-    setLocalStream(stream);
-    setIsMicOn(true);
-    setIsVideoOn(incomingCall.callType === 'video');
-
-    if (localVideoRef.current && incomingCall.callType === 'video') {
-      localVideoRef.current.srcObject = stream;
-    }
-
-    // ❌ Do NOT assign your own mic to audio element
-
-    const pc = createPeerConnection();
-    setPeerConnection(pc);
-    stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-
-    await pc.setRemoteDescription(new RTCSessionDescription(offer));
-
-    socket.on('ice-candidate', ({ candidate }: any) => {
-      if (pc && candidate) {
-        pc.addIceCandidate(new RTCIceCandidate(candidate));
-      }
-    });
-
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-
-    socket.emit('call:answer', {
-      to: incomingCall.caller._id,
-      answer,
-    });
-
-    setCallActive(true);
-    onCallStart();
-    clearIncomingCall();
-    setOffer(null);
-  } catch (err) {
-    console.error('❌ Error accepting call:', err);
-    onCallEnd();
-  }
-}, [incomingCall, offer, onCallStart, onCallEnd]);
+  }, [incomingCall, offer, onCallStart, onCallEnd]);
 
   const toggleMic = () => {
     if (!localStream) return;
@@ -412,6 +425,5 @@ const acceptCall = useCallback(async () => {
     acceptCall,
     toggleMute,
     incomingCall,
-    remoteAudioRef
   };
 };

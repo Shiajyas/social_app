@@ -30,7 +30,6 @@ const IncomingCallUI = () => {
     isRemoteVideoOn,
     isMicOn,
     isVideoOn,
-    remoteAudioRef
   } = useWebRTC({
     userId: user?._id || '',
     chatId: activeCall?.chatId || '',
@@ -123,7 +122,6 @@ const IncomingCallUI = () => {
         incomingCall={false}
         isRemoteMicOn={isRemoteMicOn}
         isRemoteVideoOn={isRemoteVideoOn}
-        remoteAudioRef={remoteAudioRef}
       />
     );
   }
