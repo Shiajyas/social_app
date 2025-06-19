@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { chatSocket as socket } from '@/utils/chatSocket';
 import { useIncomingCallStore } from '@/appStore/useIncomingCallStore';
-import { ca } from 'date-fns/locale';
 
 interface UseWebRTCProps {
   userId: string;
@@ -12,6 +11,7 @@ interface UseWebRTCProps {
   callType?: 'voice' | 'video';
   activeChatId?: string;
 }
+
 export const useWebRTC = ({
   userId,
   chatId,
@@ -38,28 +38,30 @@ export const useWebRTC = ({
   const callEndedRef = useRef(false);
   const [callPartnerId, setCallPartnerId] = useState<string | null>(null);
 
-  const [isRemoteMicOn, setIsRemoteMicOn] = useState(true); // Default: mic is on
-  const [isRemoteVideoOn, setIsRemoteVideoOn] = useState(true); // Default: video is on
+  const [isRemoteMicOn, setIsRemoteMicOn] = useState(true);
+  const [isRemoteVideoOn, setIsRemoteVideoOn] = useState(true);
 
   const createPeerConnection = () => {
-    console.log('📡 Creating RTCPeerConnection...');
     const pc = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     });
 
     pc.ontrack = (event) => {
-      console.log('🎥 Received remote track');
       const inboundStream = new MediaStream();
       event.streams[0].getTracks().forEach((track) => inboundStream.addTrack(track));
       setRemoteStream(inboundStream);
-      if (remoteVideoRef.current) {
+
+      // 🔊 Voice call uses <audio>, Video uses <video>
+      if (callType === 'video' && remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = inboundStream;
+      } else if (callType === 'voice' && localAudioRef.current) {
+        localAudioRef.current.srcObject = inboundStream;
+        localAudioRef.current.play().catch(console.error);
       }
     };
 
     pc.onicecandidate = (event) => {
       if (event.candidate && callPartnerId) {
-        console.log('❄️ Sending ICE candidate');
         socket.emit('call:ice-candidate', {
           to: callPartnerId,
           candidate: event.candidate,
@@ -70,74 +72,50 @@ export const useWebRTC = ({
     return pc;
   };
 
-  const startCall = useCallback(
-    async (type: 'voice' | 'video') => {
-      try {
-        if (!chatId) throw new Error('chatId is undefined');
-        callEndedRef.current = false;
-        setCallPartnerId(chatId);
-        // console.log("📞 Starting call with", chatId);
+  const startCall = useCallback(async (type: 'voice' | 'video') => {
+    try {
+      if (!chatId) throw new Error('chatId is undefined');
+      callEndedRef.current = false;
+      setCallPartnerId(chatId);
 
-        // callStartTimeRef.current = new Date();
+      const constraints = type === 'video' ? { audio: true, video: true } : { audio: true };
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      setLocalStream(stream);
+      setIsMicOn(true);
+      setIsVideoOn(type === 'video');
 
-        console.log(callStartTimeRef.current, 'call start time 1');
-
-        const constraints =
-          type === 'video' ? { audio: true, video: true } : { audio: true, video: false };
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        console.log('📡 Got local stream');
-
-        setLocalStream(stream);
-        setIsMicOn(true);
-        setIsVideoOn(type === 'video');
-
-        if (localVideoRef.current && type === 'video') {
-          localVideoRef.current.srcObject = stream;
-        }
-
-        // Set local audio for voice call
-        if (localAudioRef.current && type === 'voice') {
-          localAudioRef.current.srcObject = stream;
-        }
-
-        const pc = createPeerConnection();
-        setPeerConnection(pc);
-        stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        console.log('📤 Sending offer');
-
-        socket.emit('call:offer', {
-          from: userId,
-          to: chatId,
-          offer,
-          type,
-        });
-
-        onCallStart();
-      } catch (err) {
-        console.error('❌ Error starting call:', err);
-        onCallEnd();
+      if (localVideoRef.current && type === 'video') {
+        localVideoRef.current.srcObject = stream;
       }
-    },
-    [userId, chatId, onCallStart, onCallEnd, setCallActive],
-  );
+
+      const pc = createPeerConnection();
+      setPeerConnection(pc);
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      socket.emit('call:offer', {
+        from: userId,
+        to: chatId,
+        offer,
+        type,
+      });
+
+      onCallStart();
+    } catch (err) {
+      console.error('❌ Error starting call:', err);
+      onCallEnd();
+    }
+  }, [userId, chatId, onCallStart, onCallEnd]);
 
   const endCall = useCallback(() => {
     callEndedRef.current = true;
-    console.log('📴 Ending call...');
 
     const endedAt = new Date();
     const startedAt = callStartTimeRef.current ?? endedAt;
 
-    console.log('start time 3', startedAt);
-    console.log('end time', endedAt);
-
-    // Send call:end to the partner
     if (callPartnerId) {
-      console.log('📤 Sending call:end to', callPartnerId);
-
       socket.emit('call:end', {
         to: callPartnerId,
         from: userId,
@@ -146,51 +124,30 @@ export const useWebRTC = ({
         endedAt: endedAt.toISOString(),
         chatId: activeChatId ?? null,
       });
-    } else {
-      console.warn('⚠️ Tried to end call, but no partner ID found');
     }
 
-    // --- Cleanup (same as before) ---
-    if (peerConnection) {
-      peerConnection.close();
-      setPeerConnection(null);
-    }
+    peerConnection?.close();
+    setPeerConnection(null);
 
-    if (localStream) {
-      localStream.getTracks().forEach((track) => track.stop());
-      setLocalStream(null);
-    }
+    localStream?.getTracks().forEach((track) => track.stop());
+    remoteStream?.getTracks().forEach((track) => track.stop());
 
-    if (remoteStream) {
-      remoteStream.getTracks().forEach((track) => track.stop());
-      setRemoteStream(null);
-    }
-
-    setIsMicOn(true);
-    setIsVideoOn(true);
+    setLocalStream(null);
+    setRemoteStream(null);
     setOffer(null);
     clearIncomingCall();
     onCallEnd();
     setCallActive(false);
     setCallPartnerId(null);
+    setIsMicOn(true);
+    setIsVideoOn(true);
     setIsRemoteMicOn(true);
     setIsRemoteVideoOn(true);
 
     if (localVideoRef.current) localVideoRef.current.srcObject = null;
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
     if (localAudioRef.current) localAudioRef.current.srcObject = null;
-  }, [
-    peerConnection,
-    localStream,
-    remoteStream,
-    callPartnerId,
-    clearIncomingCall,
-    onCallEnd,
-    setCallActive,
-    userId,
-    callType,
-    activeChatId,
-  ]);
+  }, [peerConnection, localStream, remoteStream, callPartnerId, userId, callType, activeChatId]);
 
   const acceptCall = useCallback(async () => {
     if (!incomingCall || !offer) return;
@@ -198,47 +155,14 @@ export const useWebRTC = ({
     try {
       callEndedRef.current = false;
       setCallPartnerId(incomingCall.caller._id);
-
       callStartTimeRef.current = new Date();
 
-      console.log(callStartTimeRef.current, 'call start time 2');
-
-      // Get the available media devices
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const audioDevices = devices.filter((device) => device.kind === 'audioinput');
-      const videoDevices = devices.filter((device) => device.kind === 'videoinput');
-
-      if (!audioDevices.length || (incomingCall.callType === 'video' && !videoDevices.length)) {
-        throw new Error('No available media devices');
-      }
-
-      // Dynamically select devices for each browser
-      const selectedAudioDevice = audioDevices[0]; // Use the first available audio device
-      const selectedVideoDevice = incomingCall.callType === 'video' ? videoDevices[0] : null; // Use first video device if it's a video call
-
       const constraints = {
-        audio: {
-          deviceId: selectedAudioDevice.deviceId,
-        },
-        video: selectedVideoDevice ? { deviceId: selectedVideoDevice.deviceId } : false,
+        audio: true,
+        video: incomingCall.callType === 'video' ? true : false,
       };
 
-      let stream;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia(constraints);
-      } catch (err) {
-        if ((err as any)?.name === 'NotReadableError') {
-          alert(
-            'Your microphone or camera is in use by another application. Please close other apps using it.',
-          );
-        }
-        // throw err;
-        endCall();
-        callEndedRef.current = true;
-        return
-
-      }
-
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       setLocalStream(stream);
       setIsMicOn(true);
       setIsVideoOn(incomingCall.callType === 'video');
@@ -247,18 +171,13 @@ export const useWebRTC = ({
         localVideoRef.current.srcObject = stream;
       }
 
-      if (localAudioRef.current && incomingCall.callType === 'voice') {
-        localAudioRef.current.srcObject = stream;
-      }
-
       const pc = createPeerConnection();
       setPeerConnection(pc);
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
-      // console.log("📩 Set remote description with offer");
 
-      socket.on('ice-candidate', ({ candidate }: any) => {
+      socket.on('call:ice-candidate', ({ candidate }: any) => {
         if (pc && candidate) {
           pc.addIceCandidate(new RTCIceCandidate(candidate));
         }
@@ -266,7 +185,6 @@ export const useWebRTC = ({
 
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
-      // console.log("📤 Sending answer");
 
       socket.emit('call:answer', {
         to: incomingCall.caller._id,
@@ -288,17 +206,14 @@ export const useWebRTC = ({
     localStream.getAudioTracks().forEach((track) => {
       track.enabled = !isMicOn;
     });
-    setIsMicOn((prev) => {
-      const newMicState = !prev;
-      if (callPartnerId) {
-        socket.emit('call:toggle-mic', {
-          to: callPartnerId,
-          micOn: newMicState,
-        });
-      }
-      console.log('🎙️ Toggled mic to', newMicState);
-      return newMicState;
-    });
+    const newState = !isMicOn;
+    if (callPartnerId) {
+      socket.emit('call:toggle-mic', {
+        to: callPartnerId,
+        micOn: newState,
+      });
+    }
+    setIsMicOn(newState);
   };
 
   const toggleVideo = () => {
@@ -306,22 +221,18 @@ export const useWebRTC = ({
     localStream.getVideoTracks().forEach((track) => {
       track.enabled = !isVideoOn;
     });
-    setIsVideoOn((prev) => {
-      const newVideoState = !prev;
-      if (callPartnerId) {
-        socket.emit('call:toggle-video', {
-          to: callPartnerId,
-          videoOn: newVideoState,
-        });
-      }
-      console.log('🎥 Toggled video to', newVideoState);
-      return newVideoState;
-    });
+    const newState = !isVideoOn;
+    if (callPartnerId) {
+      socket.emit('call:toggle-video', {
+        to: callPartnerId,
+        videoOn: newState,
+      });
+    }
+    setIsVideoOn(newState);
   };
 
   useEffect(() => {
     const handleIncomingCall = ({ from, offer, type, caller }: any) => {
-      console.log('📞 Incoming call from:', caller, from);
       setIncomingCall({ caller, chatId: from, callType: type });
       setCallPartnerId(from);
       setOffer(offer);
@@ -329,7 +240,6 @@ export const useWebRTC = ({
 
     const handleCallAccepted = async ({ answer }: any) => {
       if (!peerConnection) return;
-
       try {
         await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
         setCallActive(true);
@@ -339,79 +249,48 @@ export const useWebRTC = ({
     };
 
     const handleRemoteCandidate = ({ candidate }: any) => {
-      if (!peerConnection) return;
-      // console.log("🧊 Adding received ICE candidate", candidate);
-      peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-    };
-
-    const handleCallEnd = () => {
-      console.log('📴 Call ended by remote peer');
-      endCall();
-    };
-    const handlePartnerMicToggle = ({ micOn }: { micOn: boolean }) => {
-      // console.log("🎤 Partner mic toggled:", micOn ? "ON" : "OFF");
-      setIsRemoteMicOn(micOn);
-      // You can show some UI state here, like a muted mic icon
-    };
-
-    const handlePartnerVideoToggle = ({ videoOn }: { videoOn: boolean }) => {
-      // console.log("🎥 Partner video toggled:", videoOn ? "ON" : "OFF");
-      setIsRemoteVideoOn(videoOn);
-      if (remoteVideoRef.current && remoteVideoRef.current.srcObject) {
-        const videoTracks = (remoteVideoRef.current.srcObject as MediaStream).getVideoTracks();
-        videoTracks.forEach((track) => {
-          track.enabled = videoOn;
-        });
+      if (peerConnection && candidate) {
+        peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
       }
     };
 
-    const registerSocketListeners = () => {
-      socket.on('incoming:call', handleIncomingCall);
-      socket.on('call:accepted', handleCallAccepted);
-      socket.on('ice-candidated', handleRemoteCandidate);
-      socket.on('call:ended', handleCallEnd);
-      socket.on('call:toggle-mic', handlePartnerMicToggle);
-      socket.on('call:toggle-video', handlePartnerVideoToggle);
+    const handleCallEnd = () => {
+      endCall();
     };
 
-    const removeSocketListeners = () => {
+    const handlePartnerMicToggle = ({ micOn }: { micOn: boolean }) => {
+      setIsRemoteMicOn(micOn);
+    };
+
+    const handlePartnerVideoToggle = ({ videoOn }: { videoOn: boolean }) => {
+      setIsRemoteVideoOn(videoOn);
+      if (remoteVideoRef.current && remoteVideoRef.current.srcObject) {
+        const tracks = (remoteVideoRef.current.srcObject as MediaStream).getVideoTracks();
+        tracks.forEach((track) => (track.enabled = videoOn));
+      }
+    };
+
+    socket.on('incoming:call', handleIncomingCall);
+    socket.on('call:accepted', handleCallAccepted);
+    socket.on('call:ice-candidate', handleRemoteCandidate);
+    socket.on('call:ended', handleCallEnd);
+    socket.on('call:toggle-mic', handlePartnerMicToggle);
+    socket.on('call:toggle-video', handlePartnerVideoToggle);
+
+    return () => {
       socket.off('incoming:call', handleIncomingCall);
       socket.off('call:accepted', handleCallAccepted);
-      socket.off('ice-candidated', handleRemoteCandidate);
+      socket.off('call:ice-candidate', handleRemoteCandidate);
       socket.off('call:ended', handleCallEnd);
-
       socket.off('call:toggle-mic', handlePartnerMicToggle);
       socket.off('call:toggle-video', handlePartnerVideoToggle);
     };
-
-    registerSocketListeners();
-
-    return () => {
-      console.log('🧹 Cleaning up socket listeners');
-      removeSocketListeners();
-    };
   }, [peerConnection, endCall, setCallActive]);
-
-  // useEffect(() => {
-  //   return () => {
-  //     console.log("🧹 Component unmounted, ending call...");
-  //     endCall();
-  //   };
-  // }, []);
-
-  const toggleMute = () => {
-    if (!localStream) return;
-    localStream.getAudioTracks().forEach((track) => {
-      track.enabled = !isMicOn;
-    });
-    // console.log("🎙️ Toggled mic to", !isMicOn);
-    setIsMicOn((prev) => !prev);
-  };
 
   return {
     localVideoRef,
     remoteVideoRef,
-    localAudioRef, // Returning local audio reference
+    localAudioRef,
     localStream,
     remoteStream,
     isMicOn,
@@ -423,7 +302,6 @@ export const useWebRTC = ({
     startCall,
     endCall,
     acceptCall,
-    toggleMute,
     incomingCall,
   };
 };

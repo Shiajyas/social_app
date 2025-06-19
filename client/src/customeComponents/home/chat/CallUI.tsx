@@ -343,7 +343,7 @@ const CallUI: React.FC<CallUIProps> = ({
   </div>
 )} */}
 
-        {callType === 'voice' && <audio id="local-audio" autoPlay className="hidden" />}
+        {callType === 'voice' && <audio id="local-audio" autoPlay playsInline className="hidden" />}
       </div>
     </div>
   );

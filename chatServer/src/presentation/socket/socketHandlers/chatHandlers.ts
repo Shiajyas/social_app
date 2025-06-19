@@ -42,7 +42,7 @@ export const chatHandlers = (
 
   socket.on('sendMessage', async (newMessage) => {
     try {
-      console.log(newMessage, 'new message from socket');
+      // console.log(newMessage, 'new message from socket');
       const { _id, chatId, senderId, content, type, createdAt, replyTo } =
         newMessage;
       await chatSocketHandlers.sendMessage(
