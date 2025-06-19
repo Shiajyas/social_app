@@ -119,7 +119,8 @@ const PostList: React.FC = () => {
   }, [handleObserver]);
 
   return (
-    <div className="w-full max-w-2xl mx-0 md:mx-auto px-0 md:px-4">
+ <div className="min-h-screen bg-white flex justify-center px-0">
+  <div className="w-full max-w-2xl px-0">
       {data?.pages.map((page) =>
         page.posts.map((post) => (
           <PostCard
@@ -136,6 +137,7 @@ const PostList: React.FC = () => {
 
       <div ref={observerRef} className="h-10"></div>
       {isFetchingNextPage && <p className="text-center text-gray-500">Loading more posts...</p>}
+    </div>
     </div>
   );
 };
