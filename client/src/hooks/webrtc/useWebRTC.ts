@@ -43,16 +43,17 @@ export const useWebRTC = ({
   const remoteDescSetRef = useRef(false);
 
   const createPeerConnection = () => {
-  const pc = new RTCPeerConnection({
+const pc = new RTCPeerConnection({
   iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun.l.google.com:19302' }, // STUN (fallback)
     {
-      urls: 'turn:<your-ec2-public-ip>:3478',
-      username: 'myuser',
-      credential: 'mypassword',
+      urls: 'turn:15.207.66.184:3478',
+      username: 'myuser', // must match your Coturn config
+      credential: 'mypassword', // must match your Coturn config
     },
   ],
 });
+
 
 
     pc.ontrack = (event) => {
