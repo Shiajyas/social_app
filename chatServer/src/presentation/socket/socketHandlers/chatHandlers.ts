@@ -9,8 +9,13 @@ export const chatHandlers = (
 ) => {
   socket.on('joinChat', async (chatId) => {
     console.log('joinChat', chatId);
-    if (chatRooms.get(socket.id) === chatId) return;
-    chatRooms.set(socket.id, chatId);
+  const previousChatId = chatRooms.get(socket.id);
+if (previousChatId) {
+  socket.leave(previousChatId);
+}
+socket.join(chatId);
+chatRooms.set(socket.id, chatId);
+
     socket.join(chatId);
     await chatSocketHandlers.getMessages(socket, chatId, 0, 20);
   });

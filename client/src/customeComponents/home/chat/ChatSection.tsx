@@ -64,6 +64,7 @@ const ChatSection = () => {
     incomingCall,
     isRemoteMicOn,
     isRemoteVideoOn,
+    remoteAudioRef
   } = useWebRTC({
     userId,
     chatId: selectedChat?.users.find((u) => u._id !== userId)?._id,
@@ -289,6 +290,7 @@ const ChatSection = () => {
           incomingCall={!!incomingCall}
           isRemoteMicOn={isRemoteMicOn}
           isRemoteVideoOn={isRemoteVideoOn}
+          remoteAudioRef={remoteAudioRef}
         />
       )}
 
