@@ -14,6 +14,7 @@ const IncomingCallUI = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [callEnded, setCallEnded] = useState(false);
   const [endedDuration, setEndedDuration] = useState<string | null>(null);
+
   const callStartTimeRef = useRef<number | null>(null);
   const dragRef = useRef<HTMLDivElement | null>(null);
   const offset = useRef({ x: 0, y: 0 });
@@ -26,21 +27,21 @@ const IncomingCallUI = () => {
     toggleVideo,
     localStream,
     remoteStream,
-    isRemoteMicOn,
-    isRemoteVideoOn,
     isMicOn,
     isVideoOn,
-    remoteAudioRef
+    isRemoteMicOn,
+    isRemoteVideoOn,
+    remoteAudioRef,
   } = useWebRTC({
     userId: user?._id || '',
     chatId: activeCall?.chatId || '',
     onCallEnd: () => {
       const endTime = Date.now();
       if (callStartTimeRef.current) {
-        const durationInSeconds = Math.floor((endTime - callStartTimeRef.current) / 1000);
-        const minutes = Math.floor(durationInSeconds / 60);
-        const seconds = durationInSeconds % 60;
-        setEndedDuration(`${minutes}m ${seconds}s`);
+        const seconds = Math.floor((endTime - callStartTimeRef.current) / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        setEndedDuration(`${minutes}m ${secs}s`);
       } else {
         setEndedDuration(null);
       }
@@ -49,7 +50,6 @@ const IncomingCallUI = () => {
       clearIncomingCall();
       setCallEnded(true);
 
-      // Hide "Call Ended" message after 3 seconds
       setTimeout(() => {
         setCallEnded(false);
         setEndedDuration(null);
@@ -58,9 +58,10 @@ const IncomingCallUI = () => {
     onCallStart: () => {
       callStartTimeRef.current = Date.now();
     },
-    setCallActive: () => {},
+    setCallActive: () => {}, // set externally
   });
 
+  // Positioning the popup center
   useEffect(() => {
     const screenWidth = window.innerWidth;
     const modalWidth = 320;
@@ -70,6 +71,7 @@ const IncomingCallUI = () => {
     });
   }, []);
 
+  // Drag start
   const startDragging = (e: React.MouseEvent) => {
     if (!dragRef.current) return;
     isDragging.current = true;
@@ -80,6 +82,7 @@ const IncomingCallUI = () => {
     };
   };
 
+  // Drag logic
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging.current) return;
@@ -87,7 +90,6 @@ const IncomingCallUI = () => {
       const newY = e.clientY - offset.current.y;
       setPosition({ x: newX, y: newY });
     };
-
     const handleMouseUp = () => {
       isDragging.current = false;
     };
@@ -102,11 +104,11 @@ const IncomingCallUI = () => {
 
   if (!incomingCall && !activeCall && !callEnded) return null;
 
-  // === If Call Accepted, Render Full CallUI ===
+  // 🔴 Ongoing Call UI
   if (activeCall) {
     return (
       <CallUI
-        callType={activeCall?.callType || 'voice'}
+        callType={activeCall.callType || 'voice'}
         onClose={() => {
           endCall();
           clearActiveCall();
@@ -116,8 +118,8 @@ const IncomingCallUI = () => {
         remoteStream={remoteStream}
         isMicOn={isMicOn}
         isVideoOn={isVideoOn}
-        onToggleMic={() => toggleMic()}
-        onToggleVideo={() => toggleVideo()}
+        onToggleMic={toggleMic}
+        onToggleVideo={toggleVideo}
         otherUser={activeCall.caller}
         callActive={!!activeCall}
         incomingCall={false}
@@ -128,7 +130,7 @@ const IncomingCallUI = () => {
     );
   }
 
-  // === Incoming Call Popup ===
+  // 🟡 Incoming Call Popup
   return (
     <div
       ref={dragRef}
@@ -150,7 +152,6 @@ const IncomingCallUI = () => {
         <button
           onClick={() => setIsMinimized((prev) => !prev)}
           className="text-gray-500 hover:text-gray-700 dark:hover:text-white"
-          aria-label="Toggle"
         >
           {isMinimized ? <ChevronUp /> : <ChevronDown />}
         </button>
@@ -161,17 +162,17 @@ const IncomingCallUI = () => {
           {incomingCall ? (
             <>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {incomingCall?.caller.username}
+                {incomingCall.caller.username}
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
-                wants to start a {incomingCall?.callType} call
+                wants to start a {incomingCall.callType} call
               </p>
 
               <div className="mt-4 flex gap-3 justify-center">
                 <button
                   onClick={() => {
                     acceptCall();
-                    setActiveCall(incomingCall!);
+                    setActiveCall(incomingCall);
                     clearIncomingCall();
                   }}
                   className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm"
@@ -180,12 +181,10 @@ const IncomingCallUI = () => {
                 </button>
                 <button
                   onClick={() => {
-                    endCall(); // just in case a stream started
+                    endCall();
                     clearIncomingCall();
                     setCallEnded(true);
-                    setTimeout(() => {
-                      setCallEnded(false);
-                    }, 3000);
+                    setTimeout(() => setCallEnded(false), 3000);
                   }}
                   className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm"
                 >
@@ -194,10 +193,14 @@ const IncomingCallUI = () => {
               </div>
             </>
           ) : (
-            // Call Ended Message
             callEnded && (
-              <div className="text-center mt-2 transition-opacity duration-500">
+              <div className="text-center mt-2">
                 <p className="text-sm text-gray-600 dark:text-gray-300">Call Ended</p>
+                {endedDuration && (
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    Duration: {endedDuration}
+                  </p>
+                )}
               </div>
             )
           )}
