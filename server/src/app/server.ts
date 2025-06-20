@@ -1,7 +1,8 @@
-import express, { Application, Request, Response,} from "express";
+import express, { Application, Request, Response, NextFunction } from "express";
 import bodyParser from "body-parser";
 import session from "express-session";
 import morgan from "morgan";
+import corsMiddleware from "../presentation/middleware/corsMiddleware";
 import userAuthRoutes from "../presentation/routes/users/userAuthRoutes";
 import adminAuthRoutes from "../presentation/routes/admin/adminRoutes";
 import notificationRoutes from "../presentation/routes/users/notificationRoutes";
@@ -40,7 +41,7 @@ export class App {
   }
 
   private initializeMiddlewares(): void {
-    // this.app.use(corsMiddleware);
+    this.app.use(corsMiddleware);
     // this.app.use((req: Request, res: Response, next: NextFunction) => {
     //   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
     //   res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
