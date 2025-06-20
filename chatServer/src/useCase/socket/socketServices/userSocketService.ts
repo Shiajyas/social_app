@@ -43,20 +43,29 @@ export class UserSocketService implements IUserSocketService {
     }
   }
 
-  async removeUser(socket: Socket, userId: string): Promise<void> {
-    try {
-      console.log(`🗑️ Removing user ${userId} with socket ID ${socket.id}`);
-      await this._SessionUserRepository.removeUser(socket.id);
+async removeUser(socket: Socket, userId?: string): Promise<void> {
+  try {
+    const resolvedUserId =
+      userId || (await this._SessionUserRepository.findUserIdBySocket(socket.id));
 
-      const onlineUsers = (await this._SessionUserRepository.getActiveUsers()).map((user) => user.id);
-      console.log('Online users:', onlineUsers);
-      this.io.emit('updateOnlineUsers', onlineUsers);
-
-      await this.broadcastOnlineUserCountToAdmins();
-    } catch (error) {
-      this.handleError(socket, error, 'removeUserError');
+    if (!resolvedUserId) {
+      console.warn(`⚠️ Could not resolve user for socket ID ${socket.id}`);
+      return;
     }
+
+    console.log(`🗑️ Removing user ${resolvedUserId} with socket ID ${socket.id}`);
+
+    await this._SessionUserRepository.removeUser(socket.id);
+
+    const onlineUsers = (await this._SessionUserRepository.getActiveUsers()).map((user) => user.id);
+    this._Io.emit('updateOnlineUsers', onlineUsers);
+
+    await this.broadcastOnlineUserCountToAdmins();
+  } catch (error) {
+    this.handleError(socket, error, 'removeUserError');
   }
+}
+
 
   async getOnlineUsers(socket: Socket): Promise<void> {
     try {

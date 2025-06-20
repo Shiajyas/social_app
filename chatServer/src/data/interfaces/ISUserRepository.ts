@@ -18,4 +18,6 @@ export interface ISUserRepository {
   getActiveUserCount(): Promise<number>;
 
   logActiveUsers(): Promise<{ userId: string; socketIds: string[] }[]>;
+
+  findUserIdBySocket(socketId: string): Promise<string | null>
 }

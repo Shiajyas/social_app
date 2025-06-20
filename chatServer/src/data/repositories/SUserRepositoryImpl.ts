@@ -50,6 +50,17 @@ export class SUserRepositoryImpl implements ISUserRepository {
     }
   }
 
+  async findUserIdBySocket(socketId: string): Promise<string | null> {
+  try {
+    const userId = await redis.hget('socket_to_user', socketId);
+    return userId ?? null;
+  } catch (error) {
+    console.error('❌ Redis error in findUserIdBySocket:', error);
+    return null;
+  }
+}
+
+
   async removeUser(socketId: string): Promise<void> {
     try {
       const userId = await redis.hget(SOCKET_TO_USER_KEY, socketId);
