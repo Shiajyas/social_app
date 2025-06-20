@@ -28,7 +28,9 @@ export const initializeSocket = (
     cors: {
       origin: [
         'http://localhost:3001',
-        'http://192.168.1.7:3001', // Frontend IP
+        'http://192.168.1.7:3001',
+           "https://social-app-ten-nu.vercel.app",
+      'https://vconnect.work.gd'
       ],
       methods: ['GET', 'POST', 'PUT', 'PATCH'],
       credentials: true,

@@ -4,7 +4,8 @@ const corsMiddleware = cors({
   origin: [
     'http://localhost:3001',
     'http://192.168.1.7:3001',
-     "https://social-app-ten-nu.vercel.app"
+     "https://social-app-ten-nu.vercel.app",
+      'https://vconnect.work.gd'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
