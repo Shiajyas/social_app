@@ -55,15 +55,16 @@ export const useWebRTC = ({
 // });
 
 const pc = new RTCPeerConnection({
-  iceTransportPolicy: 'relay', // ⛔ Forces TURN relay, avoids direct/STUN-only paths
+  iceTransportPolicy: 'relay', // force TURN usage
   iceServers: [
     {
-      urls: 'turn:15.207.66.184:3478',
+      urls: ['turn:15.207.66.184:3478?transport=udp'], // 👈 explicitly specify transport
       username: 'myuser',
       credential: 'mypassword',
     },
   ],
 });
+
 
 
 
