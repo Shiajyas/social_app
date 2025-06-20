@@ -55,8 +55,9 @@ export const useWebRTC = ({
 // });
 
 const pc = new RTCPeerConnection({
-  iceTransportPolicy: 'relay', // force TURN usage
+  iceTransportPolicy: 'all', // force TURN usage
   iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
     {
       urls: ['turn:15.207.66.184:3478?transport=udp'], // 👈 explicitly specify transport
       username: 'myuser',
