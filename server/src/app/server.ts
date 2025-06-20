@@ -116,13 +116,12 @@ export class App {
 
   //write the start method
 
-  public start(): void {
-    this.server.listen(this.port, () => {
-      console.log(`Main server running on http://localhost:${this.port}`);
-    });
+public start(): void {
+  this.server.listen(this.port, '0.0.0.0', () => {
+    console.log(`Main server running on http://0.0.0.0:${this.port}`);
+  });
+}
 
-    
-  }
 }
 
 export default App;
