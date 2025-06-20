@@ -1,8 +1,7 @@
-import express, { Application, Request, Response, NextFunction } from "express";
+import express, { Application, Request, Response,} from "express";
 import bodyParser from "body-parser";
 import session from "express-session";
 import morgan from "morgan";
-import corsMiddleware from "../presentation/middleware/corsMiddleware";
 import userAuthRoutes from "../presentation/routes/users/userAuthRoutes";
 import adminAuthRoutes from "../presentation/routes/admin/adminRoutes";
 import notificationRoutes from "../presentation/routes/users/notificationRoutes";
