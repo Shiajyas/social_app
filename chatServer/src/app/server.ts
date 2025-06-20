@@ -58,11 +58,12 @@ export class App {
     initializeSocket(this.server);
   }     
    
-  public start(): void {
-    this.server.listen(this.port, () => {
-      console.log(`🚀 chat server running on http://localhost:${this.port}`);
-    }); 
-  }
+public start(): void {
+  this.server.listen(this.port, '0.0.0.0', () => {
+    console.log(`🚀 chat server running on http://0.0.0.0:${this.port}`);
+  });
+}
+
 }
 
 export default App;
