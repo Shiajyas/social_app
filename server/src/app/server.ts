@@ -42,11 +42,11 @@ export class App {
 
   private initializeMiddlewares(): void {
     this.app.use(corsMiddleware);
-    this.app.use((req: Request, res: Response, next: NextFunction) => {
-      res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-      res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-      next();
-    });
+    // this.app.use((req: Request, res: Response, next: NextFunction) => {
+    //   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+    //   res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+    //   next();
+    // });
 
     this.app.use(bodyParser.json({ limit: "50mb" }));
     this.app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
