@@ -39,8 +39,8 @@ export const initializeSocket = (
   io = new Server(server, {
     cors: {
       origin: [
-        'http://localhost:3001',
-        'http://192.168.1.7:3001',
+        // 'http://localhost:3001',
+        // 'http://192.168.1.7:3001',
            "https://social-app-ten-nu.vercel.app",
             'https://vconnect.work.gd'
       ],
