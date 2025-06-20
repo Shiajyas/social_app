@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL ||"https://vconnect.work.gd/api";
 
 let accessToken: string | null = null; // Keep latest token in memory
 

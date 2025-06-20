@@ -2,7 +2,7 @@ import express, { Application, Request, Response, NextFunction } from "express";
 import bodyParser from "body-parser";
 import session from "express-session";
 import morgan from "morgan";
-import cors from "cors";
+import corsMiddleware from "../presentation/middleware/corsMiddleware";
 import userAuthRoutes from "../presentation/routes/users/userAuthRoutes";
 import adminAuthRoutes from "../presentation/routes/admin/adminRoutes";
 import notificationRoutes from "../presentation/routes/users/notificationRoutes";
@@ -40,28 +40,9 @@ export class App {
     this.initializeSocketServers();
   }
 
-
-
-
-
-
-
   private initializeMiddlewares(): void {
-    const corsMiddleware = cors({
-  origin: 'https://social-app-ten-nu.vercel.app',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-});
     this.app.use(corsMiddleware);
-    // this.app.use((req: Request, res: Response, next: NextFunction) => {
-    //   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-    //   res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-    //   next();
-    // });
-  
-    this.app.options('*', corsMiddleware); // ✅ handle preflight manually
-
+ this.app.options('*', corsMiddleware); // ✅ handle preflight manually
 
     this.app.use(bodyParser.json({ limit: "50mb" }));
     this.app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
