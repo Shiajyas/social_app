@@ -44,7 +44,7 @@ export const initializeSocket = (
            "https://social-app-ten-nu.vercel.app",
           
       ],
-      methods: ['GET', 'POST', 'PUT', 'PATCH'],
+      methods: ['GET', 'POST', 'PUT', 'PATCH','OPTIONS'],
       credentials: true,
     },
   });
