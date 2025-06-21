@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 import 'react-toastify/dist/ReactToastify.css';
 
-const CHAT_SOCKET_URL = import.meta.env.VITE_CHAT_SOCKET_URL;
+const CHAT_SOCKET_URL = import.meta.env.VITE_CHAT_SOCKET_URL || "https://chat.vconnect.work.gd";
 
 console.log(CHAT_SOCKET_URL,">>>>>>");
 
