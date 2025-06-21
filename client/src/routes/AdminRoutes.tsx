@@ -6,11 +6,11 @@ import Spam from '@/customeComponents/adminDashbord/spamManagement/Spam';
 import UsersManagement from '@/customeComponents/adminDashbord/usersManagemen/UsersManagemen';
 import RoleManagement from '@/customeComponents/adminDashbord/adminManagement/RoleManagement';
 import { useAuthStore } from '@/appStore/AuthStore';
-import type { IPermissions } from '@/types/adminTypes'; // adjust if located elsewhere
+import type { IPermissions } from '@/types/adminTypes'; 
 import { useModalStore } from '@/appStore/modalStore';
 import { useEffect } from 'react';
 
-// ✅ Authenticated Admin Wrapper
+
 const ProtectedAdminRoute = () => {
   const { admin } = useAuthStore();
   console.log(admin, 'admin');
@@ -18,7 +18,7 @@ const ProtectedAdminRoute = () => {
   return isAuthenticated ? <Outlet /> : <Navigate to="/admin/login" replace />;
 };
 
-// ✅ Permission-based Wrapper
+
 const PermissionRoute = ({
   permissionKey,
   element,
