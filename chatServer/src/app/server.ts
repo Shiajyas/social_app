@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import http from 'http';
 import redis from '../infrastructure/utils/redisClient';
 import { initializeSocket } from '../presentation/socket/SocketServer';
+import corsMiddleware from '../infrastructure/utils/corsMiddleware';
 
 export class App {
   public app: Application;
@@ -23,6 +24,8 @@ export class App {
   }
 
   private initializeMiddlewares(): void {
+    this.app.use(corsMiddleware);
+    this.app.options('*', corsMiddleware);
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(cookieParser());
