@@ -13,7 +13,7 @@ export const chatSocket = io(CHAT_SOCKET_URL, {
 // When connectedus
 chatSocket.on('connect', () => {
   console.log(
-    `%c[${new Date().toISOString()}] ✅ Connected to Socket.IO Chat server with ID: ${chatSocket.id}`,
+    `%c[${new Date().toISOString()}] ✅ Connected to ChatSocket.IO Chat server with ID: ${chatSocket.id}`,
     'color: green; font-weight: bold;',
   );
 
