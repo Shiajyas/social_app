@@ -25,7 +25,7 @@ export class App {
 
   private initializeMiddlewares(): void {
     this.app.use(corsMiddleware);
-    this.app.options('*', corsMiddleware);
+    // this.app.options('*', corsMiddleware);
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: true }));
     this.app.use(cookieParser());
