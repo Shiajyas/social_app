@@ -6,8 +6,9 @@ import { useAuthStore } from '@/appStore/AuthStore';
 import { NormalizedChat, normalizeChat } from '@/utils/normalizeChat';
 import { useQueryClient } from '@tanstack/react-query';
 import { chatSocket as socket } from '@/utils/chatSocket';
-import { socket as mainSocket } from '@/utils/Socket';
 import useMessageStore from '@/appStore/useMessageStore';
+
+import { socket as mainSocket } from '@/utils/Socket';
 
 interface ChatListProps {
   chats: any[];
@@ -44,12 +45,10 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, setSelectedCha
     };
 
     socket.on('chatUpdated', handleMessageReceived);
-    mainSocket.on('chatUpdated', handleMessageReceived);
     return () => {
       socket.off('chatUpdated', handleMessageReceived);
-      mainSocket.off('chatUpdated', handleMessageReceived);
     };
-  }, []);
+  }, [queryClient, userId]);
 
   useEffect(() => {
     socket.emit('getOnlineUsers');
@@ -59,11 +58,12 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, setSelectedCha
     };
 
     socket.on('updateOnlineUsers', handleUpdate);
-
+    mainSocket.on('updateOnlineUsers', handleUpdate);
     return () => {
       socket.off('updateOnlineUsers', handleUpdate);
+      mainSocket.off('updateOnlineUsers', handleUpdate);
     };
-  }, [selectedChat]);
+  }, []);
 
   if (!user || loading) {
     return <p className="text-gray-400 text-center p-4">Loading chats...</p>;
