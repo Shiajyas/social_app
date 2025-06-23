@@ -6,6 +6,7 @@ import { useAuthStore } from '@/appStore/AuthStore';
 import { NormalizedChat, normalizeChat } from '@/utils/normalizeChat';
 import { useQueryClient } from '@tanstack/react-query';
 import { chatSocket as socket } from '@/utils/chatSocket';
+import { socket as mainSocket } from '@/utils/Socket';
 import useMessageStore from '@/appStore/useMessageStore';
 
 interface ChatListProps {
@@ -43,8 +44,10 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, setSelectedCha
     };
 
     socket.on('chatUpdated', handleMessageReceived);
+    mainSocket.on('chatUpdated', handleMessageReceived);
     return () => {
       socket.off('chatUpdated', handleMessageReceived);
+      mainSocket.off('chatUpdated', handleMessageReceived);
     };
   }, []);
 
