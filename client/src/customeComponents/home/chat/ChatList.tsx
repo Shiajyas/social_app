@@ -1,3 +1,4 @@
+'use client';
 import React, { useEffect, useState } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -5,10 +6,9 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/appStore/AuthStore';
 import { NormalizedChat, normalizeChat } from '@/utils/normalizeChat';
 import { useQueryClient } from '@tanstack/react-query';
-import { chatSocket as socket } from '@/utils/chatSocket';
-import useMessageStore from '@/appStore/useMessageStore';
-
+import { chatSocket } from '@/utils/chatSocket';
 import { socket as mainSocket } from '@/utils/Socket';
+import useMessageStore from '@/appStore/useMessageStore';
 
 interface ChatListProps {
   chats: any[];
@@ -16,7 +16,11 @@ interface ChatListProps {
   setSelectedChat: React.Dispatch<React.SetStateAction<NormalizedChat | null>>;
 }
 
-const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, setSelectedChat }) => {
+const ChatList: React.FC<ChatListProps> = ({
+  chats,
+  selectedChat,
+  setSelectedChat,
+}) => {
   const { user } = useAuthStore();
   const userId = user?._id;
   const [loading, setLoading] = useState(true);
@@ -24,19 +28,24 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, setSelectedCha
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   const queryClient = useQueryClient();
+  const {
+    setCurrentlyOpenChatId,
+    resetUnreadCount,
+    unreadCounts,
+  } = useMessageStore();
 
-  const { setCurrentlyOpenChatId, resetUnreadCount, unreadCounts } = useMessageStore();
-
+  // Normalize chats
   useEffect(() => {
     if (!Array.isArray(chats)) return;
     setNormalizedChats(chats.map(normalizeChat));
     setLoading(false);
   }, [chats]);
 
+  // Update on new messages
   useEffect(() => {
     if (!userId) return;
 
-    const handleMessageReceived = (newMessage: any) => {
+    const handleMessageReceived = () => {
       queryClient.invalidateQueries({ queryKey: ['chats', userId] });
       const updatedChats = queryClient.getQueryData<NormalizedChat[]>(['chats', userId]);
       if (Array.isArray(updatedChats)) {
@@ -44,23 +53,27 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, setSelectedCha
       }
     };
 
-    socket.on('chatUpdated', handleMessageReceived);
+    chatSocket.on('chatUpdated', handleMessageReceived);
+
     return () => {
-      socket.off('chatUpdated', handleMessageReceived);
+      chatSocket.off('chatUpdated', handleMessageReceived);
     };
   }, [queryClient, userId]);
 
+  // Fetch online users
   useEffect(() => {
-    socket.emit('getOnlineUsers');
+    if (!userId) return;
 
     const handleUpdate = (onlineUserIds: string[]) => {
       setOnlineUsers(onlineUserIds);
     };
 
-    socket.on('updateOnlineUsers', handleUpdate);
+    chatSocket.emit('getOnlineUsers');
+    chatSocket.on('updateOnlineUsers', handleUpdate);
     mainSocket.on('updateOnlineUsers', handleUpdate);
+
     return () => {
-      socket.off('updateOnlineUsers', handleUpdate);
+      chatSocket.off('updateOnlineUsers', handleUpdate);
       mainSocket.off('updateOnlineUsers', handleUpdate);
     };
   }, []);
@@ -73,7 +86,6 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, setSelectedCha
     <div className="flex flex-col flex-grow overflow-hidden">
       <h2 className="text-lg font-semibold p-4 pb-2">Chats</h2>
 
-      {/* Set fixed height with flex-grow */}
       <ScrollArea className="flex-grow overflow-y-auto">
         <div className="p-2">
           {normalizedChats.length > 0 ? (
@@ -81,9 +93,14 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, setSelectedCha
               if (!chat || !Array.isArray(chat.users)) return null;
 
               const otherUser =
-                !chat.isGroupChat && userId ? chat.users.find((u) => u._id !== userId) : null;
+                !chat.isGroupChat && userId
+                  ? chat.users.find((u) => u && u._id !== userId)
+                  : null;
 
-              const isOnline = otherUser ? onlineUsers.includes(otherUser._id) : false;
+              const isOnline = otherUser?.['_id']
+                ? onlineUsers.includes(otherUser._id)
+                : false;
+
               const unreadCount = unreadCounts[chat._id] || 0;
 
               return (
@@ -101,7 +118,7 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, setSelectedCha
                     resetUnreadCount(chat._id);
                   }}
                 >
-                  {/* Avatar with online dot */}
+                  {/* Avatar */}
                   <div className="relative flex-shrink-0">
                     <Avatar>
                       <AvatarImage
@@ -114,16 +131,17 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, setSelectedCha
                       />
                       <AvatarFallback>
                         {chat.isGroupChat
-                          ? chat.groupName?.charAt(0) || 'G'
-                          : otherUser?.username?.charAt(0) || '?'}
+                          ? chat.groupName?.[0] || 'G'
+                          : otherUser?.username?.[0] || '?'}
                       </AvatarFallback>
                     </Avatar>
+
                     {isOnline && (
                       <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full" />
                     )}
                   </div>
 
-                  {/* Username + last message */}
+                  {/* Chat Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                       <p className="font-medium text-sm truncate mr-2">
@@ -148,8 +166,6 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, setSelectedCha
                             : chat.lastMessage.text || chat.lastMessage.content
                           : 'No messages yet'}
                       </p>
-
-                      {/* Unread Count Badge */}
                       {unreadCount > 0 && (
                         <div className="bg-green-600 text-white text-[10px] px-2 py-[2px] rounded-full min-w-[20px] text-center shadow-md font-semibold flex-shrink-0">
                           {unreadCount > 99 ? '99+' : unreadCount}
