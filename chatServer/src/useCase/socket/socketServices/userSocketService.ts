@@ -82,6 +82,7 @@ async removeUser(socket: Socket, userId?: string): Promise<void> {
     try {
       await this._SessionUserRepository.addUser({ id, socketId: socket.id });
       socket.emit('joinSuccess', { userId: id });
+      this.getOnlineUsers(socket);
     } catch (error) {
       this.handleError(socket, error, 'joinError');
     }
