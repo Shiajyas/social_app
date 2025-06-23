@@ -33,9 +33,10 @@ const Header: React.FC<HeaderProps> = ({ unreadCount }) => {
 
     return () => {
       socket.emit('leaveUser', userId);
-      chatSocket.disconnect();
+    
+      chatSocket.disconnect()
     };
-  }, [userId]);
+  }, []);
 
   const handleLogout = () => {
     useAuthStore.getState().logout();

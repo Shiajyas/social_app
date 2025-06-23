@@ -5,6 +5,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://vconnect.work.gd";
 
+console.log(SOCKET_URL,">>>>>>1");
+
 export const socket = io(SOCKET_URL, {
   withCredentials: true,
   transports: ['websocket'],
