@@ -13,7 +13,7 @@ export const socket = io(SOCKET_URL, {
 // Log when connected
 socket.on('connect', () => {
   console.log(
-    `%c[${new Date().toISOString()}] ✅ Connected to Socket.IO server with ID: ${socket.id}`,
+    `%c[${new Date().toISOString()}] ✅ Connected to MainSocket.IO server with ID: ${socket.id}`,
     'color: green; font-weight: bold;',
   );
 });
