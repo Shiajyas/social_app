@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "format": "prettier --write ."
+    
   },
   "dependencies": {
     "@cloudinary/react": "^1.13.1",

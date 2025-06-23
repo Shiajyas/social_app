@@ -46,7 +46,7 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChat, setSelectedCha
     return () => {
       socket.off('chatUpdated', handleMessageReceived);
     };
-  }, [queryClient, userId]);
+  }, []);
 
   useEffect(() => {
     socket.emit('getOnlineUsers');
