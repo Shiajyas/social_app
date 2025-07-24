@@ -28,6 +28,34 @@ interface Report {
 
 const PAGE_LIMIT = 10;
 
+function DescriptionWithReadMore({ description }: { description: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const maxLength = 100;
+
+  if (!description) {
+    return (
+      <span className="italic text-gray-400 dark:text-gray-500">No description</span>
+    );
+  }
+
+  const isLong = description.length > maxLength;
+  const visibleText = expanded || !isLong ? description : description.slice(0, maxLength) + '...';
+
+  return (
+    <span className="text-gray-800 dark:text-gray-100">
+      {visibleText}
+      {isLong && (
+        <button
+          onClick={() => setExpanded((prev) => !prev)}
+          className="ml-1 text-blue-500 hover:underline text-sm"
+        >
+          {expanded ? 'Show less' : 'Read more'}
+        </button>
+      )}
+    </span>
+  );
+}
+
 export default function Spam() {
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
@@ -80,21 +108,25 @@ export default function Spam() {
   useEffect(() => {
     socket.emit('admin:join');
     adminReportService.getReportCount().then((r) => setReportCount(r.count));
-    socket.on('admin:newReport', (report: Report) => {
-      qc.setQueryData<Report[]>(['reports', 1], (prev) => (prev ? [report, ...prev] : [report]));
+
+    const onNewReport = (report: Report) => {
+      qc.setQueryData<Report[]>(['reports', 1], (prev) =>
+        prev ? [report, ...prev] : [report]
+      );
       incRep();
       toast.info('📨 New report received');
-    });
-    socket.off('admin:newReport'); // move this line here
+    };
+
+    socket.on('admin:newReport', onNewReport);
+
+    return () => {
+      socket.off('admin:newReport', onNewReport);
+    };
   }, [qc, setReportCount, incRep]);
 
   const toggleSelect = (id: string) => {
     const s = new Set(selected);
-    if (s.has(id)) {
-      s.delete(id);
-    } else {
-      s.add(id);
-    }
+    s.has(id) ? s.delete(id) : s.add(id);
     setSelected(s);
   };
 
@@ -113,10 +145,8 @@ export default function Spam() {
 
   const blockSelected = () => {
     selected.forEach((id) => {
-      const p = reports.find((r) => r._id === id)?.post._id;
-      if (p) {
-        blockMutation.mutate(p);
-      }
+      const postId = reports.find((r) => r._id === id)?.post._id;
+      if (postId) blockMutation.mutate(postId);
     });
     clearSelection();
   };
@@ -165,12 +195,12 @@ export default function Spam() {
         <p className="text-gray-500 italic dark:text-gray-400">No reports found.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reports?.map((report) => {
-            const isSel = selected?.has(report?._id);
+          {reports.map((report) => {
+            const isSel = selected.has(report._id);
             return (
               <Card
-                key={report?._id}
-                onClick={() => toggleSelect(report?._id)}
+                key={report._id}
+                onClick={() => toggleSelect(report._id)}
                 className={`shadow-sm border-2 cursor-pointer transition-all duration-200 ${
                   isSel
                     ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900'
@@ -182,9 +212,9 @@ export default function Spam() {
                     <div className="text-sm text-gray-500 dark:text-gray-300">
                       Reported by{' '}
                       <strong className="text-gray-800 dark:text-gray-100">
-                        {report?.reporter?.username}
+                        {report.reporter.username}
                       </strong>{' '}
-                      · {formatDistanceToNow(new Date(report?.createdAt), { addSuffix: true })}
+                      · {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}
                     </div>
                     <div className="text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 px-2 py-0.5 rounded">
                       {report.reason}
@@ -192,11 +222,7 @@ export default function Spam() {
                   </div>
 
                   <p className="text-gray-800 dark:text-gray-100">
-                    {report.post.description || (
-                      <span className="italic text-gray-400 dark:text-gray-500">
-                        No description
-                      </span>
-                    )}
+                    <DescriptionWithReadMore description={report.post.description} />
                   </p>
 
                   {report.post.mediaUrls?.[0] && (
@@ -212,7 +238,7 @@ export default function Spam() {
                   <div className="text-sm text-gray-600 dark:text-gray-300">
                     Owner:{' '}
                     <strong className="text-gray-800 dark:text-gray-100">
-                      {report?.post?.owner?.username}
+                      {report.post.owner.username}
                     </strong>
                   </div>
                 </CardContent>
