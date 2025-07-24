@@ -127,7 +127,13 @@ const LoginPage: React.FC<LoginPageProps> = ({
         <div className="my-6 border-t border-gray-300 dark:border-gray-600"></div>
 
         {/* Google Login Button */}
-        {role === 'user' && <GoogleAuthProvider onGoogleSignIn={handleGoogleLogin} />}
+         {role === 'user' && (
+  <div className="flex justify-center mt-4">
+    <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
+      <GoogleAuthProvider onGoogleSignIn={handleGoogleLogin} />
+    </div>
+  </div>
+)}
 
         {/* Register Link */}
         {role === 'user' && (
