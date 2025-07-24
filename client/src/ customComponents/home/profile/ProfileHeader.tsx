@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useMutation } from '@tanstack/react-query';
 import { userService } from '@/services/userService';
-import FollowBtn from '@/customeComponents/FollowBtn';
+import FollowBtn from '@/ customComponents/FollowBtn';
 import { useSubscription } from '@/hooks/stripeHooks/useSubscription';
 import {
   Select,
@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
-import SubscriptionStatus from '@/customeComponents/common/SubscriptionModal';
+import SubscriptionStatus from '@/ customComponents/common/SubscriptionModal';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';

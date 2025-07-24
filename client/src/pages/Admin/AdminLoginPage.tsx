@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
-import LoginPage from '../../customeComponents/auth/Login';
+import LoginPage from '../../ customComponents/auth/Login';
 import { useNavigate } from 'react-router-dom';
 
 const AdminLoginPage: React.FC = () => {

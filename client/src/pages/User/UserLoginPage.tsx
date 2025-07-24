@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import LoginPage from '../../customeComponents/auth/Login';
+import LoginPage from '../../ customComponents/auth/Login';
 import { useUserAuth } from '../../hooks/useUserAuth';
 import { socket } from '@/utils/Socket'; // Import the socket instance
 

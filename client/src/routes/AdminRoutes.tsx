@@ -1,10 +1,10 @@
 import { Route, Navigate, Outlet } from 'react-router-dom';
-import AdminLayout from '@/customeComponents/adminDashbord/AdminLayout';
-import Main from '@/customeComponents/adminDashbord/main/Main';
-import SubscriptionManagement from '@/customeComponents/adminDashbord/adminManagement/AdminManagement';
-import Spam from '@/customeComponents/adminDashbord/spamManagement/Spam';
-import UsersManagement from '@/customeComponents/adminDashbord/usersManagemen/UsersManagemen';
-import RoleManagement from '@/customeComponents/adminDashbord/adminManagement/RoleManagement';
+import AdminLayout from '@/ customComponents/adminDashbord/AdminLayout';
+import Main from '@/ customComponents/adminDashbord/main/Main';
+import SubscriptionManagement from '@/ customComponents/adminDashbord/adminManagement/AdminManagement';
+import Spam from '@/ customComponents/adminDashbord/spamManagement/Spam';
+import UsersManagement from '@/ customComponents/adminDashbord/usersManagemen/UsersManagemen';
+import RoleManagement from '@/ customComponents/adminDashbord/adminManagement/RoleManagement';
 import { useAuthStore } from '@/appStore/AuthStore';
 import type { IPermissions } from '@/types/adminTypes'; 
 import { useModalStore } from '@/appStore/modalStore';

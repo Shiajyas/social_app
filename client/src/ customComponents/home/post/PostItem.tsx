@@ -15,13 +15,13 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
 import { socket } from '@/utils/Socket';
-import CommentSection from '@/customeComponents/home/comments/CommentSection';
+import CommentSection from '@/ customComponents/home/comments/CommentSection';
 import { useAuthStore } from '@/appStore/AuthStore';
-import ConfirmModal from '@/customeComponents/common/confirmationModel';
-import FriendsListModal from '@/customeComponents/home/chat/FriendsListModal';
+import ConfirmModal from '@/ customComponents/common/confirmationModel';
+import FriendsListModal from '@/ customComponents/home/chat/FriendsListModal';
 import { useChat } from '@/hooks/chatHooks/useChat';
 import { useQuery } from '@tanstack/react-query';
-import ReportButton from '@/customeComponents/common/ReportButton';
+import ReportButton from '@/ customComponents/common/ReportButton';
 
 interface Post {
   _id: string;

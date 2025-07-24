@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
-import { useInfiniteScroll } from '@/customeComponents/common/useInfiniteScroll';
+import { useInfiniteScroll } from '@/ customComponents/common/useInfiniteScroll';
 import useChatSockets from '@/hooks/chatHooks/useChatSocket';
 import ChatInput from './ChatInput';
 

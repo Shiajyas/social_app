@@ -1,14 +1,14 @@
 import { Route } from 'react-router-dom';
 import HomeLayout from '@/pages/User/Home';
-import PostList from '@/customeComponents/home/post/PostList';
-import PostDetails from '@/customeComponents/home/post/PostDetails';
-import Notification from '@/customeComponents/home/Notification';
-import ProfilePage from '@/customeComponents/home/profile/ProfilePage';
-import PostUpload from '@/customeComponents/home/post/postUploadComponent';
-import EditPost from '@/customeComponents/home/post/EditPost';
-import ChatSection from '@/customeComponents/home/chat/ChatSection';
+import PostList from '@/ customComponents/home/post/PostList';
+import PostDetails from '@/ customComponents/home/post/PostDetails';
+import Notification from '@/ customComponents/home/Notification';
+import ProfilePage from '@/ customComponents/home/profile/ProfilePage';
+import PostUpload from '@/ customComponents/home/post/postUploadComponent';
+import EditPost from '@/ customComponents/home/post/EditPost';
+import ChatSection from '@/ customComponents/home/chat/ChatSection';
 import UserPrivateRoute from './UserPrivateRoute';
-import { SearchSection } from '@/customeComponents/home/search/SearchSection';
+import { SearchSection } from '@/ customComponents/home/search/SearchSection';
 
 const UserRoutes = () => (
   <Route

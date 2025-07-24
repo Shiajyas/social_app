@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'; // Import navigate
-import MediaPreview from '@/customeComponents/common/MediaPreview';
-import MediaCapture from '@/customeComponents/common/MediaCapture';
+import MediaPreview from '@/ customComponents/common/MediaPreview';
+import MediaCapture from '@/ customComponents/common/MediaCapture';
 import { socket } from '@/utils/Socket';
 import { useUpdatePost, useGetPostDetails } from '@/hooks/usePost'; // Fetch post
 import { useQueryClient } from '@tanstack/react-query';

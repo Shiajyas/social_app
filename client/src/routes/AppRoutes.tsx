@@ -1,9 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/appStore/AuthStore';
 
-import RegisterPage from '@/customeComponents/auth/RegisterPage';
-import OtpVerification from '@/customeComponents/auth/VerifyOtpPage';
-import ForgotPasswordPage from '@/customeComponents/ForgetPwd';
+import RegisterPage from '@/ customComponents/auth/RegisterPage';
+import OtpVerification from '@/ customComponents/auth/VerifyOtpPage';
+import ForgotPasswordPage from '@/ customComponents/ForgetPwd';
 import { UserLoginPage } from '@/pages/User/UserLoginPage';
 import AdminLoginPage from '@/pages/Admin/AdminLoginPage';
 

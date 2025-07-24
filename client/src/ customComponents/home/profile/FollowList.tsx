@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import FollowBtn from '@/customeComponents/FollowBtn';
+import FollowBtn from '@/ customComponents/FollowBtn';
 import { useAuthStore } from '@/appStore/AuthStore';
 
 interface FollowListProps {
