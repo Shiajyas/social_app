@@ -59,7 +59,7 @@ const pc = new RTCPeerConnection({
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     {
-      urls: ['turn:15.207.66.184:3478?transport=udp'], 
+      urls: ['turn:13.202.177.174:3478?transport=udp'], 
       username: 'myuser',
       credential: 'mypassword',
     },
