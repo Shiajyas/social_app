@@ -1,4 +1,5 @@
 export interface IUser {
+  isFollowing: boolean;
   _id: string;
   fullname: string;
   username: string;

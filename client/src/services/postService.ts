@@ -8,7 +8,6 @@ export const postService = {
       {
         method: 'POST',
         data: content,
-        headers: { 'Content-Type': 'multipart/form-data' },
       },
       'Failed to create post',
     ),
@@ -19,7 +18,6 @@ export const postService = {
       {
         method: 'PUT',
         data: content,
-        headers: { 'Content-Type': 'multipart/form-data' },
       },
       'Failed to update post',
     ),

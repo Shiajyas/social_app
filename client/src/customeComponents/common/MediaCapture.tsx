@@ -23,7 +23,6 @@ const MediaCapture = ({ onMediaCaptured }: MediaCaptureProps) => {
   const [webcamKey, setWebcamKey] = useState(0);
   const [selectedFilter, setSelectedFilter] = useState(filters[0]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [showDevices, setShowDevices] = useState(false);
 
   const webcamRef = useRef<Webcam>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);

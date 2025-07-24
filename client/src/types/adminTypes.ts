@@ -8,6 +8,7 @@ export interface IPermissions {
 }
 
 export interface IAdmin {
+  userName: string;
   id?: string;
   email: string;
   roleName: string;

@@ -30,7 +30,6 @@ const UsersManagement = () => {
   // Fetch all users once
   const {
     data: allUsersData,
-    isLoading,
     isError,
   } = useQuery({
     queryKey: ['allUsers'],

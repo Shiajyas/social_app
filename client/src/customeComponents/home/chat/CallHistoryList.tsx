@@ -3,7 +3,9 @@ import { useCallHistory } from '@/hooks/callHooks/useCallHistory';
 import { useAuthStore } from '@/appStore/AuthStore';
 
 interface CallHistoryListProps {
+  isOpen: boolean;
   onClose: () => void;
+  chatId?: string;
 }
 
 export const CallHistoryList = ({ onClose }: CallHistoryListProps) => {

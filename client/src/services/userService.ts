@@ -114,7 +114,6 @@ export const userService = {
       {
         method: 'PUT',
         data: updatedData,
-        headers: { 'Content-Type': 'multipart/form-data' },
       },
       'Failed to update profile',
     );

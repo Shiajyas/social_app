@@ -17,13 +17,12 @@ import redis from "../infrastructure/utils/redisClient";
 // === SocketIO Chat/Call ===
 import { initializeSocket } from "../infrastructure/socket/SocketServer";
 
-import { Server as IOServer } from "socket.io";
+
 
 export class App {
   public app: Application;
   private port: number;
   private server: http.Server;
-  private mediaServer: http.Server;
 
   constructor(port: number) {
     this.app = express();
@@ -33,7 +32,6 @@ export class App {
     this.server = http.createServer(this.app);
 
     // Media server (runs on a separate port or can be attached to same app with a different path)
-    this.mediaServer = http.createServer(); // no express attached for lightweight streaming
 
     this.initializeMiddlewares();
     this.initializeRoutes();
@@ -98,14 +96,7 @@ export class App {
     // 1. Initialize standard chat/call socket
     initializeSocket(this.server);
 
-    // 2. Initialize Media server with Redis adapter
-    const io = new IOServer(this.mediaServer, {
-      cors: {
-        origin: process.env.FRONTEND_URL,
-        credentials: true,
-      },
-    });
-
+  
 
   }
 

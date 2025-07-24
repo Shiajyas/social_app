@@ -18,6 +18,7 @@ const REPORT_REASONS = [
 interface ReportButtonProps {
   postId: string;
   userId: string;
+  onReport?: any
 }
 
 export default function ReportButton({ postId, userId }: ReportButtonProps) {

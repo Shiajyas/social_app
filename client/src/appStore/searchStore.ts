@@ -1,4 +1,4 @@
-// appStore/searchStore.ts
+
 import { create } from 'zustand';
 
 type SearchSource = 'header' | 'search' | null;

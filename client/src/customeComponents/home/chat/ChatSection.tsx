@@ -6,10 +6,10 @@ import { userService } from '@/services/userService';
 import { useFetchChats } from '@/hooks/chatHooks/useFetchChats';
 import { useChat } from '@/hooks/chatHooks/useChat';
 import { useChatHandler } from '@/hooks/chatHooks/useChatHandler';
-import ChatList from '../chat/ChatList';
-import ChatMessages from '../chat/ChatMessages';
+import ChatList from './ChatList';
+import ChatMessages from './ChatMessages';
 import FriendsListModal from './FriendsListModal';
-import CallUI from '../chat/CallUI';
+import CallUI from './CallUI';
 import { useWebRTC } from '@/hooks/webrtc/useWebRTC';
 import { chatSocket as socket } from '@/utils/chatSocket';
 import { CallHistoryList } from './CallHistoryList';
@@ -220,7 +220,6 @@ const ChatSection = () => {
         onClose={() => setShowFriendsList(false)}
         users={allUsers}
         onSelectUser={handleUserSelect}
-        darkMode={darkMode} // Optional: if you still need for modal logic
       />
 
       {/* Main Content */}
@@ -267,7 +266,7 @@ const ChatSection = () => {
                 </div>
               </div>
             )}
-            <ChatMessages chatId={selectedChat._id} userId={userId} />
+            <ChatMessages chatId={selectedChat._id} userId={userId} darkMode={false} />
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:3001';
+const BASE_URL = (import.meta as any).env.VITE_BASE_URL || 'http://localhost:3001';
 
 interface MessageStore {
   unreadCounts: Record<string, number>;

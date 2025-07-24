@@ -26,7 +26,6 @@ const LoginPage: React.FC<LoginPageProps> = ({
   onSubmit,
   redirectPath = role === 'admin' ? '/admin/dashboard' : '/home',
   title = 'Login',
-  logoUrl = logo,
   forgotPasswordLink = '/forgot-password',
   registerLink = '/register',
   isLoading = false,

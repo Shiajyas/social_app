@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import ProfileHeader from './ProfileHeader';
 import FollowList from './FollowList';
 import ProfilePosts from './ProfilePosts';

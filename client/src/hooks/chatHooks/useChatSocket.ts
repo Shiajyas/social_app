@@ -5,6 +5,9 @@ import { NormalizedChat } from '@/utils/normalizeChat';
 import { userService } from '@/services/userService';
 
 interface Message {
+  files: any;
+  type: string;
+  sender: any;
   _id: string;
   senderId: string;
   content: string;

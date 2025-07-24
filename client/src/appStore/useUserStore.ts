@@ -1,4 +1,4 @@
-// appStore/useUserStore.ts
+
 import { create } from 'zustand';
 
 type User = {

@@ -110,9 +110,10 @@ const IncomingCallUI = () => {
       <CallUI
         callType={activeCall.callType || 'voice'}
         onClose={() => {
-          endCall();
+         
           clearActiveCall();
           clearIncomingCall();
+           endCall();
         }}
         localStream={localStream}
         remoteStream={remoteStream}

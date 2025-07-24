@@ -40,6 +40,7 @@ interface PostCardProps {
   onToggleComments: () => void;
   isLiked: boolean;
   isCommentsOpen: boolean;
+  userId?: string;
   onClick: () => void;
 }
 

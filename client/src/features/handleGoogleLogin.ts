@@ -14,7 +14,7 @@ export const handleGoogleLogin = () => {
 
     // Initialize GIS client
     window.google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      client_id: (import.meta as any).env.VITE_GOOGLE_CLIENT_ID,
       callback: (response: any) => {
         const idToken = response.credential;
 

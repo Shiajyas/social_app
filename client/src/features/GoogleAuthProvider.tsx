@@ -32,7 +32,7 @@ const GoogleAuthProvider = ({ onGoogleSignIn }: { onGoogleSignIn: (user: any) =>
     const initializeGis = () => {
       if (window.google) {
         window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          client_id: (import.meta as any).VITE_GOOGLE_CLIENT_ID,
           callback: handleGoogleLogin,
         });
 

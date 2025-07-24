@@ -1,4 +1,4 @@
-// src/components/common/PermissionDeniedModal.tsx
+
 import { useEffect } from 'react';
 import { useModalStore } from '@/appStore/modalStore';
 import { useNavigate } from 'react-router-dom';

@@ -1,4 +1,4 @@
-// @/appStore/AuthStore.ts
+
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { IAdmin, IPermissions } from '@/types/adminTypes'; // Make sure path matches

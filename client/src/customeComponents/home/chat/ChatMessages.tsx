@@ -139,7 +139,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ chatId, userId, darkMode })
                   <div
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleLinkClick(msg);
+                      handleLinkClick(msg as Message);
                     }}
                     className={`p-2 rounded-md transition-colors cursor-pointer ${
                       isSelf ? 'bg-white/10' : 'bg-white'
@@ -156,7 +156,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ chatId, userId, darkMode })
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleLinkClick(msg);
+                        handleLinkClick(msg as Message);
                       }}
                     >
                       {msg.content}
@@ -302,7 +302,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ chatId, userId, darkMode })
                     {isSelf ? (
                       <>
                         <button
-                          onClick={() => setEditMode(msg)}
+                          onClick={() => setEditMode(msg as Message)}
                           className="text-yellow-300 hover:underline"
                         >
                           Edit
@@ -316,7 +316,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ chatId, userId, darkMode })
                       </>
                     ) : (
                       <button
-                        onClick={() => handleReply(msg)}
+                        onClick={() => handleReply(msg as Message)}
                         className="text-blue-300 hover:underline"
                       >
                         Reply

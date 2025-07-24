@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 import LoginPage from '../../customeComponents/auth/Login';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/appStore/AuthStore';
 
 const AdminLoginPage: React.FC = () => {
   const { loginMutation: useAdminLoginMutation } = useAdminAuth();

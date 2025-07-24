@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { userService } from '@/services/userService';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import {
   Image as ImageIcon,
   Video as VideoIcon,

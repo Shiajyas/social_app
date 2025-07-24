@@ -202,30 +202,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, userId, refetch, pa
         username: data.user.username,
         fullname: data.user.fullname,
       });
-      // Navigate after update
-      // navigate('/home');
-
-      // Optionally, if you want to refetch or invalidate:
-      // queryClient.invalidateQueries(['user']);
+ 
     },
     onError: () => setLoading(false),
   });
 
-  // const updateProfile = useMutation({
-  //   mutationFn: async () => {
-  //     setLoading(true);
-  //     const formData = new FormData();
-  //     Object.entries(profileData).forEach(([key, value]) => formData.append(key, value));
-  //     if (avatarFile) formData.append('avatar', avatarFile);
-  //     await userService.updateUserProfile(userId, formData);
-  //   },
-  //   onSuccess: () => {
-  //     setLoading(false);
-  //     refetch();
-  //     setEditing(false);
-  //   },
-  //   onError: () => setLoading(false),
-  // });
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
@@ -234,10 +215,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, userId, refetch, pa
     }
   };
 
-  const isFollowing =
-    (user?.followers ?? []).includes(parentUserId) ||
-    (user?.following ?? []).includes(parentUserId);
-
+const isFollowing =
+  (user?.followers ?? [] as string[])?.includes(parentUserId) ||
+  (user?.following ?? [] as string[])?.includes(parentUserId);
+  
   return (
     <Card className="max-w-3xl mx-auto">
       <CardContent className="p-6 relative overflow-visible">

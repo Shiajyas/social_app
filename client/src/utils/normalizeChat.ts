@@ -6,6 +6,8 @@ export interface NormalizedChat {
   groupAvatar?: string;
   createdAt: string;
   lastMessage?: {
+    content: string;
+    type: string;
     _id: string;
     text: string;
     senderId: string;

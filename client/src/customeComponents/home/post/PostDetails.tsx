@@ -169,8 +169,9 @@ const PostDetails: React.FC = () => {
         isCommentsOpen={isCommentsOpen}
         onToggleComments={handleToggleComments}
         userId={userId}
-        isLiked={Array.isArray(data.post.likes) ? data.post.likes.includes(userId) : false}
-      />
+        isLiked={Array.isArray(data.post.likes) ? data.post.likes.includes(userId) : false} onClick={function (): void {
+          throw new Error('Function not implemented.');
+        } }      />
     </div>
   );
 };

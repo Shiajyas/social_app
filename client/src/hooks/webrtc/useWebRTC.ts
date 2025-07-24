@@ -59,7 +59,7 @@ const pc = new RTCPeerConnection({
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     {
-      urls: ['turn:15.207.66.184:3478?transport=udp'], // 👈 explicitly specify transport
+      urls: ['turn:15.207.66.184:3478?transport=udp'], 
       username: 'myuser',
       credential: 'mypassword',
     },
@@ -187,46 +187,89 @@ const pc = new RTCPeerConnection({
       endCall();
     }
   }, [incomingCall, offer, clearIncomingCall, onCallStart, setCallActive]);
+const endCall = useCallback(() => {
+  callEndedRef.current = true;
 
-  const endCall = useCallback(() => {
-    callEndedRef.current = true;
-    const endedAt = new Date();
-    const startedAt = callStartTimeRef.current ?? endedAt;
+  const endedAt = new Date();
+  const startedAt = callStartTimeRef.current ?? endedAt;
 
-    if (callPartnerId) {
-      socket.emit('call:end', {
-        to: callPartnerId,
-        from: userId,
-        type: callType,
-        startedAt: startedAt.toISOString(),
-        endedAt: endedAt.toISOString(),
-        chatId: activeChatId ?? null,
-      });
-    }
+  console.log('🔚 [endCall] Triggered');
+  console.log('🕒 Started at:', startedAt.toISOString());
+  console.log('🕒 Ended at:', endedAt.toISOString());
+  console.log('👤 Call partner ID:', callPartnerId);
+  console.log('📞 Incoming call object:', incomingCall);
 
-    peerConnection?.close();
+  // Determine recipient for call:end event
+  const targetId = callPartnerId || incomingCall?.caller?._id;
+
+  if (targetId) {
+    const finalCallType = callType || incomingCall?.callType;
+    console.log('📡 Emitting call:end to:', targetId);
+
+    socket.emit('call:end', {
+      to: targetId,
+      from: userId,
+      type: finalCallType,
+      startedAt: startedAt.toISOString(),
+      endedAt: endedAt.toISOString(),
+      chatId: activeChatId ?? null,
+    });
+  } else {
+    console.warn('⚠️ No valid partner ID to emit call:end');
+  }
+
+  // Close peer connection
+  if (peerConnection) {
+    peerConnection.close();
     setPeerConnection(null);
+  }
 
-    localStream?.getTracks().forEach((t) => t.stop());
-    remoteStream?.getTracks().forEach((t) => t.stop());
+  // Stop and clean up local/remote media streams
+  if (localStream) {
+    localStream.getTracks().forEach((track) => track.stop());
     setLocalStream(null);
+  }
+
+  if (remoteStream) {
+    remoteStream.getTracks().forEach((track) => track.stop());
     setRemoteStream(null);
+  }
 
-    if (localVideoRef.current) localVideoRef.current.srcObject = null;
-    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
-    if (remoteAudioRef.current) remoteAudioRef.current.srcObject = null;
+  // Clear media refs
+  if (localVideoRef.current) localVideoRef.current.srcObject = null;
+  if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+  if (remoteAudioRef.current) remoteAudioRef.current.srcObject = null;
 
-    setIsMicOn(true);
-    setIsVideoOn(true);
-    setCallPartnerId(null);
-    setIsRemoteMicOn(true);
-    setIsRemoteVideoOn(true);
-    setCallActive(false);
-    clearIncomingCall();
-    remoteDescSetRef.current = false;
-    pendingCandidates.current = [];
-    onCallEnd();
-  }, [peerConnection, localStream, remoteStream, userId, callType, activeChatId]);
+  // Reset all state flags
+  setIsMicOn(true);
+  setIsVideoOn(true);
+  setIsRemoteMicOn(true);
+  setIsRemoteVideoOn(true);
+  setCallPartnerId(null);
+  setCallActive(false);
+
+  // Reset stores and internal refs
+  clearIncomingCall();
+  remoteDescSetRef.current = false;
+  pendingCandidates.current = [];
+  callStartTimeRef.current = null;
+
+  // Call external handler
+  onCallEnd();
+
+  console.log('✅ [endCall] Cleanup complete');
+}, [
+  peerConnection,
+  localStream,
+  remoteStream,
+  userId,
+  callType,
+  activeChatId,
+  callPartnerId,
+  incomingCall,
+  clearIncomingCall,
+  onCallEnd,
+]);
 
   const toggleMic = () => {
     if (!localStream) return;

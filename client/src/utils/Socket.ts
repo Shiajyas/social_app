@@ -3,7 +3,7 @@ import useNotificationStore from '@/store/notificationStore'; // Import the stor
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://vconnect.work.gd";
+const SOCKET_URL = (import.meta as any).env.VITE_SOCKET_URL 
 
 console.log(SOCKET_URL,">>>>>>1");
 

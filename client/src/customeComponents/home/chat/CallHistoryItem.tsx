@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Video, Phone, Clock, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Video, Phone,  ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 
 type CallType = 'video' | 'voice' | 'text';

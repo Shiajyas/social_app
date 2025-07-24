@@ -24,6 +24,7 @@ export class AuthController {
   async login(req: Request, res: Response): Promise<void> {
     try {
       const { email, password, role } = req.body;
+      console.log(email)
    
     let loginResult;
 
