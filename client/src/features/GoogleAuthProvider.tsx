@@ -29,12 +29,13 @@ const GoogleAuthProvider = ({ onGoogleSignIn }: { onGoogleSignIn: (user: any) =>
 
   useEffect(() => {
     // Load the Google Identity Services (GIS) library
-    console.log((import.meta as any).VITE_GOOGLE_CLIENT_ID,"client Id");
+    // console.log((import.meta as any).VITE_GOOGLE_CLIENT_ID,"client Id");
     
     const initializeGis = () => {
       if (window.google) {
         window.google.accounts.id.initialize({
-          client_id: (import.meta as any).VITE_GOOGLE_CLIENT_ID,
+          // client_id: (import.meta as any).VITE_GOOGLE_CLIENT_ID,
+         client_id:  "830047924664-uuplt30fb6pcr653s6jj1hm6obaan0c5.apps.googleusercontent.com",
           callback: handleGoogleLogin,
         });
 

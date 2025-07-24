@@ -12,12 +12,13 @@ export const handleGoogleLogin = () => {
   try {
     const { googleAuthMutation } = useUserAuth();
 
-    console.log( (import.meta as any).env.VITE_GOOGLE_CLIENT_ID);
+    // console.log( (import.meta as any).env.VITE_GOOGLE_CLIENT_ID);
     
 
     // Initialize GIS client
     window.google.accounts.id.initialize({
-      client_id: (import.meta as any).env.VITE_GOOGLE_CLIENT_ID,
+      // client_id: (import.meta as any).env.VITE_GOOGLE_CLIENT_ID,
+       client_id:  "830047924664-uuplt30fb6pcr653s6jj1hm6obaan0c5.apps.googleusercontent.com",
       callback: (response: any) => {
         const idToken = response.credential;
 
