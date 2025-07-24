@@ -51,7 +51,15 @@ const GoogleAuthProvider = ({ onGoogleSignIn }: { onGoogleSignIn: (user: any) =>
     initializeGis();
   }, []);
 
-  return <div id="google-signin-button"></div>;
+  return (
+  <div className="flex justify-center items-center mt-4">
+    <div
+      id="google-signin-button"
+      className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg h-[50px]"
+    ></div>
+  </div>
+);
+
 };
 
 export default GoogleAuthProvider;
