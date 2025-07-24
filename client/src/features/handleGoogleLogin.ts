@@ -12,6 +12,9 @@ export const handleGoogleLogin = () => {
   try {
     const { googleAuthMutation } = useUserAuth();
 
+    console.log( (import.meta as any).env.VITE_GOOGLE_CLIENT_ID);
+    
+
     // Initialize GIS client
     window.google.accounts.id.initialize({
       client_id: (import.meta as any).env.VITE_GOOGLE_CLIENT_ID,
