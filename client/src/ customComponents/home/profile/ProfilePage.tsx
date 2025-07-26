@@ -1,27 +1,29 @@
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ProfileHeader from './ProfileHeader';
 import FollowList from './FollowList';
 import ProfilePosts from './ProfilePosts';
 import { userService } from '@/services/userService';
 import { socket } from '@/utils/Socket';
 import { useAuthStore } from '@/appStore/AuthStore';
+import { FaUsers } from 'react-icons/fa';
+import clsx from 'clsx';
+
 
 const ProfilePage: React.FC = () => {
-  const { userId } = useParams(); // ✅ Get userId from URL
+  const { userId } = useParams();
   const { user: parentUser } = useAuthStore();
   const parentUserId = parentUser?._id;
   const queryClient = useQueryClient();
+  const [showFollowList, setShowFollowList] = useState(false); // 🔁 Toggle state
 
-  // Fetch user profile
   const { data: user, refetch } = useQuery({
     queryKey: ['userProfile', userId],
-    queryFn: () => userService.getUserProfile(userId as string), // Ensure it's a string
+    queryFn: () => userService.getUserProfile(userId as string),
     enabled: !!userId,
   });
 
-  // Fetch followers & following
   const { data: followers, refetch: refetchFollowers } = useQuery({
     queryKey: ['followers', userId],
     queryFn: () => userService.getFollowers(userId as string),
@@ -34,7 +36,6 @@ const ProfilePage: React.FC = () => {
     enabled: !!userId,
   });
 
-  // Handle socket updates
   useEffect(() => {
     if (!userId) return;
 
@@ -60,9 +61,7 @@ const ProfilePage: React.FC = () => {
     };
   }, [queryClient, refetch, refetchFollowers, refetchFollowing, userId]);
 
-  if (!userId) {
-    return <div>User ID not found</div>;
-  }
+  if (!userId) return <div>User ID not found</div>;
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -74,17 +73,37 @@ const ProfilePage: React.FC = () => {
         refetch={refetch}
       />
 
-      {/* Combined FollowList (Single Div with Swipe for Followers/Following) */}
-      <div className="mt-6">
-        <FollowList
-          followers={followers || []}
-          following={following || []}
-          parentUserId={parentUserId || ''}
-        />
-      </div>
+  <div className="flex justify-center mt-4">
+  <button
+    onClick={() => setShowFollowList((prev) => !prev)}
+    className={clsx(
+      'flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium shadow transition',
+      showFollowList
+        ? 'bg-slate-600 text-white'
+        : 'bg-white border border-slate-300 text-slate-800 hover:bg-slate-100'
+    )}
+  >
+    <FaUsers className="w-4 h-4" />
+    {showFollowList ? 'Hide Follow List' : 'Follow List'}
+  </button>
+</div>
 
-      {/* Profile Posts */}
+
+      {showFollowList && (
+        <div className="mt-6">
+          <FollowList
+            followers={followers || []}
+            following={following || []}
+            parentUserId={parentUserId || ''}
+          />
+        </div>
+      )}
+
+      {/* Posts */}
       <ProfilePosts userId={userId} />
+
+      {/* Follow List (Visible only if toggled) */}
+      
     </div>
   );
 };
