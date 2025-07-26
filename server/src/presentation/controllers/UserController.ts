@@ -4,54 +4,46 @@ import { getErrorMessage } from '../../infrastructure/utils/errorHelper';
 import { IUser } from '../../core/domain/interfaces/IUser';
 import { ISubscriptionUseCase } from '../../useCase/interfaces/ISubscriptionUseCase';
 import { stripe } from '../../infrastructure/utils/stripe';
-
-
+import { HttpStatus,ResponseMessages as Msg } from '../../infrastructure/constants/userConstants';
 export class UserController {
-  private _UserService: IUserService;
-  private _SubscriptionUseCase: ISubscriptionUseCase;
   constructor(
-    userService: IUserService,
-    SubscriptionUseCase: ISubscriptionUseCase,
-  ) {
-    this._UserService = userService;
-    this._SubscriptionUseCase = SubscriptionUseCase;
-  }
+    private _UserService: IUserService,
+    private _SubscriptionUseCase: ISubscriptionUseCase
+  ) {}
 
   async getSuggestions(req: Request, res: Response): Promise<void> {
     try {
       const userId = (req as Request & { user?: IUser }).user?.id;
-      if (!userId) {
-        res.status(400).json({ message: 'User ID is missing' });
-        return;
+      if (!userId){
+        res.status(HttpStatus.BAD_REQUEST).json({ message: Msg.USER_ID_MISSING });
+          return 
       }
+      
+
       const suggestions = await this._UserService.getSuggestions(userId);
-      res.json(suggestions);
+      res.status(HttpStatus.OK).json(suggestions);
     } catch (error) {
-      res.status(500).json({ message: getErrorMessage(error) });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
     }
   }
 
-
   async getFollowers(req: Request, res: Response): Promise<void> {
-    console.log('reached follower');
     try {
       const { id } = req.params;
       const followers = await this._UserService.getFollowers(id);
-      res.json(followers);
+      res.status(HttpStatus.OK).json(followers);
     } catch (error) {
-      res.status(500).json({ message: getErrorMessage(error) });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
     }
   }
 
   async getFollowing(req: Request, res: Response): Promise<void> {
-    console.log('reached following');
     try {
       const { id } = req.params;
       const following = await this._UserService.getFollowing(id);
-      // console.log(following,">>>>>>>>>>>>>>folewing")
-      res.json(following);
+      res.status(HttpStatus.OK).json(following);
     } catch (error) {
-      res.status(500).json({ message: getErrorMessage(error) });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
     }
   }
 
@@ -60,229 +52,161 @@ export class UserController {
       const userId = (req as Request & { user?: IUser }).user?.id;
       const { id: targetUserId } = req.params;
 
-      if (!userId) {
-        res.status(400).json({ message: 'User ID is missing' });
-        return;
+      if (!userId){
+
+       res.status(HttpStatus.BAD_REQUEST).json({ message: Msg.USER_ID_MISSING }) 
+        return ;
       }
 
       await this._UserService.unfollowUser(userId, targetUserId);
-      res.json({ message: 'Successfully unfollowed user' });
+      res.status(HttpStatus.OK).json({ message: Msg.FOLLOW_SUCCESS });
     } catch (error) {
-      res.status(500).json({ message: getErrorMessage(error) });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
     }
   }
 
   async getProfile(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      console.log('reached profile');
-
       const userProfile = await this._UserService.getProfile(id);
-      // console.log(userProfile,">>>>>>>>>>>>>profile")
-      res.json(userProfile);
+      res.status(HttpStatus.OK).json(userProfile);
     } catch (error) {
-      res.status(500).json({ message: getErrorMessage(error) });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
     }
   }
 
   async getUserPost(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      console.log('reached profile post');
-
       const userPost = await this._UserService.getUserPost(id);
-      // console.log(userPost,">>>>>>>>>>>>>profile")
-      res.json(userPost);
+      res.status(HttpStatus.OK).json(userPost);
     } catch (error) {
-      res.status(500).json({ message: getErrorMessage(error) });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
     }
   }
 
   async getUserSavedPost(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      console.log('reached profile post');
-
       const userPost = await this._UserService.getUserSavedPost(id, 1, 10);
-      // console.log(userPost,">>>>>>>>>>>>>profile")
-      res.json(userPost);
+      res.status(HttpStatus.OK).json(userPost);
     } catch (error) {
-      res.status(500).json({ message: getErrorMessage(error) });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
     }
   }
 
-  async updateUserprofile(req: Request, res: Response) {
+  async updateUserprofile(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.params.id;
       const updatedData = req.body;
 
-      console.log('Received body:', req.body);
-      console.log('Received file:', req.file);
-
-      // Check if an avatar file is uploaded
       if (req.file) {
-        updatedData.avatar = (
-          req.file as unknown as { location: string }
-        ).location; // Store the file path in the database
+        updatedData.avatar = (req.file as any).location;
       }
-      // console.log(updatedData, '>>>>>>>>>>>>> profile');
 
-      const updatedUser = await this._UserService.updateUserProfile(
-        userId,
-        updatedData,
-      );
-
-      return res.status(200).json({
-        message: 'Profile updated successfully',
-        user: updatedUser,
-      });
+      const updatedUser = await this._UserService.updateUserProfile(userId, updatedData);
+      res.status(HttpStatus.OK).json({ message: Msg.PROFILE_UPDATED, user: updatedUser });
     } catch (error) {
-      console.error('Error updating profile:', error);
-      return res.status(500).json({ message: 'Internal server error' });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.INTERNAL_ERROR });
     }
   }
 
-  async getSubscription(req: Request, res: Response) {
-    const userId = req.params.id;
-    // const { userId } = req.body;
-    console.log('try to get subscription', userId);
+  async getSubscription(req: Request, res: Response): Promise<void> {
     try {
-      const subscription =
-        await this._SubscriptionUseCase.getUserSubscription(userId);
-      if (!subscription)
-        return res.status(404).json({ message: 'No subscription found' });
-      // console.log(subscription, '>>>>>>>>>>>>subscription');
-      res.status(200).json(subscription);
+      const { id: userId } = req.params;
+      const subscription = await this._SubscriptionUseCase.getUserSubscription(userId);
+
+      if (!subscription){
+        res.status(HttpStatus.NOT_FOUND).json({ message: Msg.SUBSCRIPTION_NOT_FOUND });
+        return 
+      }
+        
+
+      res.status(HttpStatus.OK).json(subscription);
     } catch (error) {
-      res.status(500).json({ message: 'Server error', error });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.INTERNAL_ERROR });
     }
   }
 
-  async subscribe(req: Request, res: Response) {
-    console.log('➡️ Processing subscription...');
-
+  async subscribe(req: Request, res: Response): Promise<void> {
     const { userId } = req.body;
 
     try {
-      // Create a PaymentIntent instead of a Charge
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: 1000, // $10
+        amount: 1000,
         currency: 'usd',
-        automatic_payment_methods: { enabled: true }, // Supports Google Pay, Apple Pay, etc.
+        automatic_payment_methods: { enabled: true },
       });
 
       if (!paymentIntent.client_secret) {
-        console.error('❌ Failed to create PaymentIntent');
-        return res
-          .status(500)
-          .json({ message: 'Failed to create PaymentIntent' });
+       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.PAYMENT_FAILED });
+         return
       }
 
-      // console.log('✅ PaymentIntent created:', paymentIntent.id);
-
-      return res
-        .status(200)
-        .json({ clientSecret: paymentIntent.client_secret });
+      res.status(HttpStatus.OK).json({ clientSecret: paymentIntent.client_secret });
     } catch (error) {
-      console.error('❌ Payment error:', error);
-      return res.status(500).json({ message: 'Payment error', error });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.PAYMENT_ERROR });
     }
   }
 
-  async confirmSubscription(req: Request, res: Response) {
-    const { userId } = req.body;
-    console.log(`🔄 Confirming subscription for user: ${userId}`);
-
+  async confirmSubscription(req: Request, res: Response): Promise<void> {
     try {
+      const { userId } = req.body;
       const startDate = new Date();
       const endDate = new Date();
       endDate.setMonth(startDate.getMonth() + 1);
 
-      const subscription =
-        await this._SubscriptionUseCase.createOrUpdateSubscription(
-          userId,
-          startDate,
-          endDate,
-        );
+      const subscription = await this._SubscriptionUseCase.createOrUpdateSubscription(userId, startDate, endDate);
 
-      //  Call n8n webhook asynchronously
-      // axios.post('http://localhost:5678/webhook/subscription-confirmed', {
-      //   userId,
-      //   subscription,
-      // }).catch(err => {
-      //   console.error("⚠️ Failed to send n8n webhook:", err.message);
-      // });
-
-      return res.status(200).json({
-        message: '✅ Subscription confirmed successfully!',
-        subscription,
-      });
+      res.status(HttpStatus.OK).json({ message: Msg.SUBSCRIPTION_CONFIRMED, subscription });
     } catch (error) {
-      console.error('❌ Subscription update failed:', error);
-      return res
-        .status(500)
-        .json({ message: 'Subscription update failed', error });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.SUBSCRIPTION_FAILED });
     }
   }
 
-  // get subscription history
-  async getSubscriptionHistory(req: Request, res: Response) {
-    const userId = req.params.id;
-    console.log(userId, 'userId in subscription history controller');
+  async getSubscriptionHistory(req: Request, res: Response): Promise<void> {
     try {
-      const subscriptionHistory =
-        await this._SubscriptionUseCase.getUserSubscriptionHistory(userId);
-      // console.log(subscriptionHistory, ">>>>>>>>>>>>subscription")
-      res.status(200).json(subscriptionHistory);
+      const { id: userId } = req.params;
+      const history = await this._SubscriptionUseCase.getUserSubscriptionHistory(userId);
+      res.status(HttpStatus.OK).json(history);
     } catch (error) {
-      console.error('Error fetching subscription history:', error);
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.INTERNAL_ERROR });
     }
   }
 
-  getCallHistory = async (req: Request, res: Response) => {
-    const userId = req.params.id;
-    console.log(userId, 'userId in call history controller');
+  async getCallHistory(req: Request, res: Response): Promise<void> {
     try {
-      const callHistory =
-      await this._UserService.getCallHistory(userId);
-      res.status(200).json(callHistory);
+      const { id: userId } = req.params;
+      const history = await this._UserService.getCallHistory(userId);
+      res.status(HttpStatus.OK).json(history);
     } catch (error) {
-      console.error('Error fetching call history:', error);
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.INTERNAL_ERROR });
     }
-  };
+  }
 
-  async uploadMedia(req: Request, res: Response) {
+  async uploadMedia(req: Request, res: Response): Promise<void> {
     try {
       const files = req.files as Express.Multer.File[];
-      console.log(req, 'files in upload media 2');
-      console.log(files, 'files in upload media');
-      const fileUrls = files?.map(
-        (file) => (file as unknown as { location: string }).location,
-      );
-      console.log(fileUrls, 'file urls');
-      res.status(200).json({ fileUrls });
+      const fileUrls = files?.map((file) => (file as any).location);
+      res.status(HttpStatus.OK).json({ fileUrls });
     } catch (error) {
-      console.error('Error uploading media:', error);
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.FILE_UPLOAD_ERROR });
     }
   }
 
-  async searchUsers(req: Request, res: Response) {
+  async searchUsers(req: Request, res: Response): Promise<void> {
     try {
       const query = req.query.query as string;
 
-      if (!query || query.trim() === '') {
-        return res.status(400).json({ error: 'Empty search query' });
+      if (!query?.trim()) {
+      res.status(HttpStatus.BAD_REQUEST).json({ error: Msg.SEARCH_QUERY_EMPTY });
+         return
       }
 
       const result = await this._UserService.searchUsers(query);
-      console.log(result, 'result');
-      res.status(200).json(result);
+      res.status(HttpStatus.OK).json(result);
     } catch (error) {
-      console.error('Error searching users:', error);
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.INTERNAL_ERROR });
     }
   }
 }

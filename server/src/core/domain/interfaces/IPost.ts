@@ -18,4 +18,5 @@ export interface IPost extends Document {
   saved: mongoose.Types.ObjectId[];
   visibility: 'public' | 'private';
   visible: boolean;
+  
 }

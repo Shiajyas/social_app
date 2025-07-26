@@ -70,10 +70,10 @@ export class App {
       console.log('🔁 /health/redis hit');
       try {
         const pong = await redis.ping();
-        console.log('✅ Redis ping:', pong);
+        console.log('Redis ping:', pong);
         res.json({ status: 'ok', redis: pong });
       } catch (error) {        
-        console.error('❌ Redis health check failed', error);
+        console.error(' Redis health check failed', error);
         res.status(500).json({ status: 'error', message: 'Redis not reachable' });
       }
     });

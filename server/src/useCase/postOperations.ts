@@ -16,6 +16,7 @@ export class PostService implements IPostService {
     description: string,
     mediaUrls: string[],
     visibility: 'public' | 'private',
+    isProUser: string
   ): Promise<IPost> {
     return await this._PostRepository.createPost(
       userId,
@@ -23,6 +24,7 @@ export class PostService implements IPostService {
       description,
       mediaUrls,
       visibility,
+      isProUser
     );
   }
 
