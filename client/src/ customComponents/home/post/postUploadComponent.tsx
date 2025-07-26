@@ -64,8 +64,8 @@ const PostUpload = () => {
         setVisibility('public');
         setErrors({});
       },
-      onError: () => {
-        toast.error('Upload failed!');
+      onError: (e) => {
+        toast.error(e.message);
       },
     });
   };

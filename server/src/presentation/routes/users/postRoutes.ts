@@ -9,12 +9,19 @@ import { upload } from '../../middleware/uploadMiddleware';
 import { AuthenticatedPostRequest } from '../../../core/domain/interfaces/IAuthenticatedPostRequest';
 import { ICommentRepository } from '../../../data/interfaces/ICommentRepository';
 import { CommentRepository } from '../../../data/repositories/CommentRepository';
+import { UserRepository } from '../../../data/repositories/UserRepository';
+import { IUserRepository } from '../../../data/interfaces/IUserRepository';
+import SubscriptionRepository from '../../../data/repositories/SubscriptionRepository';
+import { ISubscriptionRepository } from '../../../data/interfaces/ISubscriptionRepository';
 
 const router = Router();
 
 // Initialize repositories and services
 const postRepository: IPostRepository = new PostRepository();
-const postService: IPostService = new PostService(postRepository);
+const userRepository: IUserRepository = new UserRepository()
+const subscriptionRepo: ISubscriptionRepository = new SubscriptionRepository()
+
+const postService: IPostService = new PostService(postRepository,userRepository,subscriptionRepo);
 const commentService: ICommentRepository = new CommentRepository();
 const postController = new PostController(postService, commentService);
 

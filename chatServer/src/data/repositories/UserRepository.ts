@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 export class UserRepository implements IUserRepository {
   // Find a user by email
   async findByEmail(email: string): Promise<IUser | null> {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('-password');;
     return user ? (user.toObject() as IUser) : null;
   }
 
@@ -31,7 +31,7 @@ export class UserRepository implements IUserRepository {
 
   // Find a user by email and role
   async findByEmailAndRole(email: string, role: string): Promise<IUser | null> {
-    const user = await User.findOne({ email, role: role });
+    const user = await User.findOne({ email, role: role }).select('-password');;
     console.log(user, 3);
     return user ? (user.toObject() as IUser) : null;
   }

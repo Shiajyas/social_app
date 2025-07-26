@@ -1,4 +1,3 @@
-// src/constants.ts
 
 export enum HttpStatus {
   OK = 200,

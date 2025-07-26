@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io';
 import { Types } from 'mongoose';
-import { AdminOverviewService } from '../../adminOverviewService';
+import { IAdminOverviewService } from '../../interfaces/IAdminOverviewService';
 import { ISUserRepository } from '../../../data/interfaces/ISUserRepository';
 import { IReportRepository } from '../../../data/interfaces/IReportRepository';
 import { INotificationService } from '../../interfaces/InotificationService';
@@ -9,7 +9,7 @@ import { IPostRepository } from '../../../data/interfaces/IPostRepository';
 
 export class AdminSocketService {
   private _Io: Server;
-  private _AdminOverviewService: AdminOverviewService;
+  private _AdminOverviewService: IAdminOverviewService;
   private _SessionUserRepo: ISUserRepository;
   private _ReportRepository: IReportRepository;
   private _NotificationService?: INotificationService;
@@ -17,7 +17,7 @@ export class AdminSocketService {
 
   constructor(
     io: Server,
-    adminOverviewService: AdminOverviewService,
+    adminOverviewService: IAdminOverviewService,
     sessionUserRepo: ISUserRepository,
     reportRepository: IReportRepository,
     notificationService: INotificationService,
@@ -32,18 +32,22 @@ export class AdminSocketService {
   }
 
   registerAdmin(socketId: string) {
-    console.log(`🛡️ Admin connected: ${socketId}`);
+    console.log(`Admin connected: ${socketId}`);
     const count = this._SessionUserRepo.getActiveUserCount()
     this._Io.to('admin').emit('admin:updateOnlineCount', count);
   }
 
   unregisterAdmin(socketId: string) {
-    console.log(`⚠️ Admin disconnected: ${socketId}`);
+    console.log(`Admin disconnected: ${socketId}`);
   }
 
-  async getOverviewData() {
-    return await this._AdminOverviewService.getOverview();
-  }
+async getOverviewData() {
+  const defaultRange: '7d' | '1m' | '1y' = '7d';
+  const defaultLikesRange = { min: 0, max: Infinity };
+
+  return await this._AdminOverviewService.getOverview(defaultRange, defaultLikesRange);
+}
+
 
 
   async pushOverviewUpdate() {
@@ -82,10 +86,10 @@ export class AdminSocketService {
         await this._ReportRepository.fetchSingleReportedPost(postId, userId);
       if (enrichedReport) {
         this._Io.to('admin').emit('admin:newReport', enrichedReport);
-        console.log('🔔 Emitted admin:newReport');
+        console.log(' Emitted admin:newReport');
       }
     } catch (error) {
-      console.error('❌ Error reporting post:', error);
+      console.error('Error reporting post:', error);
     }
   }
 
@@ -94,7 +98,7 @@ export class AdminSocketService {
       await this._ReportRepository.deleteById(reportId);
       console.log(`🗑️ Report ${reportId} dismissed`);
     } catch (error) {
-      console.error('❌ Error dismissing report:', error);
+      console.error(' Error dismissing report:', error);
     }
   }
 
@@ -102,19 +106,19 @@ export class AdminSocketService {
     try {
       const post: any = await this._PostRepository.getPost(postId);
       if (!post) {
-        console.warn(`⚠️ Post ${postId} not found`);
+        console.warn(` Post ${postId} not found`);
         return;
       }
 
       const ownerId = post?.userId?._id?.toString();
-      console.log('🧾 Deleting post:', postId, 'Owner:', ownerId);
+      console.log(' Deleting post:', postId, 'Owner:', ownerId);
 
       await this._ReportRepository.blockPostById(postId);
       this._Io.to('admin').emit('admin:postDeleted', { postId });
-      console.log(`🗑️ Post ${postId} deleted and admins notified`);
+      console.log(`Post ${postId} deleted and admins notified`);
 
       if (this._NotificationService && ownerId) {
-        console.log('📨 Sending notification to user:', ownerId);
+        console.log('Sending notification to user:', ownerId);
         await this._NotificationService.sendNotification(
           SYSTEM_ADMIN_ID.toString(),
           [ownerId],
@@ -130,7 +134,7 @@ export class AdminSocketService {
         console.warn('⚠️ Owner ID is undefined; notification not sent');
       }
     } catch (error) {
-      console.error('❌ Error deleting post:', error);
+      console.error('Error deleting post:', error);
     }
   }
 }

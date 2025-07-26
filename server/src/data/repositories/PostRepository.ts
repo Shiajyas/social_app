@@ -215,6 +215,22 @@ export class PostRepository implements IPostRepository {
     }
   }
 
+  async countUserPostsInRange(userId: string, startDate: Date, endDate: Date): Promise<number> {
+  try {
+    return await Post.countDocuments({
+      userId,
+      createdAt: {
+        $gte: startDate,
+        $lt: endDate,
+      },
+    });
+  } catch (error) {
+    console.error('Error counting user posts in range:', error);
+    throw new Error('Failed to count posts in range');
+  }
+}
+
+
   async searchPosts(query: string): Promise<IPost[]> {
     console.log(query, 'searchquery post');
     // return await Post.find({

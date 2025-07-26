@@ -3,6 +3,7 @@ import { ISubscription } from '../../core/domain/interfaces/ISubscription';
 import { ISubscriptionRepository } from '../interfaces/ISubscriptionRepository';
 
 class SubscriptionRepository implements ISubscriptionRepository {
+
   async findByUserId(userId: string): Promise<ISubscription | null> {
     try {
       console.log('Fetching subscription for user:', userId);
@@ -77,4 +78,4 @@ class SubscriptionRepository implements ISubscriptionRepository {
   }
 }
 
-export default new SubscriptionRepository();
+export default SubscriptionRepository

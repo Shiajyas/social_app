@@ -23,7 +23,7 @@ import { IReportRepository } from '../../../data/interfaces/IReportRepository';
 
 import { IAdminSubscriptionService } from '../../../useCase/interfaces/IAdminSubscriptionService';
 import { AdminSubscriptionController } from '../../controllers/AdminSubscriptionController';
-import { adminSubscriptionService as adminSubscriptionServiceImpl } from '../../../useCase/adminSubscriptionService';
+import { AdminSubscriptionService as adminSubscriptionServiceImpl } from '../../../useCase/adminSubscriptionService';
 
 import {AdminOverviewController} from '../../controllers/AdminOverviewController';
 
@@ -51,7 +51,7 @@ const {
 const authController = new AuthController(userService, adminUseCase);
 const adminController = new AdminController(adminUseCase);
 
-const subscriptionService: IAdminSubscriptionService = adminSubscriptionServiceImpl;
+const subscriptionService: IAdminSubscriptionService = new adminSubscriptionServiceImpl;
 const {
   getAllSubscriptions,
   updateSubscription,
