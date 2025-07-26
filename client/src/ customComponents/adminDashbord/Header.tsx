@@ -65,7 +65,7 @@ const Header = () => {
         return [report, ...prev];
       });
       increment();
-      toast.info('📨 New report received');
+      // toast.info('📨 New report received');
     };
 
     socket.on('admin:updateOnlineCount', updateOnlineCount);
