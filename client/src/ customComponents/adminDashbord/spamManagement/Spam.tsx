@@ -122,7 +122,7 @@ export default function Spam() {
     return () => {
       socket.off('admin:newReport', onNewReport);
     };
-  }, [qc,  incRep]);
+  }, [ ]);
 
   const toggleSelect = (id: string) => {
     const s = new Set(selected);
