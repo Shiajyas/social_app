@@ -109,18 +109,18 @@ export default function Spam() {
     socket.emit('admin:join');
     adminReportService.getReportCount().then((r) => setReportCount(r.count));
 
-    const onNewReport = (report: Report) => {
-      qc.setQueryData<Report[]>(['reports', 1], (prev) =>
-        prev ? [report, ...prev] : [report]
-      );
-      incRep();
-      toast.info('📨 New report received');
-    };
+    // const onNewReport = (report: Report) => {
+    //   qc.setQueryData<Report[]>(['reports', 1], (prev) =>
+    //     prev ? [report, ...prev] : [report]
+    //   );
+    //   incRep();
+    //   toast.info('📨 New report received');
+    // };
 
-    socket.on('admin:newReport', onNewReport);
+    // socket.on('admin:newReport', onNewReport);
 
     return () => {
-      socket.off('admin:newReport', onNewReport);
+      // socket.off('admin:newReport', onNewReport);
     };
   }, [qc, setReportCount, incRep]);
 
