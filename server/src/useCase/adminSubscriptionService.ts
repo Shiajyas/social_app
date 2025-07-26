@@ -1,9 +1,14 @@
 import SubscriptionModel from '../core/domain/models/SubscriptionModel';
 import User from '../core/domain/models/UserModel';
-import { IAdminSubscriptionService, QueryParams, AllQueryParams, SubscriptionResult } from './interfaces/IAdminSubscriptionService';
+import {
+  IAdminSubscriptionService,
+  QueryParams,
+  AllQueryParams,
+  SubscriptionResult,
+} from './interfaces/IAdminSubscriptionService';
 import { Types } from 'mongoose';
 
-export const adminSubscriptionService: IAdminSubscriptionService = {
+export class AdminSubscriptionService implements IAdminSubscriptionService {
   async getSubscriptions({
     search,
     status,
@@ -37,7 +42,7 @@ export const adminSubscriptionService: IAdminSubscriptionService = {
     const skip = (page - 1) * limit;
 
     const subscriptions = await SubscriptionModel.find(filters)
-      .populate('userId', 'username email') // No avatar
+      .populate('userId', 'username email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -51,7 +56,7 @@ export const adminSubscriptionService: IAdminSubscriptionService = {
       page,
       hasMore: total > skip + subscriptions.length,
     };
-  },
+  }
 
   async getAllSubscriptions({
     search,
@@ -87,7 +92,7 @@ export const adminSubscriptionService: IAdminSubscriptionService = {
       .lean();
 
     return { subscriptions };
-  },
+  }
 
   async toggleSubscriptionStatus(subscriptionId: string): Promise<{
     message: string;
@@ -109,5 +114,5 @@ export const adminSubscriptionService: IAdminSubscriptionService = {
       message: 'Subscription updated',
       isSubscribed: subscription.isSubscribed,
     };
-  },
-};
+  }
+}

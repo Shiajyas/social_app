@@ -11,12 +11,15 @@ import { IUserRepository } from '../../../data/interfaces/IUserRepository';
 import { IPostRepository } from '../../../data/interfaces/IPostRepository';
 import { ICallHistoryRepository } from '../../../data/interfaces/ICallHistoryRepository';
 import { ISubscriptionUseCase } from '../../../useCase/interfaces/ISubscriptionUseCase';
+import { ISubscriptionRepository } from '../../../data/interfaces/ISubscriptionRepository';
+import SubscriptionRepository from '../../../data/repositories/SubscriptionRepository';
 
 const router = express.Router();
+const subscriptionRepo : ISubscriptionRepository = new SubscriptionRepository()
 const userRepositoryInstance: IUserRepository = new UserRepository();
 const postRepositoryInstance :IPostRepository = new PostRepository();
 const callHistoryRepositoryInstance : ICallHistoryRepository= new CallHistoryRepository();
-const subscriptionUseCaseInstance : ISubscriptionUseCase = SubscriptionUseCase;
+const subscriptionUseCaseInstance : ISubscriptionUseCase = new SubscriptionUseCase (subscriptionRepo)
 export function userRoutes() {
   const userServiceInstance = new UserService(
     userRepositoryInstance,

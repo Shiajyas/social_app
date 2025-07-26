@@ -1,32 +1,60 @@
 import { IPostService } from './interfaces/IPostService';
 import { IPostRepository } from '../data/interfaces/IPostRepository';
+import { IUserRepository } from '../data/interfaces/IUserRepository';
+import { ISubscriptionRepository } from '../data/interfaces/ISubscriptionRepository';
 import { IPost } from '../core/domain/interfaces/IPost';
 
 export class PostService implements IPostService {
   private _PostRepository: IPostRepository;
+  private _UserRepository!: IUserRepository;
+  private _SubscriptionRepo!: ISubscriptionRepository 
 
-  constructor(postRepository: IPostRepository) {
-    this._PostRepository = postRepository;
+  constructor(postRepository: IPostRepository, userRepository: IUserRepository, subscriptionRepo:  ISubscriptionRepository) {
+    this._PostRepository = postRepository,
+    this._UserRepository= userRepository,
+    this._SubscriptionRepo = subscriptionRepo
   }
 
   // Create a new post
-  async createPost(
-    userId: string,
-    title: string,
-    description: string,
-    mediaUrls: string[],
-    visibility: 'public' | 'private',
-    isProUser: string
-  ): Promise<IPost> {
-    return await this._PostRepository.createPost(
-      userId,
-      title,
-      description,
-      mediaUrls,
-      visibility,
-      isProUser
-    );
+async createPost(
+  userId: string,
+  title: string,
+  description: string,
+  mediaUrls: string[],
+  visibility: 'public' | 'private',
+  isProUser: string
+): Promise<IPost> {
+  const user = await this._UserRepository.findById(userId); // You should have this method
+  if (!user) throw new Error('User not found');
+
+  const isSubscribed = await this._SubscriptionRepo.findByUserId(userId)
+
+  console.log(isSubscribed,">>>>>>>>>>")
+
+  // Regular user logic: check post count
+  if (!isSubscribed) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const todayPostCount = await this._PostRepository.countUserPostsInRange(userId, today, tomorrow);
+    if (todayPostCount >= 3) {
+      throw new Error('Daily post limit reached. Upgrade to Pro for unlimited posts.');
+    }
   }
+
+  return await this._PostRepository.createPost(
+    userId,
+    title,
+    description,
+    mediaUrls,
+    visibility,
+    isProUser
+  );
+}
+
 
   async getPosts(
     userId: string,

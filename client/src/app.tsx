@@ -19,7 +19,7 @@ const App = () => {
           <RouteWatcher />
 
           <ToastContainer
-            position="top-center"
+            position="bottom-left"
             autoClose={3000}
             hideProgressBar={false}
             newestOnTop
@@ -27,7 +27,7 @@ const App = () => {
             pauseOnFocusLoss
             draggable
             pauseOnHover
-            theme="auto"
+             theme="colored"
           />
 
           <IncomingCallUI />

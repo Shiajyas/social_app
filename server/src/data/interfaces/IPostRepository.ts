@@ -35,4 +35,5 @@ export interface IPostRepository {
     limit: number,
   ): Promise<{ posts: IPost[]; nextPage: number | null }>;
   searchPosts(query: string): Promise<IPost[]>;
+  countUserPostsInRange(userId: string, startDate: Date, endDate: Date): Promise<number> 
 }

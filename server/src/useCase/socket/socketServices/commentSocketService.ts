@@ -3,6 +3,7 @@ import { ICommentSocketService } from './Interface/ICommentSocketService';
 import { ICommentRepository } from '../../../data/interfaces/ICommentRepository';
 import { IUserRepository } from '../../../data/interfaces/IUserRepository';
 import { NotificationService } from '../../notificationService';
+import { INotificationService } from '../../interfaces/InotificationService';
 import { IPostRepository } from '../../../data/interfaces/IPostRepository';
 import { Server } from 'socket.io';
 import mongoose from 'mongoose';
@@ -12,7 +13,7 @@ export class CommentSocketService implements ICommentSocketService {
   private _Io: Server;
   private _CommentRepository: ICommentRepository;
   private _UserRepository: IUserRepository;
-  private _NotificationService: NotificationService;
+  private _NotificationService: INotificationService;
   private _PostRepository: IPostRepository;
 
   constructor(
