@@ -7,6 +7,7 @@ export interface IPostService {
     description: string,
     mediaUrls: string[],
     visibility: 'public' | 'private',
+    isProUser: string
   ): Promise<IPost>;
   getPosts(
     userId: string,

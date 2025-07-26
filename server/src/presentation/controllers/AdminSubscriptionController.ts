@@ -1,64 +1,70 @@
-// controllers/adminSubscriptionController.ts
+// controllers/AdminSubscriptionController.ts
 
 import { Request, Response } from 'express';
 import { IAdminSubscriptionService } from '../../useCase/interfaces/IAdminSubscriptionService';
+import { HttpStatus,ResponseMessages } from '../../infrastructure/constants/adminConstants';
 
-export const createAdminSubscriptionController = (
-  subscriptionService: IAdminSubscriptionService
-) => ({
-  getSubscriptionsController: async (req: Request, res: Response) => {
+export class AdminSubscriptionController {
+  constructor(private readonly subscriptionService: IAdminSubscriptionService) {}
+
+  getSubscriptions = async (req: Request, res: Response): Promise<void> => {
     try {
       const {
-        search,
-        status,
-        startDate,
-        endDate,
+        search = '',
+        status = 'all',
+        startDate = '',
+        endDate = '',
         page = '1',
         limit = '10',
       } = req.query;
 
-      const data = await subscriptionService.getSubscriptions({
-        search: String(search || ''),
-        status: String(status || 'all'),
-        startDate: String(startDate || ''),
-        endDate: String(endDate || ''),
+      const data = await this.subscriptionService.getSubscriptions({
+        search: String(search),
+        status: String(status),
+        startDate: String(startDate),
+        endDate: String(endDate),
         page: parseInt(page as string),
         limit: parseInt(limit as string),
       });
 
-      res.status(200).json(data);
+      res.status(HttpStatus.OK).json(data);
     } catch (error) {
-      console.error('getSubscriptionsController error:', error);
-      res.status(500).json({ error: 'Failed to fetch subscriptions' });
+      console.error('getSubscriptions error:', error);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ResponseMessages.SUBSCRIPTION_FETCH_FAILED });
     }
-  },
+  };
 
-  getAllSubscriptionsController: async (req: Request, res: Response) => {
+  getAllSubscriptions = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { search, status, startDate, endDate } = req.query;
+      const {
+        search = '',
+        status = 'all',
+        startDate = '',
+        endDate = '',
+      } = req.query;
 
-      const data = await subscriptionService.getAllSubscriptions({
-        search: String(search || ''),
-        status: String(status || 'all'),
-        startDate: String(startDate || ''),
-        endDate: String(endDate || ''),
+      const data = await this.subscriptionService.getAllSubscriptions({
+        search: String(search),
+        status: String(status),
+        startDate: String(startDate),
+        endDate: String(endDate),
       });
 
-      res.status(200).json(data);
+      res.status(HttpStatus.OK).json(data);
     } catch (error) {
-      console.error('getAllSubscriptionsController error:', error);
-      res.status(500).json({ error: 'Failed to fetch all subscriptions' });
+      console.error('getAllSubscriptions error:', error);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ResponseMessages.SUBSCRIPTION_FETCH_FAILED });
     }
-  },
+  };
 
-  updateSubscriptionController: async (req: Request, res: Response) => {
+  updateSubscription = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
-      const result = await subscriptionService.toggleSubscriptionStatus(id);
-      res.status(200).json(result);
+      const result = await this.subscriptionService.toggleSubscriptionStatus(id);
+      res.status(HttpStatus.OK).json(result);
     } catch (error) {
-      console.error('updateSubscriptionController error:', error);
-      res.status(500).json({ error: 'Failed to update subscription' });
+      console.error('updateSubscription error:', error);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ResponseMessages.SUBSCRIPTION_UPDATE_FAILED });
     }
-  },
-});
+  };
+}

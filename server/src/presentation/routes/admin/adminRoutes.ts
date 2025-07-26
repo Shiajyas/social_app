@@ -22,7 +22,7 @@ import { ReportRepository } from '../../../data/repositories/ReportRepository';
 import { IReportRepository } from '../../../data/interfaces/IReportRepository';
 
 import { IAdminSubscriptionService } from '../../../useCase/interfaces/IAdminSubscriptionService';
-import { createAdminSubscriptionController } from '../../controllers/AdminSubscriptionController';
+import { AdminSubscriptionController } from '../../controllers/AdminSubscriptionController';
 import { adminSubscriptionService as adminSubscriptionServiceImpl } from '../../../useCase/adminSubscriptionService';
 
 import {AdminOverviewController} from '../../controllers/AdminOverviewController';
@@ -53,10 +53,10 @@ const adminController = new AdminController(adminUseCase);
 
 const subscriptionService: IAdminSubscriptionService = adminSubscriptionServiceImpl;
 const {
-  getSubscriptionsController,
-  getAllSubscriptionsController,
-  updateSubscriptionController,
-} = createAdminSubscriptionController(subscriptionService);
+  getAllSubscriptions,
+  updateSubscription,
+  getSubscriptions
+} = new AdminSubscriptionController(subscriptionService);
 
 
 // Auth routes
@@ -70,9 +70,9 @@ router.post('/users/:id/block', authController.blockUser.bind(authController));
 router.post('/users/:id/unblock', authController.unblockUser.bind(authController));
 
 // Subscription management
-router.get('/subscriptions', adminAuthMiddleware.authenticate, getSubscriptionsController);
-router.get('/subscriptions/all', adminAuthMiddleware.authenticate, getAllSubscriptionsController);
-router.patch('/subscriptions/:id', adminAuthMiddleware.authenticate, updateSubscriptionController);
+router.get('/subscriptions', adminAuthMiddleware.authenticate, getSubscriptions);
+router.get('/subscriptions/all', adminAuthMiddleware.authenticate,getAllSubscriptions);
+router.patch('/subscriptions/:id', adminAuthMiddleware.authenticate, updateSubscription);
 
 // Admin dashboard overview
 router.get('/overview', adminAuthMiddleware.authenticate, getOverview);

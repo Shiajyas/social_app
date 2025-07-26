@@ -6,7 +6,7 @@ import { setCookie } from '../../infrastructure/utils/setCookie';
 import { IAuthService } from '../../useCase/interfaces/IAuthService';
 import { AuthenticatdRequest } from '../../core/domain/interfaces/IAuthenticatedRequest';
 import { IAdminUseCase } from '../../useCase/interfaces/IAdminUseCase';
-
+import { HttpStatus,ResponseMessages } from '../../infrastructure/constants/AuthConstants';
 declare module 'express-session' {
   interface Session {
     user?: IUser;
@@ -58,13 +58,14 @@ export class AuthController {
 
       setCookie(res, 'refreshToken', refreshToken);
 
-      res.status(200).json({
-        msg: 'Logged in Successfully!',
+         res.status(HttpStatus.OK).json({
+        msg: ResponseMessages.LOGIN_SUCCESS,
         user: userWithoutPassword,
       });
     } catch (error) {
       console.error(error);
-      res.status(400).json({ message: getErrorMessage(error) });
+      res.status(HttpStatus.BAD_REQUEST).json({ message: getErrorMessage(error) });
+    
     }
   }
 
@@ -72,53 +73,58 @@ export class AuthController {
     try {
       const { email } = req.body;
       await this._UserService.requestOtp(email);
-      res.status(200).json({ msg: 'OTP sent successfully.' });
+      res.status(HttpStatus.OK).json({ msg: ResponseMessages.OTP_SENT});
     } catch (error) {
       console.log(getErrorMessage(error), 'error');
 
-      res.status(400).json({ msg: getErrorMessage(error) });
+     res.status(HttpStatus.BAD_REQUEST).json({ msg: getErrorMessage(error) });
     }
   }
 
   async register(req: Request, res: Response): Promise<void> {
     try {
       await this._UserService.register(req.body);
-      res
-        .status(201)
-        .json({ message: 'OTP sent successfully.', email: req.body.email });
+         res.status(HttpStatus.CREATED).json({
+        message: ResponseMessages.REGISTER_SUCCESS,
+        email: req.body.email,
+      });
     } catch (error) {
       console.log(getErrorMessage(error), 'error');
 
-      res.status(400).json({ message: getErrorMessage(error) });
+     res.status(HttpStatus.BAD_REQUEST).json({ message: getErrorMessage(error) });
     }
   }
 
   async getUser(req: Request, res: Response): Promise<void> {
     try {
-      let userId = (req as AuthenticatdRequest).user?.id || (req as AuthenticatdRequest).admin?.id;
-       console.log(userId, 'userId');
+      const userId =
+        (req as AuthenticatdRequest).user?.id ||
+        (req as AuthenticatdRequest).admin?.id;
+
+      console.log(userId, 'userId');
+
       if (!userId) {
         res
-          .status(400)
-          .json({ message: 'Invalid request: User information is missing.' });
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ message: ResponseMessages.INVALID_USER_REQUEST });
         return;
       }
 
-      const getUser = await this._UserService.getUser(userId) || await this._AdminService.getUserById(userId);
+      const getUser =
+        (await this._UserService.getUser(userId)) ||
+        (await this._AdminService.getUserById(userId));
 
       console.log(getUser, 'getUser');
 
-      if (!getUser) { 
-         console.log(userId, 'userId');
-        res.status(404).json({ message: 'User not found.' });
+      if (!getUser) {
+        res.status(HttpStatus.NOT_FOUND).json({ message: ResponseMessages.USER_NOT_FOUND });
         return;
       }
 
-      res.status(200).json(getUser);
+      res.status(HttpStatus.OK).json(getUser);
     } catch (error) {
-      console.log(error, 'error');
-
-      res.status(500).json({ message: getErrorMessage(error) });
+      console.error('getUser error:', error);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
     }
   }
 
@@ -126,72 +132,81 @@ export class AuthController {
     try {
       const { email, enterdOtp } = req.body;
 
-      // Ensure correct deconstruction
       const { userData, accessToken, refreshToken } =
         await this._UserService.verify_Otp(email, enterdOtp);
 
-      
       setCookie(res, 'refreshToken', refreshToken);
       setCookie(res, 'userToken', accessToken);
-      res.status(200).json({
-        msg: 'OTP verified successfully.',
+
+      res.status(HttpStatus.OK).json({
+        msg: ResponseMessages.OTP_VERIFIED,
         userData,
       });
     } catch (error) {
-      res.status(400).json({ msg: getErrorMessage(error) });
+      console.error('verify_Otp error:', error);
+      res.status(HttpStatus.BAD_REQUEST).json({ msg: getErrorMessage(error) });
     }
   }
 
-  async verifyOtp(req: Request, res: Response): Promise<void> {
-    try {
-      const { email, enterdOtp } = req.body;
-      const { accessToken, refreshToken, user } =
-        await this._UserService.verifyOtp(email, enterdOtp);
+async verifyOtp(req: Request, res: Response): Promise<void> {
+  try {
+    const { email, enterdOtp } = req.body;
 
-      setCookie(res, 'refreshToken', refreshToken);
-      setCookie(res, 'userToken', accessToken);
-      res.status(200).json({
-        message: 'OTP verified successfully.',
-        user,
-      });
-    } catch (error) {
-      res.status(400).json({ message: getErrorMessage(error) });
-    }
+    const { accessToken, refreshToken, user } =
+      await this._UserService.verifyOtp(email, enterdOtp);
+
+    setCookie(res, 'refreshToken', refreshToken);
+    setCookie(res, 'userToken', accessToken);
+
+    res.status(HttpStatus.OK).json({
+      message: ResponseMessages.OTP_VERIFIED,
+      user,
+    });
+  } catch (error) {
+    console.error('Error in verifyOtp:', error);
+    res.status(HttpStatus.BAD_REQUEST).json({ message: getErrorMessage(error) });
   }
+}
 
-  async resendOtp(req: Request, res: Response): Promise<void> {
-    try {
-      const { email } = req.body;
-      console.log(email, 'email');
-      const success = await this._UserService.resendOtp(email);
-      if (!success) {
-        res.status(400).json({ message: 'Failed to send OTP.' });
-        return;
-      }
-      res.status(200).json({
-        message: 'New OTP sent successfully.',
-        success: success,
-      });
-    } catch (error) {
-      res.status(400).json({ msg: getErrorMessage(error) });
+async resendOtp(req: Request, res: Response): Promise<void> {
+  try {
+    const { email } = req.body;
+    const success = await this._UserService.resendOtp(email);
+
+    if (!success) {
+      res.status(HttpStatus.BAD_REQUEST).json({ message: ResponseMessages.OTP_SEND_FAILED });
+      return;
     }
+
+    res.status(HttpStatus.OK).json({
+      message: ResponseMessages.OTP_SENT,
+      success,
+    });
+  } catch (error) {
+    console.error('Error in resendOtp:', error);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
   }
+}
 
-  async resetPassword(req: Request, res: Response): Promise<void> {
-    try {
-      const { email, password } = req.body;
-      console.log(req.body);
 
-      let success = await this._UserService.resetPassword(email, password);
-      if (!success) {
-        res.status(400).json({ message: 'Failed to reset password.' });
-        return;
-      }
-      res.status(200).json({ message: 'Password reset successfully.' });
-    } catch (error) {
-      res.status(400).json({ msg: getErrorMessage(error) });
+
+async resetPassword(req: Request, res: Response): Promise<void> {
+  try {
+    const { email, password } = req.body;
+    const success = await this._UserService.resetPassword(email, password);
+
+    if (!success) {
+      res.status(HttpStatus.BAD_REQUEST).json({ message: ResponseMessages.RESET_PASSWORD_FAILED });
+      return;
     }
+
+    res.status(HttpStatus.CREATED).json({ message: ResponseMessages.RESET_PASSWORD_SUCCESS });
+  } catch (error) {
+    console.error(error);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
   }
+}
+
 
   async getAllUser(req: Request, res: Response): Promise<void> {
     try {
@@ -203,15 +218,15 @@ export class AuthController {
 
       if (!users) throw new Error('User list fetching failed');
 
-      res.status(200).json({
-        users,
-        totalUsers,
-        totalPages,
-        currentPage: page,
-      });
+      res.status(HttpStatus.OK).json({
+      users,
+      totalUsers,
+      totalPages,
+      currentPage: page,
+    });
     } catch (error) {
       console.error(error);
-      res.status(400).json({ message: getErrorMessage(error) });
+          res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
     }
   }
   async googleAuth(req: Request, res: Response): Promise<void> {
@@ -226,10 +241,15 @@ export class AuthController {
       setCookie(res, 'userToken', token);
       if (!user) throw new Error('Google login faild');
       if (!token) throw new Error('Google login faild');
-      res.status(200).json({ message: 'User varified', user });
+     
+
+    res.status(HttpStatus.OK).json({
+      message: ResponseMessages.GOOGLE_AUTH_SUCCESS,
+      user,
+    });
     } catch (error) {
       console.error(error);
-      res.status(400).json({ message: getErrorMessage(error) });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
     }
   }
 
@@ -247,127 +267,147 @@ export class AuthController {
 
       setCookie(res, 'refreshToken', refreshToken);
       setCookie(res, 'userToken', token);
-      res.status(200).json({ message: 'Token refreshed successfully.' });
+      res.status(HttpStatus.OK).json({ message: ResponseMessages.REFRESH_TOKEN_SUCCESS })
     } catch (error) {
       console.error(error, '>>>>');
-      res.status(400).json({ message: getErrorMessage(error) });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
     }
   }
 
-  async logout(req: Request, res: Response): Promise<void> {
-    try {
-      res.cookie('refreshToken', '', {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        expires: new Date(0), // Expire immediately
-        path: '/',
-      });
 
-      res.cookie('userToken', '', {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        expires: new Date(0), // Expire immediately
-        path: '/',
-      });
+async logout(req: Request, res: Response): Promise<void> {
+  try {
+    res.cookie('refreshToken', '', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      expires: new Date(0),
+      path: '/',
+    });
 
-      req.session.destroy((err) => {
-        if (err) {
-          console.error(err);
-        }
-        res.status(200).json({ message: 'Logged out successfully.', ok: true });
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(400).json({ message: getErrorMessage(error) });
-    }
-  }
+    res.cookie('userToken', '', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      expires: new Date(0),
+      path: '/',
+    });
 
-  async adminLogout(req: Request, res: Response): Promise<void> {
-    try {
-      res.cookie('refreshToken', '', {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        expires: new Date(0),
-        path: '/',
-      });
-
-      res.cookie('adminToken', '', {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        expires: new Date(0),
-        path: '/',
-      });
-
-      req.session.destroy((err) => {
-        if (err) {
-          console.error(err);
-        }
-        res.status(200).json({ message: 'Logged out successfully.', ok: true });
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(400).json({ message: getErrorMessage(error) });
-    }
-  }
-
-  async blockUser(req: Request, res: Response): Promise<void> {
-    try {
-      const { id: userId } = req.params; // Get userId from URL params
-
-      if (!userId) {
-        res
-          .status(400)
-          .json({ message: 'User ID is required to block a user.' });
-        return;
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Session destroy failed:', err);
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+          message: ResponseMessages.INTERNAL_ERROR,
+        });
       }
 
-      const blockedUser = await this._UserService.blockUser(userId);
-
-      if (!blockedUser) {
-        res.status(400).json({ message: 'Failed to block user.' });
-        return;
-      }
-
-      res.status(200).json({
-        message: 'User blocked successfully.',
-        user: blockedUser,
+      res.status(HttpStatus.OK).json({
+        message: 'Logged out successfully.',
+        ok: true,
       });
-    } catch (error) {
-      console.error(error);
-      res.status(400).json({ message: getErrorMessage(error) });
-    }
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
   }
+}
 
-  // Unblock a user
-  async unblockUser(req: Request, res: Response): Promise<void> {
-    try {
-      const { id: userId } = req.params; // Get userId from URL params
+async adminLogout(req: Request, res: Response): Promise<void> {
+  try {
+    res.cookie('refreshToken', '', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      expires: new Date(0),
+      path: '/',
+    });
 
-      if (!userId) {
-        res
-          .status(400)
-          .json({ message: 'User ID is required to unblock a user.' });
-        return;
+    res.cookie('adminToken', '', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      expires: new Date(0),
+      path: '/',
+    });
+
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Session destroy failed:', err);
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+          message: ResponseMessages.INTERNAL_ERROR,
+        });
       }
 
-      const unblockedUser = await this._UserService.unblockUser(userId);
-
-      if (!unblockedUser) {
-        res.status(400).json({ message: 'Failed to unblock user.' });
-        return;
-      }
-
-      res.status(200).json({
-        message: 'User unblocked successfully.',
-        user: unblockedUser,
+      res.status(HttpStatus.OK).json({
+        message: 'Logged out successfully.',
+        ok: true,
       });
-    } catch (error) {
-      console.error(error);
-      res.status(400).json({ message: getErrorMessage(error) });
-    }
+    });
+  } catch (error) {
+    console.error('Admin logout error:', error);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
   }
+}
+
+async blockUser(req: Request, res: Response): Promise<void> {
+  try {
+    const { id: userId } = req.params;
+
+    if (!userId) {
+       res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: ResponseMessages.INVALID_USER_REQUEST });
+        return
+    }
+
+    const blockedUser = await this._UserService.blockUser(userId);
+
+    if (!blockedUser) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: 'Failed to block user.' });
+         return
+    }
+
+    res.status(HttpStatus.OK).json({
+      message: 'User blocked successfully.',
+      user: blockedUser,
+    });
+  } catch (error) {
+    console.error('Block user error:', error);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
+  }
+}
+
+async unblockUser(req: Request, res: Response): Promise<void> {
+  try {
+    const { id: userId } = req.params;
+
+    if (!userId) {
+    res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: ResponseMessages.INVALID_USER_REQUEST });
+          return 
+    }
+
+    const unblockedUser = await this._UserService.unblockUser(userId);
+
+    if (!unblockedUser) {
+     res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: 'Failed to unblock user.' });
+         return 
+    }
+
+    res.status(HttpStatus.OK).json({
+      message: 'User unblocked successfully.',
+      user: unblockedUser,
+    });
+  } catch (error) {
+    console.error('Unblock user error:', error);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
+  }
+}
+
+
 }
