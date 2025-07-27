@@ -24,6 +24,7 @@ import { useQuery } from '@tanstack/react-query';
 import ReportButton from '@/ customComponents/common/ReportButton';
 
 interface Post {
+  hashtags: string[] | string;
   _id: string;
   userId: { _id: string; fullname: string; avatar: string };
   description: string;
@@ -134,6 +135,17 @@ const PostCard = memo(
       setShareModalOpen(true);
     };
 
+    const hashtags = Array.isArray(post.hashtags)
+  ? post.hashtags.flat()
+  : typeof post.hashtags === 'string'
+    ? post.hashtags.split(/[\s,]+/)
+    : [];
+
+
+
+    // console.log('post in PostCard:', post);
+    
+
     return (
       // <div className="bg-white rounded-xl shadow-lg p-4 mb-4 cursor-pointer relative">
       <div className="  bg-white dark:bg-gray-900 text-black dark:text-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 cursor-pointer relative outline outline-1 outline-gray-200 dark:outline-gray-700">
@@ -207,6 +219,26 @@ const PostCard = memo(
             </button>
           )}
         </p>
+
+        {/* Hashtags */}
+
+{hashtags.length > 0 && (
+  <div className="mt-2 flex flex-wrap gap-2">
+    {hashtags.map((tag, index) => (
+      <span
+        key={`${tag}-${index}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          navigate(`/home/hashtag/${tag.trim()}`);
+        }}
+        className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-white"
+      >
+        {tag}
+      </span>
+    ))}
+  </div>
+)}
+
 
         {/* Media Preview */}
         {post?.mediaUrls?.length > 0 && (
