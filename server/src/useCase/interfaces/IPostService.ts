@@ -7,7 +7,7 @@ export interface IPostService {
     description: string,
     mediaUrls: string[],
     visibility: 'public' | 'private',
-    isProUser: string
+    hashtags: string[]
   ): Promise<IPost>;
   getPosts(
     userId: string,
@@ -27,4 +27,8 @@ export interface IPostService {
   unlikePost(userId: string, postId: string): Promise<void>;
   getUserPosts(userId: string, page: number, limit: number): Promise<IPost[]>;
   reportPost(userId: string, postId: string): Promise<void>;
+  generateHashtagsFromAI(
+      description: string,
+      userId: string
+    ): Promise<string[]> | null;
 }

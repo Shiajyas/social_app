@@ -114,4 +114,16 @@ router.get(
   },
 );
 
+router.post(
+  '/generate-hashtags',
+  userAuthMiddleware.authenticate,
+  async (req, res, next) => {
+    try {
+      await postController.generateHashtags(req, res);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 export default router;

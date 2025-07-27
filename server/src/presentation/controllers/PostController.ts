@@ -29,9 +29,14 @@ async createPost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
       title: string;
       description: string;
       visibility?: 'public' | 'private';
+      hashtags: string
     };
-    const { title, description, visibility = 'public' } = body;
-
+    const { title, description, visibility = 'public',hashtags } = body;
+ 
+    // Convert hashtags string to array
+    const hashtagsArray = hashtags ? hashtags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : [];
+  //  console.log(hashtagsArray, 'Hashtags Array >>>>>>>>');
+  //  
     if (!req.user) {
       res.status(StatusCode.UNAUTHORIZED).json({ message: ResponseMessages.UNAUTHORIZED });
       return;
@@ -48,7 +53,8 @@ async createPost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
       description,
       mediaUrls,
       visibility,
-      isProUser
+      hashtagsArray,
+
     );
 
     res.status(StatusCode.CREATED).json({
@@ -109,6 +115,7 @@ async getPosts(req: AuthenticatedPostRequest, res: Response): Promise<void> {
     }
 
     const { posts, nextPage } = await this._PostService.getPosts(userId, page, limit);
+
 
     res.status(StatusCode.OK).json({
       message: ResponseMessages.SUCCESS,
@@ -243,4 +250,28 @@ async getPostComments(req: AuthenticatedPostRequest, res: Response): Promise<voi
     res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
   }
 }
+
+async generateHashtags(req: Request, res: Response) {
+  try {
+    // console.log(req.body, 'req.body in generateHashtags');
+    
+    const { description, userId } = req.body;
+
+// console.log('Generating hashtags for description:', description, 'and userId:', userId);
+
+    if(!description || !userId) {
+      return res.status(StatusCode.BAD_REQUEST).json({ message: 'Description and userId are required' });
+    }
+    const hashtags = await this._PostService.generateHashtagsFromAI(description,userId);
+    console.log(hashtags, 'Generated hashtags >>>');
+    
+    return res.status(StatusCode.OK).json({ hashtags });
+  } catch (err) {
+    console.error('Hashtag generation error:', err);
+    res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Failed to generate hashtags' });
+  }
+}
+
+
+
 }

@@ -24,6 +24,8 @@ export const useUploadPost = () => {
 
   return useMutation<any, Error, FormData>({
     mutationFn: async (formData: FormData): Promise<any> => {
+
+    console.log(formData, 'FormData in useUploadPost>>>')
       return postService.createPost(formData);
     },
     onSuccess: (_, variables) => {

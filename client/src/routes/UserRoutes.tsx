@@ -9,6 +9,7 @@ import EditPost from '@/ customComponents/home/post/EditPost';
 import ChatSection from '@/ customComponents/home/chat/ChatSection';
 import UserPrivateRoute from './UserPrivateRoute';
 import { SearchSection } from '@/ customComponents/home/search/SearchSection';
+import { HashtagSearchResults } from '@/ customComponents/home/search/HashtagSearchResults';
 
 const UserRoutes = () => (
   <Route
@@ -27,6 +28,8 @@ const UserRoutes = () => (
     <Route path="edit-post/:postId" element={<EditPost />} />
     <Route path="messages" element={<ChatSection />} />
     <Route path="search" element={<SearchSection />} />
+    <Route path="/search/hashtag/:tag" element={<HashtagSearchResults />} />
+
   </Route>
 );
 

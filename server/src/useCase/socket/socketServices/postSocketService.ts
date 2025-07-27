@@ -4,13 +4,14 @@ import { IPostSocketService } from './Interface/IPostSocketService';
 import { IPostRepository } from '../../../data/interfaces/IPostRepository';
 import { IUserRepository } from '../../../data/interfaces/IUserRepository';
 import { NotificationService } from '../../notificationService';
+import { INotificationService } from '../../interfaces/InotificationService';
 import { Server } from 'socket.io';
 
 export class PostSocketService implements IPostSocketService {
   private _Io: Server;
   private _UserRepository: IUserRepository;
   private _PostRepository: IPostRepository;
-  private _NotificationService: NotificationService;
+  private _NotificationService: INotificationService;
 
   constructor(
     ioInstance: Server,

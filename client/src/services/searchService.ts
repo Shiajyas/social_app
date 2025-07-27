@@ -10,4 +10,14 @@ export const searchService = {
             'Failed to search',
         );
     },
+
+    getPostsByHashtag: (tag: string) => {
+        return fetchData(
+            `/users/search/hashtag/${tag}`,
+            {
+                method: 'GET',
+            },
+            'Failed to fetch posts by hashtag',
+        );
+    }
 };
