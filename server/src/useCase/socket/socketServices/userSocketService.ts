@@ -3,6 +3,7 @@ import { IUserSocketService } from './Interface/IUserSocketService';
 import { ISUserRepository } from '../../../data/interfaces/ISUserRepository';
 import { IUserRepository } from '../../../data/interfaces/IUserRepository';
 import { NotificationService } from '../../notificationService';
+import { INotificationService } from '../../interfaces/InotificationService';
 import { ObjectId } from 'mongodb';
 import { Server } from 'socket.io';
 
@@ -10,7 +11,7 @@ export class UserSocketService implements IUserSocketService {
   private _Io: Server;
   private _UserRepository: IUserRepository;
   private _SessionUserRepository: ISUserRepository;
-  private _NotificationService: NotificationService;
+  private _NotificationService: INotificationService;
 
   constructor(
     ioInstance: Server,

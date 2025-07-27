@@ -32,9 +32,9 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
     return () => debouncedSetQuery.cancel();
   }, [query, debouncedSetQuery]);
 
-  const { data, isLoading, isFetching, isError, error } = useQuery<ISearchResult>({
+  const { data, isLoading, isFetching, isError, error } = useQuery<ISearchResult, Error>({
     queryKey: ['search', debouncedQuery],
-    queryFn: () => searchService.searchAll(debouncedQuery),
+    queryFn: async () => await searchService.searchAll(debouncedQuery),
     enabled: debouncedQuery.trim().length > 0,
     keepPreviousData: true,
     staleTime: 5 * 60 * 1000,
@@ -66,16 +66,16 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
         </p>
       )}
 
-      {!isLoading && !isFetching && !isError && data && (
+      {!isLoading && !isFetching && !isError && (
         <>
-          {data.users.length === 0 && data.posts.length === 0 ? (
+          {(data?.users?.length === 0 && data?.posts?.length === 0) ? (
             <div className="flex flex-col items-center justify-center mt-8">
               <img src="/image.png" alt="No results" className="w-48 h-48 object-contain mb-3" />
               <p className="text-gray-600 text-sm">No users or posts found.</p>
             </div>
           ) : (
             <>
-              {data.users.length > 0 && (
+              {data?.users?.length > 0 && (
                 <div className="mb-6">
                   <h4 className="font-semibold mb-3 text-lg text-gray-900 dark:text-white">
                     Users
@@ -106,7 +106,7 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
                 </div>
               )}
 
-              {data.posts.length > 0 && (
+              {data?.posts?.length > 0 && (
                 <div>
                   <h4 className="font-semibold mb-3 text-lg">Posts</h4>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">

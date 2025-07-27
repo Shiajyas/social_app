@@ -1,21 +1,20 @@
 import SubscriptionModel from '../../core/domain/models/SubscriptionModel';
+import User from '../../core/domain/models/UserModel';
 import { ISubscription } from '../../core/domain/interfaces/ISubscription';
 import { ISubscriptionRepository } from '../interfaces/ISubscriptionRepository';
 
 class SubscriptionRepository implements ISubscriptionRepository {
-
+  /**
+   * Fetch latest active subscription for user
+   */
   async findByUserId(userId: string): Promise<ISubscription | null> {
     try {
-      console.log('Fetching subscription for user:', userId);
       const sub = await SubscriptionModel.findOne({
         userId,
         isSubscribed: true,
         startDate: { $ne: null },
         endDate: { $ne: null },
       }).sort({ endDate: -1 });
-
-      if (!sub) console.log('No matching active subscription found.');
-      else console.log('Found subscription:', sub);
 
       return sub;
     } catch (error) {
@@ -24,10 +23,11 @@ class SubscriptionRepository implements ISubscriptionRepository {
     }
   }
 
+  /**
+   * Fetch all subscriptions and mark expired ones inactive
+   */
   async findAllByUserId(userId: string): Promise<ISubscription[]> {
     try {
-      console.log('Fetching all subscriptions for user:', userId);
-
       const subscriptions = await SubscriptionModel.find({
         userId,
         startDate: { $ne: null },
@@ -52,30 +52,76 @@ class SubscriptionRepository implements ISubscriptionRepository {
     }
   }
 
+  /**
+   * Create subscription and update User model's subscription & role
+   */
   async createSubscription(
     userId: string,
     startDate: Date,
     endDate: Date,
   ): Promise<ISubscription> {
-    return await SubscriptionModel.create({
-      userId,
-      isSubscribed: true,
-      startDate,
-      endDate,
-    });
+    try {
+      const subscription = await SubscriptionModel.create({
+        userId,
+        isSubscribed: true,
+        startDate,
+        endDate,
+      });
+
+      // Update user record as proUser
+      await User.findByIdAndUpdate(userId, {
+        role: 'proUser',
+        subscription: {
+          isActive: true,
+          startDate,
+          endDate,
+        },
+      });
+
+      return subscription;
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      throw new Error('Failed to create subscription');
+    }
   }
 
+  /**
+   * Update subscription if already exists
+   */
   async updateSubscription(
     userId: string,
     startDate: Date,
     endDate: Date,
   ): Promise<ISubscription | null> {
-    return await SubscriptionModel.findOneAndUpdate(
-      { userId },
-      { isSubscribed: true, startDate, endDate },
-      { new: true },
-    );
+    try {
+      const updated = await SubscriptionModel.findOneAndUpdate(
+        { userId },
+        {
+          isSubscribed: true,
+          startDate,
+          endDate,
+        },
+        { new: true },
+      );
+
+      // Sync user model as well
+      if (updated) {
+        await User.findByIdAndUpdate(userId, {
+          role: 'proUser',
+          subscription: {
+            isActive: true,
+            startDate,
+            endDate,
+          },
+        });
+      }
+
+      return updated;
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      throw new Error('Failed to update subscription');
+    }
   }
 }
 
-export default SubscriptionRepository
+export default  SubscriptionRepository

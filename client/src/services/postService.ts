@@ -116,4 +116,15 @@ export const postService = {
       },
       'Failed to unsave post',
     ),
+
+genrateHashtags: (description: string, userId: string) =>
+  fetchData(
+    '/users/posts/generate-hashtags',
+    {
+      method: 'POST',
+      data: { description, userId }, 
+    },
+    'Failed to generate hashtags',
+  )
+
 };
