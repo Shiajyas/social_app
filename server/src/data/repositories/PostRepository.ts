@@ -12,6 +12,7 @@ export class PostRepository implements IPostRepository {
     description: string,
     mediaUrls: string[],
     visibility: 'public' | 'private',
+    hashtags: string[]
   ): Promise<IPost> {
     const newPost = new Post({
       userId,
@@ -19,7 +20,11 @@ export class PostRepository implements IPostRepository {
       description,
       mediaUrls,
       visibility,
+      hashtags,
     });
+
+    // console.log(newPost, '>>>>>>>>>');
+    
     return await newPost.save();
   }
 
@@ -75,14 +80,7 @@ export class PostRepository implements IPostRepository {
     mediaUrls?: string[],
   ): Promise<IPost | null> {
     try {
-      console.log(
-        postId,
-        userId,
-        title,
-        description,
-        mediaUrls,
-        '>>>>>>32....',
-      );
+  
 
       // Construct update object dynamically
       const updateFields: Partial<IPost> = { title, description };

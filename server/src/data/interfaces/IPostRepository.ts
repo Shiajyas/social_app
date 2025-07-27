@@ -7,7 +7,7 @@ export interface IPostRepository {
     description: string,
     mediaUrls: string[],
     visibility: 'public' | 'private',
-      isProUser: string
+    hashtags?: string[]
   ): Promise<IPost>;
   getPosts(
     userId: string,

@@ -17,6 +17,14 @@ export const postSchema = new Schema<IPost>(
       },
     ],
     commendCount: { type: Number, default: 0 },
+    hashtags: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: (v: string[]) => v.length <= 5,
+        message: 'A post can have a maximum of 5 hashtags.',
+      },
+    },
 
     // Visibility control (public/private)
     visibility: {

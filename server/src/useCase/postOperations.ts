@@ -2,6 +2,7 @@ import { IPostService } from './interfaces/IPostService';
 import { IPostRepository } from '../data/interfaces/IPostRepository';
 import { IUserRepository } from '../data/interfaces/IUserRepository';
 import { ISubscriptionRepository } from '../data/interfaces/ISubscriptionRepository';
+import { generateHashtagsFree } from '../infrastructure/utils/openAi';
 import { IPost } from '../core/domain/interfaces/IPost';
 
 export class PostService implements IPostService {
@@ -22,7 +23,7 @@ async createPost(
   description: string,
   mediaUrls: string[],
   visibility: 'public' | 'private',
-  isProUser: string
+  hashtags: string[]
 ): Promise<IPost> {
   const user = await this._UserRepository.findById(userId); // You should have this method
   if (!user) throw new Error('User not found');
@@ -51,7 +52,7 @@ async createPost(
     description,
     mediaUrls,
     visibility,
-    isProUser
+    hashtags
   );
 }
 
@@ -133,5 +134,20 @@ async createPost(
   // Report a post
   async reportPost(userId: string, postId: string): Promise<void> {
     await this._PostRepository.reportPost(userId, postId);
+  }
+
+  async generateHashtagsFromAI(
+    description: string,
+    userId: string
+  ): Promise<string[]> {
+    const user = await this._UserRepository.findById(userId);
+    if (!user) throw new Error('User not found');
+
+    // Subscription check
+    // if (!user.subscription?.isActive || user.role !== 'proUser') {
+    //   throw new Error('This is a paid feature. Subscribe to access.');
+    // }
+
+    return await generateHashtagsFree(description);
   }
 }
