@@ -9,7 +9,7 @@ let redis: Redis;
 
 const {
   REDIS_URL,
-  REDIS_HOST = '127.0.0.1',
+  REDIS_HOST = 'my-redis',
   REDIS_PORT = '6379',
 } = process.env;
 
