@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   X,
   Mic,
@@ -7,6 +7,8 @@ import {
   VideoOff,
   PhoneOff,
   User,
+  Maximize,
+  Minimize,
 } from 'lucide-react';
 import gsap from 'gsap';
 
@@ -49,15 +51,16 @@ const CallUI: React.FC<CallUIProps> = ({
   const [ringtone, setRingtone] = useState<HTMLAudioElement | null>(null);
   const [micLoading, setMicLoading] = useState(false);
   const [callEnded, setCallEnded] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // ⏱ Call duration timer
+  const videoContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!callActive) return;
     const interval = setInterval(() => setSeconds((prev) => prev + 1), 1000);
     return () => clearInterval(interval);
   }, [callActive]);
 
-  // 🔊 Setup ringtone and ringback
   useEffect(() => {
     const ringbackAudio = new Audio('/sounds/outgoing-ring.mp3');
     const ringtoneAudio = new Audio('/sounds/ringtone.mp3');
@@ -87,7 +90,6 @@ const CallUI: React.FC<CallUIProps> = ({
     };
   }, [incomingCall, callActive, ringback, ringtone]);
 
-  // 🔁 Assign video/audio streams
   useEffect(() => {
     const localVideo = document.getElementById('local-video') as HTMLVideoElement | null;
     const remoteVideo = document.getElementById('remote-video') as HTMLVideoElement | null;
@@ -101,6 +103,14 @@ const CallUI: React.FC<CallUIProps> = ({
       remoteAudioRef.current.srcObject = remoteStream;
     }
   }, [localStream, remoteStream, callType, remoteAudioRef]);
+
+  useEffect(() => {
+    gsap.fromTo(
+      '.call-modal',
+      { opacity: 0, scale: 0.9 },
+      { opacity: 1, scale: 1, duration: 0.3, ease: 'power2.out' }
+    );
+  }, []);
 
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60);
@@ -122,12 +132,21 @@ const CallUI: React.FC<CallUIProps> = ({
     setTimeout(() => onClose(), 1000);
   };
 
+  const handleToggleFullscreen = () => {
+    const elem = videoContainerRef.current;
+    if (!document.fullscreenElement && elem) {
+      elem.requestFullscreen().then(() => setIsFullscreen(true));
+    } else {
+      document.exitFullscreen().then(() => setIsFullscreen(false));
+    }
+  };
+
   useEffect(() => {
-    gsap.fromTo(
-      '.call-modal',
-      { opacity: 0, scale: 0.9 },
-      { opacity: 1, scale: 1, duration: 0.3, ease: 'power2.out' }
-    );
+    const listener = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', listener);
+    return () => document.removeEventListener('fullscreenchange', listener);
   }, []);
 
   return (
@@ -145,7 +164,12 @@ const CallUI: React.FC<CallUIProps> = ({
         </h2>
 
         {callType === 'video' ? (
-          <div className="relative w-full h-64 bg-black mb-4 rounded-xl overflow-hidden">
+          <div
+            ref={videoContainerRef}
+            className={`relative w-full h-64 bg-black mb-4 rounded-xl overflow-hidden ${
+              isFullscreen ? 'h-screen w-screen fixed top-0 left-0 z-[100]' : ''
+            }`}
+          >
             <video id="remote-video" autoPlay playsInline className="w-full h-full object-cover" />
             <video
               id="local-video"
@@ -154,6 +178,7 @@ const CallUI: React.FC<CallUIProps> = ({
               playsInline
               className="absolute bottom-2 right-2 w-24 h-24 sm:w-28 sm:h-28 border-2 border-white rounded-lg object-cover"
             />
+
             {!isRemoteVideoOn && (
               <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white">
                 Camera Off
@@ -164,6 +189,18 @@ const CallUI: React.FC<CallUIProps> = ({
                 <MicOff className="w-5 h-5" />
               </div>
             )}
+
+            <button
+              onClick={handleToggleFullscreen}
+              className="absolute top-3 left-3 bg-white dark:bg-gray-800 p-2 rounded-full shadow-md hover:scale-105 transition"
+              title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+            >
+              {isFullscreen ? (
+                <Minimize className="w-5 h-5 text-gray-700 dark:text-white" />
+              ) : (
+                <Maximize className="w-5 h-5 text-gray-700 dark:text-white" />
+              )}
+            </button>
           </div>
         ) : (
           <div className="w-full h-48 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center mb-4">
