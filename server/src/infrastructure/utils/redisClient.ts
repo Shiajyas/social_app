@@ -1,3 +1,5 @@
+// src/infrastructure/utils/redisClient.ts
+
 import Redis from 'ioredis';
 import dotenv from 'dotenv';
 
@@ -5,24 +7,48 @@ dotenv.config();
 
 let redis: Redis;
 
-// Use REDIS_URL if provided (priority), else use REDIS_HOST + REDIS_PORT
-if (process.env.REDIS_URL) {
-  console.log('✅ Using Redis URL:', process.env.REDIS_URL);
-  redis = new Redis(process.env.REDIS_URL);
+const {
+  REDIS_URL,
+  REDIS_HOST = '127.0.0.1',
+  REDIS_PORT = '6379',
+} = process.env;
+
+if (REDIS_URL) {
+  console.log('✅ Using Redis URL:', REDIS_URL);
+  redis = new Redis(REDIS_URL);
 } else {
-  const host = process.env.REDIS_HOST || '127.0.0.1';
-  const port = parseInt(process.env.REDIS_PORT || '6379', 10);
-  
-  console.log(`✅ Connecting to Redis at ${host}:${port}`);
-  redis = new Redis({ host, port });
+  const port = parseInt(REDIS_PORT, 10);
+
+  console.log(`✅ Connecting to Redis at ${REDIS_HOST}:${port}`);
+  redis = new Redis({
+    host: REDIS_HOST,
+    port,
+    retryStrategy: (times) => {
+      const delay = Math.min(times * 50, 2000);
+      console.warn(`⏳ Redis reconnect attempt #${times}, retrying in ${delay}ms`);
+      return delay;
+    },
+  });
 }
 
 redis.on('connect', () => {
-  console.log('✅ Connected to Redis');
+  console.log('✅ Redis connection established');
+});
+
+redis.on('ready', () => {
+  console.log('🚀 Redis is ready to use');
 });
 
 redis.on('error', (err) => {
-  console.error('❌ Redis connection error:', err);
+  console.error('❌ Redis connection error:', err.message);
 });
-   
+
+redis.on('close', () => {
+  console.warn('⚠️ Redis connection closed');
+});
+
+redis.on('reconnecting', () => {
+  console.info('🔄 Attempting to reconnect to Redis...');
+});
+
 export default redis;
