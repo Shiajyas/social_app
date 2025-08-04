@@ -17,15 +17,15 @@ const SubscriptionPlanPreview = () => {
         </li>
         <li className="flex items-center gap-2">
           <CheckCircleIcon className="h-5 w-5 text-green-500" />
-          Access to voice & video calls
+          Uploading video duration upto 5 min
         </li>
         <li className="flex items-center gap-2">
           <CheckCircleIcon className="h-5 w-5 text-green-500" />
-          Priority support & faster load times
+          Hash-tag genration
         </li>
         <li className="flex items-center gap-2">
           <CheckCircleIcon className="h-5 w-5 text-green-500" />
-          Post scheduling & analytics
+          Bedge for verified users
         </li>
       </ul>
     </div>
