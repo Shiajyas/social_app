@@ -237,4 +237,12 @@ export class UserRepository implements IUserRepository {
       ],
     }).limit(5);
   }
+
+   async searchSamples(): Promise<IUser[]> {
+    return await User.find({})
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('username fullname avatar')
+      .lean();
+  }
 }

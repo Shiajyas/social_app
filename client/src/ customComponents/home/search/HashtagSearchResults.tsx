@@ -35,7 +35,7 @@ export const HashtagSearchResults: React.FC = () => {
     enabled: !!tag,
   });
 
-  console.log(data.posts[0], 'userId');
+  // console.log(data.posts[0], 'userId');
   
 
   if (isLoading) return <p className="p-4">Loading...</p>;

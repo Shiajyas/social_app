@@ -140,4 +140,14 @@ router.post(
   ),
 );
 
+
+// router.get(
+//   '/search/sample',
+//   userAuthMiddleware.authenticate,
+//   (req: Request, res: Response, next: NextFunction) =>
+//     postController
+//       .searchSamples(req as unknown as AuthenticatedPostRequest, res)
+//       .catch(next),
+// );
+
 export default router;

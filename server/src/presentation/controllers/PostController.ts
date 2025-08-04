@@ -305,5 +305,16 @@ async generateHashtags(req: Request, res: Response) {
     }
   }
 
+  // async searchSamples(req: AuthenticatedPostRequest, res: Response): Promise<void> {
+  //   try {
+  //     const page = parseInt(req.query.page as string) || 1;
+  //     const limit = parseInt(req.query.limit as string) || 10;
+  
+  //     const posts = await this._PostService.searchSamples();
+  //     res.status(StatusCode.OK).json({ message: ResponseMessages.SUCCESS, posts });
+  //   } catch (error) {
+  //     res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
+  //   }
+  // }
 
 }

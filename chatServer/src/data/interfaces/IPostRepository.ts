@@ -34,4 +34,5 @@ export interface IPostRepository {
     limit: number,
   ): Promise<{ posts: IPost[]; nextPage: number | null }>;
   searchPosts(query: string): Promise<IPost[]>;
+//  searchSamples(): Promise<IPost[]> ;
 }

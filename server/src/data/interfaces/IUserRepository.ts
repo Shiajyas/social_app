@@ -48,4 +48,6 @@ export interface IUserRepository {
 
   savePost(userId: string, postId: string): Promise<boolean>;
   searchUsers(query: string): Promise<IUser[]>;
+
+  searchSamples(): Promise<IUser[]> 
 }

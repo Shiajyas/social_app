@@ -135,5 +135,15 @@ genrateHashtags: (description: string, userId: string) =>
             },
             'Failed to fetch posts by hashtag',
         );
-    }
+    },
+
+      getSearchSample: (query: string) => {
+    return fetchData(
+      `/users/post/search/sample`,
+      {
+        method: 'GET',
+      },
+      'Failed to get search sample',
+    );
+  },
 };

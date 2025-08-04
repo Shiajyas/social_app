@@ -230,4 +230,12 @@ export class PostRepository implements IPostRepository {
       ],
     }).limit(10);
   }
+  
+  //  async searchSamples(): Promise<IPost[]> {
+  //   return await Post.find({ visible: true })
+  //     .sort({ createdAt: -1 }) // newest first
+  //     .limit(8)
+  //     .populate('userId', 'fullname username avatar')
+  //     .lean();
+  // }
 }

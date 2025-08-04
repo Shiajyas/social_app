@@ -181,4 +181,14 @@ console.log("Is toxic:", isToxic);
     return await this._PostRepository.searchPostsByHashtags(query);
   }
 
+  // async searchSamples(): Promise<IPost[]> {
+  //   try {
+  //        let posts: IPost[] = await this._PostRepository.searchSamples();
+  //   let users = await this._UserRepository.searchSamples();
+  //   return [...posts, ...users];
+  //   } catch (error) {
+  //     console.log(error);
+  //     return [];
+  //   }
+  // }
 }

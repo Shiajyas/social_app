@@ -35,4 +35,6 @@ export interface IPostService {
     searchPostsByHashtags(
         query: string,
       ): Promise<IPost[]>
+
+      // searchSamples(): Promise<IPost[]> 
 }

@@ -8,6 +8,8 @@ import { IPost } from '@/types/postTypes';
 import { ISearchResult } from '@/types/searchTypes';
 import { useNavigate } from 'react-router-dom';
 import { useSearchStore } from '@/appStore/searchStore';
+import { userService } from '@/services/userService';
+import { postService } from '@/services/postService';
 
 interface SearchSectionProps {
   hideInput?: boolean;
@@ -32,20 +34,65 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
     return () => debouncedSetQuery.cancel();
   }, [query, debouncedSetQuery]);
 
-  const { data, isLoading, isFetching, isError, error } = useQuery<ISearchResult>({
+  // 🔍 Search query (only when user types)
+  const {
+    data: searchData,
+    isLoading: isSearchLoading,
+    isFetching: isSearchFetching,
+    isError: isSearchError,
+    error: searchError,
+  } = useQuery<ISearchResult>({
     queryKey: ['search', debouncedQuery],
     queryFn: () => searchService.searchAll(debouncedQuery),
     enabled: debouncedQuery.trim().length > 0,
-    keepPreviousData: true,
     staleTime: 5 * 60 * 1000,
   });
 
+  // 🧊 Initial load (sample users and posts when input is empty)
+  const {
+    data: sampleUsers,
+    isLoading: isUserLoading,
+    isError: isUserError,
+  } = useQuery<IUser[]>({
+    queryKey: ['sampleUsers'],
+    queryFn: () => userService.getSuggestions(),
+    enabled: debouncedQuery.trim().length === 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // let sampleUsers: IUser[] = [];
+
+  const {
+    data: samplePosts,
+    isLoading: isPostLoading,
+    isError: isPostError,
+  } = useQuery<IPost[]>({
+    queryKey: ['samplePosts'],
+    queryFn: () => postService.getPosts(),
+    enabled: debouncedQuery.trim().length === 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  console.log('samplePosts', samplePosts);
   const handleUserClick = useCallback(
     (userId: string) => {
       navigate(`/home/profile/${userId}`);
     },
     [navigate],
   );
+
+  // 🧠 Choose data source
+  const users = debouncedQuery.trim() ? searchData?.users ?? [] : sampleUsers?.splice(0, 4) ?? [];
+  const posts = debouncedQuery.trim() ? searchData?.posts ?? [] : samplePosts?.posts ?? [];
+  const loading = debouncedQuery.trim()
+    ? isSearchLoading || isSearchFetching
+    : isUserLoading || isPostLoading;
+
+  const error = debouncedQuery.trim()
+    ? searchError
+    : isUserError || isPostError
+    ? new Error('Sample data fetch failed')
+    : null;
 
   return (
     <div className="p-4 bg-white dark:bg-gray-900 text-black dark:text-white rounded shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-700 max-w-full">
@@ -58,30 +105,30 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
         />
       )}
 
-      {(isLoading || isFetching) && <p className="text-sm text-gray-500">Searching...</p>}
+      {loading && <p className="text-sm text-gray-500">Loading...</p>}
 
-      {isError && (
+      {error && (
         <p className="text-sm text-red-500">
           Error: {error instanceof Error ? error.message : 'Unknown error occurred'}
         </p>
       )}
 
-      {!isLoading && !isFetching && !isError && data && (
+      {!loading && !error && (
         <>
-          {data.users.length === 0 && data.posts.length === 0 ? (
+          {users.length === 0 && posts.length === 0 ? (
             <div className="flex flex-col items-center justify-center mt-8">
               <img src="/image.png" alt="No results" className="w-48 h-48 object-contain mb-3" />
               <p className="text-gray-600 text-sm">No users or posts found.</p>
             </div>
           ) : (
             <>
-              {data.users.length > 0 && (
+              {users.length > 0 && (
                 <div className="mb-6">
                   <h4 className="font-semibold mb-3 text-lg text-gray-900 dark:text-white">
                     Users
                   </h4>
                   <div className="space-y-2">
-                    {data.users.map((user: IUser) => (
+                    {users.map((user: IUser) => (
                       <div
                         key={user._id}
                         onClick={() => handleUserClick(user._id)}
@@ -106,11 +153,11 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
                 </div>
               )}
 
-              {data.posts.length > 0 && (
+              {posts.length > 0 && (
                 <div>
                   <h4 className="font-semibold mb-3 text-lg">Posts</h4>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {data.posts.map((post: IPost) => {
+                    {posts.map((post: IPost) => {
                       const mediaUrl = post.mediaUrls?.[0] || '/placeholder.jpg';
                       const video = isVideo(mediaUrl);
 
