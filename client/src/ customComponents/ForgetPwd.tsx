@@ -16,7 +16,7 @@ interface ForgotPasswordFormInputs {
 const ForgotPasswordPage: React.FC = () => {
   const [step, setStep] = useState(1); // Step 1: Email, Step 2: OTP, Step 3: Reset Password
   const [loading, setLoading] = useState(false);
-  const [timer, setTimer] = useState(90); // Timer for OTP resend
+  const [timer, setTimer] = useState(60); // Timer for OTP resend
   const [isOtpResendAvailable, setIsOtpResendAvailable] = useState(true);
 
   const {

@@ -79,3 +79,37 @@ body {
 }
 
 
+
+
+
+/* Hide scrollbar but keep scroll functionality */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+
+/* Custom color-pulse animation */
+@layer utilities {
+  @keyframes color-pulse {
+    0%, 100% {
+      color: #1f2937; /* gray-800 */
+    }
+    25% {
+      color: #3b82f6; /* blue-500 */
+    }
+    50% {
+      color: #10b981; /* green-500 */
+    }
+    75% {
+      color: #f59e0b; /* amber-500 */
+    }
+  }
+
+  .animate-color-pulse {
+    animation: color-pulse 2s infinite;
+  }
+}

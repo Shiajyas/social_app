@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect, useMemo } from 'react';
+import React, { memo, useState, useEffect, useMemo, useId } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { userService } from '@/services/userService';
@@ -22,11 +22,13 @@ import FriendsListModal from '@/ customComponents/home/chat/FriendsListModal';
 import { useChat } from '@/hooks/chatHooks/useChat';
 import { useQuery } from '@tanstack/react-query';
 import ReportButton from '@/ customComponents/common/ReportButton';
+import { useUserAuth } from '@/hooks/useUserAuth';
+import { FaStar } from 'react-icons/fa';
 
 interface Post {
   hashtags: string[] | string;
   _id: string;
-  userId: { _id: string; fullname: string; avatar: string };
+  userId: { _id: string; fullname: string; avatar: string; isSubscribed: boolean };
   description: string;
   mediaUrls?: string[];
   likes: string[];
@@ -58,19 +60,22 @@ const PostCard = memo(
     const userId = user?._id;
     const queryClient = useQueryClient();
     const navigate = useNavigate();
-    const [isSaved, setIsSaved] = useState(post.saved.includes(userId));
+    const [isSaved, setIsSaved] = useState(post?.saved?.includes(userId));
     const [menuOpen, setMenuOpen] = useState(false);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isShareModalOpen, setShareModalOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+ 
+    console.log('post in PostCard:', userId);
 
     const { sharePostWithUser } = useChat(userId);
+    
 
     const MAX_LENGTH = 150;
 
     useEffect(() => {
-      setIsSaved(post.saved.includes(userId));
+      setIsSaved(post?.saved?.includes(userId));
     }, [post.saved, userId]);
 
     useEffect(() => {
@@ -92,6 +97,10 @@ const PostCard = memo(
       e.stopPropagation();
       navigate(`/home/edit-post/${post._id}`);
     };
+   const handleHashTag = (e: React.MouseEvent, tag: string) => {
+      e.stopPropagation();
+      navigate(`/home/search/hashtag/:${tag.trim()}`);
+    };
 
     const handleDeletePost = () => {
       if (!userId) return;
@@ -105,6 +114,7 @@ const PostCard = memo(
       setIsFullscreen(true);
     };
 
+ 
     const { data: followers } = useQuery({
       queryKey: ['followers', userId],
       queryFn: () => userService.getFollowers(userId),
@@ -164,6 +174,11 @@ const PostCard = memo(
             >
               {post.userId?.fullname}
             </h3>
+            {post.userId?.isSubscribed && (
+              <span className="text-xs text-blue-500">
+                <FaStar />
+              </span>
+            )}
           </div>
           {userId === post.userId?._id && (
             <div className="relative">
@@ -202,7 +217,7 @@ const PostCard = memo(
         </div>
 
         <span className="text-gray-500 text-sm">
-          {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+          {formatDistanceToNow(new Date(post?.createdAt), { addSuffix: true })}
         </span>
 
         <p className="mt-2" onClick={onClick}>
@@ -223,17 +238,17 @@ const PostCard = memo(
         {/* Hashtags */}
 
 {hashtags.length > 0 && (
-  <div className="mt-2 flex flex-wrap gap-2">
+  <div className="mt-2 mb-2 flex flex-wrap gap-2">
     {hashtags.map((tag, index) => (
+      //remove the leading # from the tag
+      tag = tag.replace(/^#/, ''),
+      tag = tag.trim(),
       <span
         key={`${tag}-${index}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          navigate(`/home/hashtag/${tag.trim()}`);
-        }}
+        onClick={(e) => handleHashTag(e, tag)}
         className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-white"
       >
-        {tag}
+        {`#${tag}`}
       </span>
     ))}
   </div>
@@ -242,15 +257,20 @@ const PostCard = memo(
 
         {/* Media Preview */}
         {post?.mediaUrls?.length > 0 && (
-          <div className="mt-2">
+          <div >
             {post?.mediaUrls[0].endsWith('.mp4') || post?.mediaUrls[0].endsWith('.webm') ? (
-              <video
-                className="w-full h-[300px] object-cover rounded-lg"
-                controls
-                onClick={handleMediaClick}
-              >
-                <source src={post.mediaUrls[0]} type="video/mp4" />
-              </video>
+             <video
+ className="w-full h-[300px] object-cover rounded-lg"
+  src={post.mediaUrls[0]}
+  preload="metadata" // or "auto" if you'd rather buffer the entire file
+  controls={false}
+  onClick={handleMediaClick}
+  muted
+  loop
+  autoPlay
+/>
+
+
             ) : (
               <img
                 src={post.mediaUrls[0]}
@@ -275,6 +295,8 @@ const PostCard = memo(
             <Heart className={`w-5 h-5 ${isLiked ? 'text-red-500' : 'text-gray-500'}`} />
             <span>{post.likes.length}</span>
           </Button>
+
+          
           <Button
             variant="ghost"
             onClick={(e) => {
@@ -295,7 +317,7 @@ const PostCard = memo(
             <Share2 className="w-5 h-5 text-gray-500" />
           </Button>
           <Button variant="ghost" onClick={handleSavePost}>
-            <Bookmark className={`w-5 h-5 ${isSaved ? 'text-blue-500' : 'text-gray-500'}`} />
+            <Bookmark className={`w-5 h-5 ${isSaved? 'text-blue-500' : 'text-gray-500'}`} />
           </Button>
 
           <ReportButton
@@ -351,7 +373,7 @@ const PostCard = memo(
               console.log('📨 Sharing post with:', receiverId);
               try {
                 await sharePostWithUser({
-                  senderId: userId!,
+                  senderId: userId,
                   receiverId,
                   postContent: `/home/post/${post._id}`,
                 });

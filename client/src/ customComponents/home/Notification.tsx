@@ -39,6 +39,8 @@ const Notification: React.FC = () => {
       enabled: !!userId,
     });
 
+    // console.log(data,">>>>");
+
   // ✅ Reset unread count once when component mounts
   useEffect(() => {
     if (unreadCount > 0) {
@@ -106,6 +108,8 @@ const Notification: React.FC = () => {
     [isFetchingNextPage, fetchNextPage, hasNextPage],
   );
 
+  console.log(data,">>>>");
+
   return (
     <div className="p-4 bg-white dark:bg-gray-900 shadow-md rounded-lg flex-grow h-full flex flex-col">
       {/* Sticky Header */}
@@ -152,7 +156,7 @@ const Notification: React.FC = () => {
                           navigate(`/home/profile/${notification.senderId}`);
                         }}
                       >
-                        {notification.senderName}
+                        {notification.senderName }
                       </span>{' '}
                       {notification.message.replace(notification.senderName, '')}{' '}
                       {notification.postId && (

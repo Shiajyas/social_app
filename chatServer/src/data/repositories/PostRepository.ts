@@ -197,11 +197,12 @@ export class PostRepository implements IPostRepository {
   ): Promise<{ posts: IPost[]; nextPage: number | null }> {
     try {
       const savedPosts = await Post.find({ saved: userId })
+         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit + 1) // Fetch one extra to check if there's a next page
         .populate('userId', 'username fullname avatar')
-        .lean();
-
+        .lean()
+        
       const hasNextPage = savedPosts.length > limit;
       if (hasNextPage) savedPosts.pop(); // Remove the extra post used for checking
 

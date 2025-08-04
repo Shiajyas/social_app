@@ -1,11 +1,16 @@
 import { Router, Request, Response, NextFunction } from 'express';
+
+
+import userAuthMiddleware from '../../middleware/userAuthMiddleware';
+import { upload } from '../../middleware/uploadMiddleware';
+
 import { PostController } from '../../controllers/PostController';
+
+
 import { PostService } from '../../../useCase/postOperations';
 import { IPostService } from '../../../useCase/interfaces/IPostService';
 import { PostRepository } from '../../../data/repositories/PostRepository';
 import { IPostRepository } from '../../../data/interfaces/IPostRepository';
-import userAuthMiddleware from '../../middleware/userAuthMiddleware';
-import { upload } from '../../middleware/uploadMiddleware';
 import { AuthenticatedPostRequest } from '../../../core/domain/interfaces/IAuthenticatedPostRequest';
 import { ICommentRepository } from '../../../data/interfaces/ICommentRepository';
 import { CommentRepository } from '../../../data/repositories/CommentRepository';
@@ -124,6 +129,15 @@ router.post(
       next(err);
     }
   },
+
+  router.get(
+    "/search/hashtag/:hashtag",
+    userAuthMiddleware.authenticate,
+    (req: Request, res: Response, next: NextFunction) =>
+      postController
+        .searchPostsByHashtags(req, res)
+        .catch(next),
+  ),
 );
 
 export default router;

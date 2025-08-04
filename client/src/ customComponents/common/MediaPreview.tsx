@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
-import { FaDownload, FaTrash } from 'react-icons/fa';
+import { useEffect, useState } from "react";
+import { Download, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 interface MediaPreviewProps {
   previewUrl: string;
@@ -7,60 +9,57 @@ interface MediaPreviewProps {
 }
 
 const MediaPreview = ({ previewUrl, onRemove }: MediaPreviewProps) => {
-  const [isVideo, setIsVideo] = useState<boolean | null>(null);
+  const [isVideo, setIsVideo] = useState<boolean>(false);
 
   useEffect(() => {
-    if (previewUrl.startsWith('blob:')) {
-      const checkMediaType = async () => {
+    const determineType = async () => {
+      if (previewUrl.startsWith("blob:")) {
         try {
           const response = await fetch(previewUrl);
           const blob = await response.blob();
-          setIsVideo(blob.type.startsWith('video/'));
+          setIsVideo(blob.type.startsWith("video/"));
         } catch (error) {
-          console.error('Error checking media type:', error);
+          console.error("Error checking media type:", error);
+          setIsVideo(false);
         }
-      };
-      checkMediaType();
-    } else {
-      setIsVideo(previewUrl.endsWith('.mp4') || previewUrl.endsWith('.mov')); // 🔹 Detect videos by extension
-    }
+      } else {
+        // Fallback if not blob URL
+        const ext = previewUrl.split('.').pop()?.toLowerCase();
+        setIsVideo(ext === "mp4" || ext === "mov" || ext === "webm");
+      }
+    };
+
+    determineType();
   }, [previewUrl]);
 
-  console.log(previewUrl, '.............................');
   return (
-    <div className="p-4 bg-white dark:bg-gray-900 shadow-md rounded-lg flex-grow h-full flex flex-col items-center">
-      {isVideo === null ? (
-        <p className="text-gray-700 dark:text-gray-300">Loading preview...</p>
-      ) : isVideo ? (
+    <Card className="p-4 flex flex-col items-center w-full max-w-md mx-auto">
+      {isVideo ? (
         <video
           src={previewUrl}
           controls
-          className="w-full h-60 rounded object-contain bg-black dark:bg-gray-800"
+          className="w-full max-h-[300px] rounded-md bg-black object-contain"
         />
       ) : (
         <img
           src={previewUrl}
           alt="Preview"
-          className="w-full h-96 rounded object-cover bg-gray-100 dark:bg-gray-800"
+          className="w-full max-h-[400px] rounded-md object-cover bg-muted"
         />
       )}
 
-      <div className="flex justify-center gap-4 mt-4">
-        <a
-          href={previewUrl}
-          download
-          className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white p-2 rounded flex items-center gap-2 transition-colors"
-        >
-          <FaDownload /> Download
-        </a>
-        <button
+      <div className="flex gap-4 mt-4">
+   
+        <Button
+          variant="destructive"
+          className="flex items-center gap-2"
           onClick={onRemove}
-          className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white p-2 rounded flex items-center gap-2 transition-colors"
         >
-          <FaTrash /> Remove
-        </button>
+          <Trash2 className="w-4 h-4" />
+          Remove
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 };
 

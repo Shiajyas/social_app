@@ -104,10 +104,20 @@ export class SUserRepositoryImpl implements ISUserRepository {
     }
   }
 
-  async getActiveUsers(): Promise<SUser[]> {
+ async getActiveUsers(): Promise<SUser[]> {
     try {
-      const map = await redis.hgetall(ONLINE_USERS_KEY);
-      return Object.values(map).map((val) => JSON.parse(val));
+      const userMap = await redis.hgetall(ONLINE_USERS_KEY);
+
+      const users: SUser[] = Object.values(userMap).map((userStr) => {
+        try {
+          return JSON.parse(userStr);
+        } catch (parseError) {
+          console.warn('⚠️ Failed to parse user JSON:', parseError);
+          return null;
+        }
+      }).filter(Boolean); // Removes any nulls caused by failed JSON parsing
+
+      return users;
     } catch (error) {
       console.error('❌ Failed to fetch active users:', error);
       return [];

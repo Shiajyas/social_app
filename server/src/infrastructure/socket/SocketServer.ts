@@ -25,6 +25,13 @@ import { commentHandlers } from './socketHandlers/commentHandlers';
 import { userHandlers } from './socketHandlers/userHandlers';
 import { adminHandlers } from './socketHandlers/adminHandlers';
 import { IPostRepository } from '../../data/interfaces/IPostRepository';
+import { IUserRepository } from '../../data/interfaces/IUserRepository';
+import { IReportRepository } from '../../data/interfaces/IReportRepository';
+import { ICommentRepository } from '../../data/interfaces/ICommentRepository';
+import { IPostSocketService } from '../../useCase/socket/socketServices/Interface/IPostSocketService';
+import { ICommentSocketService } from '../../useCase/socket/socketServices/Interface/ICommentSocketService';
+import { ISocketAdminService } from '../../useCase/socket/socketServices/Interface/ISocketAdminService';
+import { IUserSocketService } from '../../useCase/socket/socketServices/Interface/IUserSocketService';
 
 let io: Server | null = null;
 
@@ -44,37 +51,38 @@ export const initializeSocket = (
     },
   });
 
+
+
   // Instantiate repositories
-  const userRepository = new UserRepository();
-  const mainUserRepository = new SUserRepositoryImpl();
+  const userRepository : IUserRepository = new UserRepository();
+  const mainUserRepository : SUserRepositoryImpl = new SUserRepositoryImpl();
   const postRepository: IPostRepository = new PostRepository();
-  const commentRepository = new CommentRepository();
-  const reportRepository = new ReportRepository();
+  const commentRepository : ICommentRepository = new CommentRepository();
+  const reportRepository : IReportRepository = new ReportRepository();
   const adminOverviewRepository: IAdminOverviewRepository = new AdminOverviewRepository();
-  const adminOverviewService = new AdminOverviewService(adminOverviewRepository, reportRepository);
+  const adminOverviewService: AdminOverviewService  = new AdminOverviewService(adminOverviewRepository, reportRepository);
   const notificationRepository : InotificationRepo = new NotificationRepo();
 
-  // Instantiate services
-  const notificationService  = new NotificationService(
-    io,
-    mainUserRepository,
-    userRepository,
-    notificationRepository
-  );
-  const postSocketService = new PostSocketService(
+const notificationService: NotificationService = new NotificationService(
+  io,
+  mainUserRepository,
+  userRepository,
+  notificationRepository
+);
+  const postSocketService : IPostSocketService= new PostSocketService(
     io,
     userRepository,
     postRepository,
     notificationService,
   );
-  const commentSocketService = new CommentSocketService(
+  const commentSocketService : ICommentSocketService = new CommentSocketService(
     io,
     commentRepository,
     userRepository,
     notificationService,
     postRepository,
   );
-  const adminSocketService = new AdminSocketService(
+  const adminSocketService : ISocketAdminService = new AdminSocketService(
     io,
     adminOverviewService,
     mainUserRepository,
@@ -82,7 +90,7 @@ export const initializeSocket = (
     notificationService,
     postRepository
   );
-  const userSocketService = new UserSocketService(
+  const userSocketService : IUserSocketService = new UserSocketService(
     io,
     userRepository,
     mainUserRepository,
@@ -98,8 +106,7 @@ export const initializeSocket = (
 
     socket.emit('onlineUsers', { users:  mainUserRepository.getActiveUsers() });
 
-    // console.log("onlineUsers8888", mainUserRepository.getActiveUsers());
-    // Register socket event handlers
+
     userHandlers(socket, userSocketService);
     postHandlers(socket, postSocketService);
     commentHandlers(socket, commentSocketService);
@@ -113,4 +120,13 @@ export const initializeSocket = (
   });
 
   console.log('✅ Socket.IO initialized and ready.');
+};
+
+
+
+export const getSocketInstance = (): Server => {
+  if (!io) {
+    throw new Error('Socket.IO not initialized. Make sure to call initializeSocket() first.');
+  }
+  return io;
 };

@@ -44,9 +44,16 @@ const LoginPage: React.FC<LoginPageProps> = ({
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
       <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-all">
         {/* Logo */}
-        <div className="flex justify-center mb-6">
-          <img src="/logo.png" alt="Logo" className="w-16 h-16" />
-        </div>
+<div className="flex flex-col items-center mb-6">
+  <img
+    src="/logo2.svg"
+    alt="Logo"
+    className="w-16 h-16 animate-fade-in-up"
+  />
+  <span className="mt-4 text-3xl md:text-2xl font-semibold text-gray-800 dark:text-white animate-pulse">
+    PingPod
+  </span>
+</div>
 
         <h2 className="mb-6 text-2xl font-bold text-center text-gray-800 dark:text-white">
           {role === 'admin' ? `${title}` : title}

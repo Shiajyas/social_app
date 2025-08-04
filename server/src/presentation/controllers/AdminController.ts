@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { IAdminUseCase } from '../../useCase/interfaces/IAdminUseCase';
 import { toAdminResponseDTO } from '../../core/domain/dto/toAdminResponseDTO';
-import { HttpStatus,ResponseMessages } from '../../infrastructure/constants/adminConstants';
+import { HttpStatus, ResponseMessages } from '../../infrastructure/constants/constants';
 
 export class AdminController {
   constructor(private readonly _AdminUseCase: IAdminUseCase) {}

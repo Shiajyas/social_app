@@ -5,12 +5,13 @@ import { IUserRepository } from '../../../data/interfaces/IUserRepository';
 import { NotificationService } from '../../notificationService';
 import { ObjectId } from 'mongodb';
 import { Server } from 'socket.io';
+import { INotificationService } from '../../interfaces/InotificationService';
 
 export class UserSocketService implements IUserSocketService {
   private _Io: Server;
   private _UserRepository: IUserRepository;
   private _SessionUserRepository: ISUserRepository;
-  private _NotificationService: NotificationService;
+  private _NotificationService: INotificationService
 
   constructor(
     ioInstance: Server,

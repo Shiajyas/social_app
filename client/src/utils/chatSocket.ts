@@ -1,5 +1,8 @@
 import { io } from 'socket.io-client';
 import 'react-toastify/dist/ReactToastify.css';
+import useNotificationStore from '@/store/notificationStore';
+import { toast } from 'react-toastify';
+import { useEffect } from 'react';
 
 const CHAT_SOCKET_URL = (import.meta as any).env.VITE_CHAT_SOCKET_URL ;
 
@@ -12,12 +15,16 @@ export const chatSocket = io(CHAT_SOCKET_URL, {
   transports: ['websocket'],
 });
 
+
+
 // When connectedus
 chatSocket.on('connect', () => {
   console.log(
     `%c[${new Date().toISOString()}] ✅ Connected to ChatSocket.IO Chat server with ID: ${chatSocket.id}`,
     'color: green; font-weight: bold;',
   );
+
+  // Emit a custom event to update the chatSocketId
 
   // ✅ Emit chatSocketId update after connection is established
   
@@ -38,4 +45,6 @@ chatSocket.on('connect_error', (error) => {
     'color: orange; font-weight: bold;',
     error,
   );
+
+
 });

@@ -1,9 +1,9 @@
 import { Socket } from 'socket.io';
 import { AdminSocketService } from '../../../useCase/socket/socketServices/adminSocketService';
-
+import { ISocketAdminService } from '../../../useCase/socket/socketServices/Interface/ISocketAdminService';
 export const adminHandlers = (
   socket: Socket,
-  adminService: AdminSocketService,
+  adminService: ISocketAdminService,
 ) => {
   socket.on('admin:join', () => {
     socket.join('admin');

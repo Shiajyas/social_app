@@ -4,6 +4,7 @@ import { IUserRepository } from '../data/interfaces/IUserRepository';
 import { ISubscriptionRepository } from '../data/interfaces/ISubscriptionRepository';
 import { generateHashtagsFree } from '../infrastructure/utils/openAi';
 import { IPost } from '../core/domain/interfaces/IPost';
+import {analyzeSentiment} from '../infrastructure/utils/moderation';
 
 export class PostService implements IPostService {
   private _PostRepository: IPostRepository;
@@ -30,7 +31,21 @@ async createPost(
 
   const isSubscribed = await this._SubscriptionRepo.findByUserId(userId)
 
-  console.log(isSubscribed,">>>>>>>>>>")
+  // console.log(isSubscribed,">>>>>>>>>>")
+
+  const isToxicResult = await analyzeSentiment(`${title} ${description}`);
+ console.log("isToxicResult",isToxicResult);
+ 
+const THRESHOLD = 0.041
+
+const isToxic = isToxicResult.some((inner: any[]) =>
+  inner.some((item: any) => item.label === 'negative' && item.score > THRESHOLD)
+);
+console.log("Is toxic:", isToxic); 
+  
+    if (isToxic) {
+      throw new Error('Post contains toxic content and cannot be created');
+    }
 
   // Regular user logic: check post count
   if (!isSubscribed) {
@@ -85,13 +100,17 @@ async createPost(
     title: string,
     description: string,
     mediaUrls: string[],
+    hashtags: string[]
   ): Promise<IPost> {
+    // console.log(hashtags,">>>>>");
+    
     const updatedPost = await this._PostRepository.updatePost(
       postId,
       userId,
       title,
       description,
       mediaUrls,
+      hashtags
     );
 
     if (!updatedPost) {
@@ -148,6 +167,18 @@ async createPost(
     //   throw new Error('This is a paid feature. Subscribe to access.');
     // }
 
+      const isSubscribed = await this._SubscriptionRepo.findByUserId(userId)
+    if (!isSubscribed) {
+      throw new Error('This is a paid feature. Subscribe to access.');
+    }
+
     return await generateHashtagsFree(description);
   }
+
+  async searchPostsByHashtags(
+    query: string,
+  ): Promise<IPost[]> {
+    return await this._PostRepository.searchPostsByHashtags(query);
+  }
+
 }

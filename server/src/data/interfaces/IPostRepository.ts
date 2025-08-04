@@ -21,6 +21,7 @@ export interface IPostRepository {
     title: string,
     description: string,
     mediaUrls: string[],
+    hashtags:string[]
   ): Promise<IPost | null>;
   deletePost(userId: string, postId: string): Promise<boolean>;
   likePost(userId: string, postId: string): Promise<void>;
@@ -36,4 +37,5 @@ export interface IPostRepository {
   ): Promise<{ posts: IPost[]; nextPage: number | null }>;
   searchPosts(query: string): Promise<IPost[]>;
   countUserPostsInRange(userId: string, startDate: Date, endDate: Date): Promise<number> 
+  searchPostsByHashtags(query: string): Promise<IPost[]>
 }

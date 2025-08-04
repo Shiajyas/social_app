@@ -182,4 +182,14 @@ export const userService = {
       'Failed to upload media',
     );
   },
+
+  getSearchSample: (query: string) => {
+    return fetchData(
+      `/users/search/sample}`,
+      {
+        method: 'GET',
+      },
+      'Failed to get search sample',
+    );
+  },
 };

@@ -18,7 +18,7 @@ const PostDetails: React.FC = () => {
   const userId = user?._id;
 
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
-
+const [isLiked, setIsLiked] = useState(false);
   // console.log('🔍 Rendering PostDetails for postId:', postId);
   // console.log('👤 Logged-in User ID:', userId);
 
@@ -37,6 +37,12 @@ const PostDetails: React.FC = () => {
       }
     },
   });
+
+  useEffect(() => {
+    if (data) {
+      setIsLiked(Array.isArray(data.post.likes) ? data.post.likes.includes(userId) : false);
+    }
+  },[data, userId,queryClient]);
 
   useEffect(() => {
     const handleNewComment = (data: { postId: string }) => {
@@ -89,9 +95,6 @@ const PostDetails: React.FC = () => {
       return;
     }
 
-    const isLiked = post.likes.includes(userId);
-    console.log(`💙 Like status before: ${isLiked ? 'Liked' : 'Not Liked'}`);
-
     // ✅ Optimistically update UI
     queryClient.setQueryData(['post', postId], (oldData: any) => {
       if (!oldData) return oldData;
@@ -102,6 +105,12 @@ const PostDetails: React.FC = () => {
 
       return { ...oldData, post: { ...oldData.post, likes: updatedLikes } };
     });
+
+    const updatedLikes = isLiked
+      ? post.likes.filter((id: string) => id !== userId) // Remove like
+      : [...post.likes, userId]; // Add like
+
+    
 
     if (isLiked) {
       console.log('🚀 Unliking post...');
@@ -154,26 +163,29 @@ const PostDetails: React.FC = () => {
 
   console.log('🎉 Rendering PostItem with post data:', data);
 
-  return (
-    <div className="w-full min-w-full max-w-2xl mx-auto px-0 sm:max-w-full sm:px-2">
+return (
+  <div className="w-full max-w-2xl mx-auto px-2 sm:px-4">
+    <div className="flex items-center justify-between mt-2 mb-4">
       <button
         onClick={() => navigate(-1)}
-        className="m-4 px-4 py-2 text-sm font-semibold text-white bg-gray-700 rounded-md hover:bg-gray-900 transition"
+        className="px-3 py-1 text-xs font-medium text-white bg-gray-700 rounded hover:bg-gray-900 transition"
       >
         ← Back
       </button>
-
-      <PostItem
-        post={data.post}
-        onLike={handleLike}
-        isCommentsOpen={isCommentsOpen}
-        onToggleComments={handleToggleComments}
-        userId={userId}
-        isLiked={Array.isArray(data.post.likes) ? data.post.likes.includes(userId) : false} onClick={function (): void {
-          throw new Error('Function not implemented.');
-        } }      />
     </div>
-  );
+
+    <PostItem
+      post={data.post}
+      onLike={handleLike}
+      isCommentsOpen={isCommentsOpen}
+      onToggleComments={handleToggleComments}
+      userId={userId}
+      isLiked={isLiked}
+      onClick={() : void => {throw new Error('PostItem onClick not implemented')}}
+    />
+  </div>
+);
+
 };
 
 export default PostDetails;

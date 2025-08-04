@@ -26,7 +26,6 @@ const HomeLayout: React.FC = () => {
     chatSocket.emit('updateChatSocketId', { userId: user?._id });
     return () => {
       socket.emit('leaveUser', userId);
-      // chatSocket.emit('updateChatSocketId', {userId: user?._id});
       chatSocket.disconnect();
     };
   }, [userId]);
@@ -37,10 +36,15 @@ const HomeLayout: React.FC = () => {
     if (location.pathname.includes('/messages')) newSelectedItem = 'Messages';
     else if (location.pathname.includes('/notifications')) newSelectedItem = 'Notifications';
     else if (location.pathname.includes('/profile')) newSelectedItem = 'Profile';
+    else if (location.pathname.includes('/community')) newSelectedItem = 'Community';
 
     setSelectedItem(newSelectedItem);
-    localStorage.setItem('selectedItem', newSelectedItem); // Save to localStorage
+    localStorage.setItem('selectedItem', newSelectedItem);
   }, [location.pathname]);
+
+  // ✅ Determine if current route needs full height (chat/community)
+  const needsFullHeight = location.pathname.includes('/messages') || 
+                          location.pathname.includes('/community');
 
   return (
     <div className="w-full h-screen flex flex-col border overflow-hidden">
@@ -48,7 +52,6 @@ const HomeLayout: React.FC = () => {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Hidden on small screens */}
-
         <div className="hidden lg:flex w-[260px] h-full">
           <LeftSideBar
             selectedItem={selectedItem}
@@ -58,8 +61,8 @@ const HomeLayout: React.FC = () => {
         </div>
 
         {/* Main Content - Full Width on small screens */}
-        <Card className="flex-1 w-full p-0 flex flex-col overflow-hidden border ">
-          <CardContent className="flex-1 flex flex-col p-0 overflow-hidden ">
+        <Card className="flex-1 w-full p-0 flex flex-col overflow-hidden border">
+          <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
             {/* ✅ Show Status only on Home Page */}
             {selectedItem === 'Home' && (
               <div className="flex items-center justify-between">
@@ -67,9 +70,18 @@ const HomeLayout: React.FC = () => {
               </div>
             )}
 
-            <ScrollArea className="flex-1  mt-2 overflow-y-auto m-0">
-              <Outlet />
-            </ScrollArea>
+            {/* ✅ Conditional rendering based on route type */}
+            {needsFullHeight ? (
+              // For chats and community - direct outlet without ScrollArea
+              <div className="flex-1 overflow-hidden mt-2">
+                <Outlet />
+              </div>
+            ) : (
+              // For other routes - use ScrollArea
+              <ScrollArea className="flex-1 mt-2 overflow-y-auto m-0">
+                <Outlet />
+              </ScrollArea>
+            )}
           </CardContent>
         </Card>
 

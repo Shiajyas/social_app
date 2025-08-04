@@ -74,7 +74,7 @@ const FriendsListModal: React.FC<FriendsListModalProps> = ({
         </div>
 
         {/* User List */}
-        <div className="max-h-64 overflow-y-auto space-y-2">
+        <div className="max-h-64 no-s no-scrollbar  overflow-y-auto space-y-2">
           {filteredUsers.length > 0 ? (
             filteredUsers.map((user) => (
               <div

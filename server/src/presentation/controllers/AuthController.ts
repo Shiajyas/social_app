@@ -6,7 +6,7 @@ import { setCookie } from '../../infrastructure/utils/setCookie';
 import { IAuthService } from '../../useCase/interfaces/IAuthService';
 import { AuthenticatdRequest } from '../../core/domain/interfaces/IAuthenticatedRequest';
 import { IAdminUseCase } from '../../useCase/interfaces/IAdminUseCase';
-import { HttpStatus,ResponseMessages } from '../../infrastructure/constants/AuthConstants';
+import { HttpStatus, ResponseMessages } from '../../infrastructure/constants/constants';
 declare module 'express-session' {
   interface Session {
     user?: IUser;

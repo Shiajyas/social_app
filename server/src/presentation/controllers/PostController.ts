@@ -3,7 +3,7 @@ import { IPostService } from '../../useCase/interfaces/IPostService';
 import { getErrorMessage } from '../../infrastructure/utils/errorHelper';
 import { AuthenticatedPostRequest } from '../../core/domain/interfaces/IAuthenticatedPostRequest';
 import { ICommentRepository } from '../../data/interfaces/ICommentRepository';
-import { StatusCode,ResponseMessages } from '../../infrastructure/constants/postconstants';
+import { HttpStatus as StatusCode, ResponseMessages } from '../../infrastructure/constants/constants';
 
 export class PostController {
   private _PostService: IPostService;
@@ -31,7 +31,7 @@ async createPost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
       visibility?: 'public' | 'private';
       hashtags: string
     };
-    const { title, description, visibility = 'public',hashtags } = body;
+    const { title = '.', description, visibility = 'public',hashtags } = body;
  
     // Convert hashtags string to array
     const hashtagsArray = hashtags ? hashtags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : [];
@@ -75,10 +75,17 @@ async createPost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
         );
       }
 
-      let { title, description } = req.body as unknown as {
+      let { title, description,hashtags } = req.body as unknown as {
         title: string;
         description: string;
+        hashtags: string
       };
+
+      console.log(req.body,">>>123");
+
+          // Convert hashtags string to array
+    const hashtagsArray = hashtags ? hashtags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : [];
+      
 
       const postId = (req as unknown as Request).params.id;
 
@@ -93,6 +100,7 @@ async createPost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
         title,
         description,
         mediaUrls,
+      hashtagsArray
       );
     res.status(StatusCode.OK).json({
       message: ResponseMessages.POST_UPDATED,
@@ -260,18 +268,42 @@ async generateHashtags(req: Request, res: Response) {
 // console.log('Generating hashtags for description:', description, 'and userId:', userId);
 
     if(!description || !userId) {
-      return res.status(StatusCode.BAD_REQUEST).json({ message: 'Description and userId are required' });
+      return res.status(StatusCode.BAD_REQUEST).json({ message: ResponseMessages.DESCRIOTION_REQUIRED});
     }
     const hashtags = await this._PostService.generateHashtagsFromAI(description,userId);
-    console.log(hashtags, 'Generated hashtags >>>');
+    // console.log(hashtags, 'Generated hashtags >>>');
     
     return res.status(StatusCode.OK).json({ hashtags });
   } catch (err) {
     console.error('Hashtag generation error:', err);
-    res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Failed to generate hashtags' });
+    res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: ResponseMessages.INTERNAL_ERROR});
   }
 }
 
+ async searchPostsByHashtags(req: Request, res: Response): Promise<void> {
+    try {
+      let { hashtag } = req.params;
+      hashtag = hashtag.replace(/:/g, '').trim(); // Remove '#' and trim whitespace
+      // console.log('Searching posts by hashtag:', hashtag);
+      
+
+      if (!hashtag || typeof hashtag !== 'string') {
+        res.status(StatusCode.BAD_REQUEST).json({ message: ResponseMessages.INVALID_HASHTAG });
+         return
+      }
+
+      const posts = await this._PostService.searchPostsByHashtags(hashtag);
+      // console.log('Found posts:', posts, 'for hashtag:', hashtag);
+      
+      res.status(StatusCode.OK).json({
+        message: ResponseMessages.SUCCESS,
+        posts,
+      });
+    } catch (error) {
+      console.error('Error searching posts by hashtag:', error);
+      res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
+    }
+  }
 
 
 }

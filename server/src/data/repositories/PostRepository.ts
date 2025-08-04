@@ -53,7 +53,7 @@ export class PostRepository implements IPostRepository {
     };
 
     let posts = await Post.find(query)
-      .populate('userId', 'fullname avatar username')
+      .populate('userId', 'fullname avatar username , isSubscribed')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -78,12 +78,13 @@ export class PostRepository implements IPostRepository {
     title: string,
     description: string,
     mediaUrls?: string[],
+     hashtags?: string[],
   ): Promise<IPost | null> {
     try {
   
 
       // Construct update object dynamically
-      const updateFields: Partial<IPost> = { title, description };
+      const updateFields: Partial<IPost> = { title, description,hashtags };
 
       // Only update `mediaUrls` if it's provided and not empty
       if (mediaUrls && mediaUrls.length > 0) {
@@ -242,5 +243,12 @@ export class PostRepository implements IPostRepository {
         { title: { $regex: query, $options: 'i' } },
       ],
     }).limit(10);
+  }
+
+  async searchPostsByHashtags(query: string): Promise<IPost[]> {
+    console.log(query, 'searchquery post by hashtags');
+    return await Post.find({
+      hashtags: { $regex: query, $options: 'i' },
+    }).populate('userId', 'username ').limit(15);
   }
 }

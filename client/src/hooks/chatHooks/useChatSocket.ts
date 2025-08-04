@@ -23,6 +23,7 @@ const normalizeMessage = (message: any): Message => ({
   content: message.content || '',
   replyTo: message.replyTo || null,
   createdAt: message.createdAt || new Date().toISOString(),
+  partcipants: message.participants || [],
 });
 
 const useChatSockets = (chatId: string, userId: string) => {

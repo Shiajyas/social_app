@@ -1,0 +1,77 @@
+<svg width="250" height="250" viewBox="0 0 250 250" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --bubble-color: #7C3AED;
+      --face-color: #ffffff;
+      --text-color: #4C1D95;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color:rgb(249, 248, 255);
+        --bubble-color: #a78bfa;
+        --face-color: #f9f5ff;
+        --text-color:rgb(65, 41, 172);
+      }
+    }
+
+    .cat {
+      animation: breathe 4s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    .eye {
+      animation: blink 4s infinite;
+    }
+
+    .typing-dot {
+      animation: typing 1.2s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    @keyframes blink {
+      0%, 90%, 100% { ry: 3; }
+      95% { ry: 0.5; }
+    }
+
+    @keyframes typing {
+      0%, 100% { opacity: 0.3; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(-2px); }
+    }
+  </style>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="var(--bg-color)" rx="20"/>
+
+  <!-- Cat and Chat Bubble -->
+  <g class="cat">
+    <!-- Bubble with Ears -->
+    <path d="M85 100 Q80 60 100 60 Q110 75 125 75 Q140 75 150 60 Q170 60 165 100 Q180 110 180 130 Q180 150 165 160 H145 L135 180 L125 160 H95 Q80 150 80 130 Q80 110 85 100 Z"
+          fill="var(--bubble-color)" stroke="#5B21B6" stroke-width="2"/>
+
+    <!-- Eyes -->
+    <ellipse class="eye" cx="105" cy="95" rx="3" ry="3" fill="var(--face-color)" />
+    <ellipse class="eye" cx="145" cy="95" rx="3" ry="3" fill="var(--face-color)" />
+
+    <!-- Whiskers -->
+    <path d="M95 95 L85 95 M95 100 L85 105 M95 90 L85 85" stroke="var(--face-color)" stroke-width="2"/>
+    <path d="M155 95 L165 95 M155 100 L165 105 M155 90 L165 85" stroke="var(--face-color)" stroke-width="2"/>
+
+    <!-- Smile -->
+    <path d="M115 110 Q125 120 135 110" stroke="var(--face-color)" stroke-width="2" fill="none"/>
+
+    <!-- Typing Dots -->
+
+  </g>
+
+  <!-- Text -->
+  <text x="125" y="230" font-family="Arial, sans-serif" font-size="20" fill="var(--text-color)" text-anchor="middle">PingPod</text>
+</svg>

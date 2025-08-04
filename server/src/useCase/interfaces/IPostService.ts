@@ -21,6 +21,7 @@ export interface IPostService {
     title: string,
     description: string,
     mediaUrls: string[],
+    hashtags: string[]
   ): Promise<IPost>;
   deletePost(userId: string, postId: string): Promise<void>;
   likePost(userId: string, postId: string): Promise<void>;
@@ -31,4 +32,7 @@ export interface IPostService {
       description: string,
       userId: string
     ): Promise<string[]> | null;
+    searchPostsByHashtags(
+        query: string,
+      ): Promise<IPost[]>
 }

@@ -231,6 +231,8 @@ export class AuthService implements IAuthService {
       throw new Error('User data not found.');
     }
 
+    console.log('User Data:', userData);
+
     // Create the user and save to the database
     const user = await this.createUser(userData as IUser);
 

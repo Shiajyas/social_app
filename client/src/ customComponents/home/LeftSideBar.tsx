@@ -1,5 +1,14 @@
 import React from 'react';
-import { Home, MessageSquare, Bell, PlusCircle, User, Search, LogOut } from 'lucide-react';
+import {
+  Home,
+  MessageSquare,
+  Bell,
+  PlusCircle,
+  User,
+  Search,
+  LogOut,
+  Users2,
+} from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -8,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/appStore/AuthStore';
 import { socket } from '@/utils/Socket';
 import useMessageStore from '@/appStore/useMessageStore';
+import { useGroupStore } from '@/appStore/groupStore';
 
 interface LeftSideBarProps {
   selectedItem: string;
@@ -22,11 +32,9 @@ const LeftSideBar: React.FC<LeftSideBarProps> = ({
 }) => {
   const navigate = useNavigate();
   const { logout, user } = useAuthStore();
-
   const unreadCounts = useMessageStore((state) => state.unreadCounts);
   const totalUnreadMessages = Object.values(unreadCounts).reduce((acc, count) => acc + count, 0);
-
-  // console.log("🔴 Total unread messages:", totalUnreadMessages);
+  const totalGroupUnread = useGroupStore((state) => state.getTotalUnread());
 
   const menuItems = [
     { name: 'Home', icon: <Home />, path: '/home' },
@@ -34,17 +42,31 @@ const LeftSideBar: React.FC<LeftSideBarProps> = ({
       name: 'Messages',
       icon: <MessageSquare />,
       path: '/home/messages',
-      hasMessageBadge: true,
+      badgeCount: totalUnreadMessages,
     },
     { name: 'Search', icon: <Search />, path: '/home/search' },
     {
       name: 'Notifications',
       icon: <Bell />,
       path: '/home/notifications',
-      hasNotificationBadge: true,
+      badgeCount: unreadNotifications,
     },
-    { name: 'Create', icon: <PlusCircle />, path: `/home/create/${user?._id}` },
-    { name: 'Profile', icon: <User />, path: `/home/profile/${user?._id}` },
+    {
+      name: 'Community',
+      icon: <Users2 />,
+      path: '/home/community/*',
+      badgeCount: totalGroupUnread,
+    },
+    {
+      name: 'Create',
+      icon: <PlusCircle />,
+      path: `/home/create/${user?._id}`,
+    },
+    {
+      name: 'Profile',
+      icon: <User />,
+      path: `/home/profile/${user?._id}`,
+    },
   ];
 
   const handleMenuClick = (item: any) => {
@@ -53,9 +75,7 @@ const LeftSideBar: React.FC<LeftSideBarProps> = ({
   };
 
   const handleLogout = () => {
-    if (user?._id) {
-      socket.emit('logOut', user._id);
-    }
+    if (user?._id) socket.emit('logOut', user._id);
     logout('user');
     navigate('/');
   };
@@ -63,53 +83,43 @@ const LeftSideBar: React.FC<LeftSideBarProps> = ({
   return (
     <Card className="h-full w-full bg-background shadow-lg p-4 rounded-2xl flex flex-col">
       <CardContent className="flex flex-col items-center space-y-6 flex-grow">
-        {/* Logo */}
         <div className="w-full flex justify-center">
-          <Avatar>
-            <AvatarImage src="/logo.png" alt="Logo" className="w-25 h-30" />
+          <Avatar className="w-20 h-20 border">
+            <AvatarImage src="/logo2.svg" alt="Logo" />
             <AvatarFallback>Logo</AvatarFallback>
           </Avatar>
         </div>
 
-        {/* Menu Items */}
-        <div className="w-full space-y-3 mt-4 flex-grow">
+        <div className="w-full space-y-2 mt-6 flex-grow">
           {menuItems.map((item, index) => {
-            const showMessageBadge = item.hasMessageBadge && totalUnreadMessages > 0;
-            const showNotificationBadge = item.hasNotificationBadge && unreadNotifications > 0;
-
-            // Debugging to confirm conditions
-            // console.log("showMessageBadge:", showMessageBadge);
-            // console.log("showNotificationBadge:", showNotificationBadge);
+        const hasBadge = typeof item.badgeCount === 'number' && item.badgeCount > 0;
 
             return (
               <Button
                 key={index}
                 variant="ghost"
-                className={`relative flex items-center w-full justify-start px-4 py-3 text-lg font-medium rounded-lg ${
+                className={`relative flex items-center w-full justify-start px-4 py-3 text-lg font-medium rounded-lg transition-all ${
                   selectedItem === item.name
                     ? 'bg-accent text-primary font-bold'
-                    : 'hover:bg-accent'
+                    : 'hover:bg-accent text-muted-foreground'
                 }`}
                 onClick={() => handleMenuClick(item)}
               >
-                {item.icon}
-                <span className="ml-3">{item.name}</span>
-                {(showMessageBadge || showNotificationBadge) && (
-                  <Badge className=" top-1 right-1 bg-red-600 text-white text-[11px] px-2 py-[2px] rounded-full shadow-sm font-semibold leading-none flex items-center justify-center min-w-[20px] h-[18px]">
-                    {showMessageBadge
-                      ? totalUnreadMessages > 99
-                        ? '99+'
-                        : totalUnreadMessages
-                      : unreadNotifications}
-                  </Badge>
-                )}
+                <div className="relative flex items-center gap-3">
+                  {item.icon}
+                  <span>{item.name}</span>
+                  {hasBadge && (
+                    <Badge className="ml-auto bg-red-600 text-white text-[11px] px-2 py-[2px] rounded-full shadow font-semibold leading-none flex items-center justify-center min-w-[20px] h-[18px]">
+                      {item.badgeCount > 99 ? '99+' : item.badgeCount }
+                    </Badge>
+                  )}
+                </div>
               </Button>
             );
           })}
         </div>
       </CardContent>
 
-      {/* Logout Button */}
       <div className="p-4">
         <Button
           variant="destructive"

@@ -18,6 +18,8 @@ export class UserRepository implements IUserRepository {
 
   // Save a new user
   async save(user: IUser): Promise<IUser> {
+    console.log('userRepository save', user);
+    
     const newUser = new User(user);
     const savedUser = await newUser.save();
     return savedUser.toObject() as IUser;

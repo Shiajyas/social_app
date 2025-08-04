@@ -2,10 +2,15 @@ import { Server, Socket } from 'socket.io';
 import { createServer } from 'http';
 
 import { UserRepository } from '../../data/repositories/UserRepository';
+import { IGroupRepository } from '../../data/interfaces/IGroupRepository';
+import { GroupRepository } from '../../data/repositories/GroupRepository';
 import { SUserRepositoryImpl } from '../../data/repositories/SUserRepositoryImpl';
 import { ChatRepository } from '../../data/repositories/ChatRepository';
+import IChatRepository from '../../data/interfaces/IChatRepository';
+
 import { CallHistoryRepository } from '../../data/repositories/CallHistoryRepository';
 import { UserSocketService } from '../../useCase/socket/socketServices/userSocketService';
+import { ISUserRepository } from '../../data/interfaces/ISUserRepository';
 
 import { ChatService } from '../../useCase/socket/socketServices/chatService';
 import { CallSocketService } from '../../useCase/socket/socketServices/callSocketService';
@@ -13,6 +18,25 @@ import { CallSocketService } from '../../useCase/socket/socketServices/callSocke
 import { chatHandlers } from './socketHandlers/chatHandlers';
 import { userHandlers } from './socketHandlers/userHandlers';
 import { callHandlers } from './socketHandlers/callHandlers';
+
+import { GroupSocketHandler } from './socketHandlers/groupHandlers';
+import { GroupSocketService } from '../../useCase/socket/socketServices/groupSocketService';
+
+import { NotificationService } from '../../useCase/socket/socketServices/notificationService';
+import { INotificationService } from '../../useCase/socket/socketServices/Interface/InotificationService';
+
+import { NotificationRepo } from '../../data/repositories/NotificationRepo';
+import { InotificationRepo } from '../../data/interfaces/InotificationRepo';
+
+
+import { IGroupMessageRepository } from '../../data/interfaces/IGroupMessageRepository';
+import { GroupMessageRepository } from '../../data/repositories/MessageRepository';
+import { IUserRepository } from '../../data/interfaces/IUserRepository';
+import { ICallHistoryRepository } from '../../data/interfaces/ICallHistoryRepository';
+import { IChatService } from '../../useCase/socket/socketServices/Interface/IChatService';
+import { ICallSocketService } from '../../useCase/socket/socketServices/Interface/ICallSocketService';
+import { IUserSocketService } from '../../useCase/socket/socketServices/Interface/IUserSocketService';
+import { IGroupSocketService } from '../../useCase/socket/socketServices/Interface/IGroupSocketService';
 
 let io: Server | null = null;
 
@@ -33,28 +57,40 @@ export const initializeSocket = (
   });
 
   // Instantiate repositories
-  const userRepository = new UserRepository();
-  const mainUserRepository = new SUserRepositoryImpl();
-  const chatRepository = new ChatRepository();
-  const callHistoryRepository = new CallHistoryRepository();
+  const userRepository : IUserRepository = new UserRepository();
+  const mainUserRepository : ISUserRepository = new SUserRepositoryImpl();
+  const chatRepository: IChatRepository= new ChatRepository();
+  const callHistoryRepository : ICallHistoryRepository = new CallHistoryRepository();
+  const notificationRepository : InotificationRepo = new NotificationRepo();
+  const groupMessageRepository : IGroupMessageRepository = new GroupMessageRepository()
+
+  const notificationService  : INotificationService = new NotificationService(
+    io,
+    mainUserRepository,
+    userRepository,
+    notificationRepository,
+  );
 
 
+  const chatService : IChatService = new ChatService(chatRepository, mainUserRepository, io);
 
-  const chatService = new ChatService(chatRepository, mainUserRepository, io);
-
-  const callSocketService = new CallSocketService(
+  const callSocketService : ICallSocketService = new CallSocketService(
     mainUserRepository,
     userRepository,
     callHistoryRepository,
     io
   );
 
-    const userSocketService = new UserSocketService(
+    const userSocketService : IUserSocketService = new UserSocketService(
     io,
     userRepository,
     mainUserRepository,
 
   );
+
+const groupRepository : IGroupRepository = new GroupRepository();
+const groupSocketService : IGroupSocketService = new GroupSocketService(groupRepository, mainUserRepository,groupMessageRepository, notificationService); 
+const groupSocketHandler  = new GroupSocketHandler(groupSocketService); 
 
   // Handle socket connection
 io.on('connection', async (socket: Socket) => {
@@ -71,6 +107,8 @@ io.on('connection', async (socket: Socket) => {
   userHandlers(socket, userSocketService);
   chatHandlers(socket, chatService);
   callHandlers(socket, callSocketService);
+
+  groupSocketHandler.registerHandlers(socket);
   
 
   socket.on('disconnect', () => {

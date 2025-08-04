@@ -2,7 +2,7 @@ import { INormalizedChat } from '../../core/domain/dto/INormalizedChatDto';
 import { INormalizedMessage } from '../../core/domain/dto/INormalizedMessageDto';
 import { IMessage } from '../../core/domain/interfaces/IMessage';
 
-export default interface IChatService {
+ interface IChatRepository {
   saveMessage(message: Partial<IMessage>): Promise<INormalizedMessage>;
   updateLastMessage(chatId: string, messageId: string): Promise<void>;
   getMessages(
@@ -26,3 +26,6 @@ export default interface IChatService {
     newContent: string,
   ): Promise<INormalizedMessage>;
 }
+
+
+export default IChatRepository;

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { INotificationService } from '../../useCase/interfaces/InotificationService';
-import { HttpStatus,ResponseMessages } from '../../infrastructure/constants/notificationconstants';
+import { HttpStatus, ResponseMessages } from '../../infrastructure/constants/constants';
 
 export class NotificationController {
   private _NotificationService: INotificationService;

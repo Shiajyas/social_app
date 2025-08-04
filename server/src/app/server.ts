@@ -12,10 +12,12 @@ import { errorHandler } from "../presentation/middleware/errorHandler";
 import http from "http";
 import cookieParser from "cookie-parser";
 import redis from "../infrastructure/utils/redisClient";
+import { groupRoutes }from "../presentation/routes/users/groupsRoutes";
 
 
 // === SocketIO Chat/Call ===
 import { initializeSocket } from "../infrastructure/socket/SocketServer";
+import { getSocketInstance } from "../infrastructure/socket/SocketServer";
 
 
 
@@ -30,8 +32,6 @@ export class App {
 
     // Main server
     this.server = http.createServer(this.app);
-
-    // Media server (runs on a separate port or can be attached to same app with a different path)
 
     this.initializeMiddlewares();
     this.initializeRoutes();
@@ -90,15 +90,19 @@ export class App {
     this.app.use("/api/users", userRoutes());
     this.app.use("/api/users/notification", notificationRoutes);
     this.app.use("/api/users/posts", postRoutes);
+  
   }
+
 
   private async initializeSocketServers(): Promise<void> {
-    // 1. Initialize standard chat/call socket
-    initializeSocket(this.server);
+  // 1. Initialize Socket.IO
+  initializeSocket(this.server);
+  const io = getSocketInstance();
 
-  
+  // 2. Now register group routes with socket instance
+  this.app.use("/api/groups", groupRoutes(io));
+}
 
-  }
 
 
 

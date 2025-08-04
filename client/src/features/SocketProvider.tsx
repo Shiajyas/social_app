@@ -1,7 +1,16 @@
 import React, { createContext, useEffect, useState, useContext } from 'react';
 import { socket } from '@/utils/Socket';
 import { chatSocket } from '@/utils/chatSocket';
+import { toast } from 'react-toastify';
+import { useQueryClient } from '@tanstack/react-query';
+
 import useMessageStore from '@/appStore/useMessageStore';
+import useNotificationStore from '@/store/notificationStore';
+import { useGroupStore } from '@/appStore/groupStore';
+
+import { useAuthStore } from '@/appStore/AuthStore';
+
+import { useGroups } from '@/hooks/group/useGroups';
 
 interface SocketContextType {
   unreadNotifications: number;
@@ -12,30 +21,66 @@ const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const queryClient = useQueryClient(); // ✅ Use React Query's main instance
+
+  const groups = useGroupStore((state) => state.groups);
+
+  const { setGroups } = useGroupStore();
+
+  const { user } = useAuthStore();
+
+  useGroups(user?._id);
 
   useEffect(() => {
     const handleNewNotification = (notification: any) => {
-      console.log('📩 New Notification Received:', notification);
+      console.log('📩 New Notification:', notification);
       setUnreadNotifications((prev) => prev + 1);
     };
 
+    const handleNewNotificationChat = (notification: any) => {
+      console.log('📩 New Chat Notification:', notification);
+      // toast.success(notification.message);
+      useNotificationStore.getState().incrementUnreadCount();
+      setUnreadNotifications((prev) => prev + 1);
+    };
+
+    chatSocket.on('newNotification', handleNewNotificationChat);
     socket.on('newNotification', handleNewNotification);
+
+    const handleGroupMessage = ({ groupId }: { groupId: string }) => {
+      const { activeGroupId, groups, incrementUnread } = useGroupStore.getState();
+
+      const isGroupExists = groups.some((group) => group._id === groupId);
+      const isActiveGroup = activeGroupId === groupId;
+
+      console.log('📨 Group message:', groupId, 'isActiveGroup:', isActiveGroup);
+
+      if (isGroupExists && !isActiveGroup) {
+        incrementUnread(groupId);
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+    };
+
+    chatSocket.on('group-message', handleGroupMessage);
+
     return () => {
       socket.off('newNotification', handleNewNotification);
+      chatSocket.off('newNotification', handleNewNotificationChat);
+      chatSocket.off('group-message', handleGroupMessage);
     };
-  }, []);
+  }, [queryClient]);
 
   useEffect(() => {
     const handleMessage = (newMessage: any) => {
       const { currentlyOpenChatId, incrementUnreadCount } = useMessageStore.getState();
-      console.log('📩 Global: New message received:', newMessage);
+      console.log('📩 Direct Message:', newMessage);
 
       if (newMessage.chatId !== currentlyOpenChatId) {
         incrementUnreadCount(newMessage.chatId);
       }
     };
 
-    // ✅ Correct event name
     socket.on('chatUpdated', handleMessage);
     return () => {
       socket.off('chatUpdated', handleMessage);

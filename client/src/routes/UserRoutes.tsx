@@ -10,7 +10,8 @@ import ChatSection from '@/ customComponents/home/chat/ChatSection';
 import UserPrivateRoute from './UserPrivateRoute';
 import { SearchSection } from '@/ customComponents/home/search/SearchSection';
 import { HashtagSearchResults } from '@/ customComponents/home/search/HashtagSearchResults';
-
+import CommunityChatSection from '@/ customComponents/home/communityGroup/communitySection';
+import CommunityLayout from '@/ customComponents/home/communityGroup/CommunityLayout';
 const UserRoutes = () => (
   <Route
     path="/home/*"
@@ -29,6 +30,8 @@ const UserRoutes = () => (
     <Route path="messages" element={<ChatSection />} />
     <Route path="search" element={<SearchSection />} />
     <Route path="search/hashtag/:tag" element={<HashtagSearchResults />} />
+   <Route path="community/*" element={<CommunityLayout />} />
+
 
   </Route>
 );

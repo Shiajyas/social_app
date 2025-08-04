@@ -25,7 +25,7 @@ const userSchema = new Schema<IUser>(
       startDate: { type: Date, default: null },
       endDate: { type: Date, default: null },
     },
-
+    isSubscribed: { type: Boolean, default: false },
     bio: { type: String, default: '' },
     gender: { type: String, default: 'male' },
     mobile: { type: String, default: '' },

@@ -4,7 +4,7 @@ import { getErrorMessage } from '../../infrastructure/utils/errorHelper';
 import { IUser } from '../../core/domain/interfaces/IUser';
 import { ISubscriptionUseCase } from '../../useCase/interfaces/ISubscriptionUseCase';
 import { stripe } from '../../infrastructure/utils/stripe';
-import { HttpStatus,ResponseMessages as Msg } from '../../infrastructure/constants/userConstants';
+import { HttpStatus, ResponseMessages as Msg } from '../../infrastructure/constants/constants';
 export class UserController {
   constructor(
     private _UserService: IUserService,

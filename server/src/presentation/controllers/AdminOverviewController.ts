@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { IAdminOverviewService } from '../../useCase/interfaces/IAdminOverviewService';
-import { HttpStatus,ResponseMessages } from '../../infrastructure/constants/adminConstants';
+import { HttpStatus, ResponseMessages } from '../../infrastructure/constants/constants';
 
 export class AdminOverviewController {
   constructor(private readonly service: IAdminOverviewService) {}

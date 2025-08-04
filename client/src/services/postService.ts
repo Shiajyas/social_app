@@ -125,6 +125,15 @@ genrateHashtags: (description: string, userId: string) =>
       data: { description, userId }, 
     },
     'Failed to generate hashtags',
-  )
+  ),
 
+      getPostsByHashtag: (tag: string) => {
+        return fetchData(
+            `/users/posts/search/hashtag/${tag}`,
+            {
+                method: 'GET',
+            },
+            'Failed to fetch posts by hashtag',
+        );
+    }
 };

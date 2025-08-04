@@ -213,9 +213,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ chatId, userId, darkMode })
                                   alt={file.name || 'image'}
                                   className={`${previewSize} rounded-md border border-gray-300 dark:border-gray-700 object-contain`}
                                 />
-                                <div className="mt-2">
-                                  <DownloadButton />
-                                </div>
+                            
                               </div>
                             );
                           } else if (['mp4', 'webm', 'ogg'].includes(extension)) {

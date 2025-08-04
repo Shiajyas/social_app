@@ -22,6 +22,7 @@ export interface IUser extends Document {
     startDate: Date | null;
     endDate: Date | null;
   };
+  isSubscribed?: boolean;
   isBlocked: boolean;
 
   findFollowers(userId: string): Promise<IUser[]>;

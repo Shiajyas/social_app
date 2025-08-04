@@ -9,7 +9,10 @@ import useMessageStore from '@/appStore/useMessageStore';
 import { socket } from '@/utils/Socket';
 import { chatSocket } from '@/utils/chatSocket';
 import { useAuthStore } from '@/appStore/AuthStore';
+import { useLocation } from 'react-router-dom';
 
+import { toast } from 'react-toastify';
+// import { chatSocket } from '@/utils/chatSocket';
 interface HeaderProps {
   unreadCount: number;
 }
@@ -22,9 +25,13 @@ const Header: React.FC<HeaderProps> = ({ unreadCount }) => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const isDark = theme === 'dark';
 
+  const location = useLocation();
+
   const totalUnreadMessages = useMessageStore((state) =>
     Object.values(state.unreadCounts).reduce((acc, count) => acc + count, 0),
   );
+
+
 
   useEffect(() => {
     if (!userId) return;
@@ -43,18 +50,27 @@ const Header: React.FC<HeaderProps> = ({ unreadCount }) => {
     navigate('/login');
   };
 
+  //hide header on specific routes in mobile view
+  const hideHeaderRoutes = ['/home/create', '/home/edit-post'];
+  const shouldHideHeader = hideHeaderRoutes.some((route) => location.pathname.startsWith(route));
+
+  // if (shouldHideHeader) return null;
+
   return (
     <>
       {/* Desktop Header */}
       <div
-        className={`sticky top-0 z-50 w-full px-6 py-4 border shadow-md hidden lg:flex justify-between items-center transition-all
+        className={`sticky top-0 z-50 w-full  px-6 py-4 border shadow-md hidden lg:flex justify-between items-center transition-all
         ${isDark ? 'bg-gray-900 text-white border-gray-700' : 'bg-white text-gray-900 border-gray-200'}`}
       >
         <button
           onClick={() => navigate('/home')}
           className="text-xl font-bold hover:underline focus:outline-none"
         >
-          VConnect
+   <span className="mt-4 text-3xl md:text-2xl font-semibold animate-color-pulse">
+  PingPod
+</span>
+
         </button>
 
         <div className="flex items-center gap-4">
@@ -95,7 +111,10 @@ const Header: React.FC<HeaderProps> = ({ unreadCount }) => {
           onClick={() => navigate('/home')}
           className="text-lg font-bold hover:underline focus:outline-none"
         >
-          VConnect
+ <span className="mt-4 text-3xl md:text-2xl font-semibold animate-color-pulse">
+  PingPod
+</span>
+
         </button>
 
         <div className="flex items-center gap-2">

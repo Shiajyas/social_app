@@ -10,8 +10,8 @@ class EmailService implements IEmailService {
       port: Number(process.env.EMAIL_PORT || 465),
       secure: process.env.EMAIL_PORT === '465', // true for 465, false for other ports
       auth: {
-        user: process.env.EMAIL_USER || 'a62824d9e0698c',
-        pass: process.env.EMAIL_PASSWORD || '1b024f9b30a7e4',
+        user: process.env.EMAIL_USER || "4b3f90b97896ee",
+        pass: process.env.EMAIL_PASSWORD || '321001ff42ce4e',
       },
     });
   }

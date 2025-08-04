@@ -1,8 +1,7 @@
-// controllers/AdminSubscriptionController.ts
 
 import { Request, Response } from 'express';
 import { IAdminSubscriptionService } from '../../useCase/interfaces/IAdminSubscriptionService';
-import { HttpStatus,ResponseMessages } from '../../infrastructure/constants/adminConstants';
+import { HttpStatus, ResponseMessages } from '../../infrastructure/constants/constants';
 
 export class AdminSubscriptionController {
   constructor(private readonly subscriptionService: IAdminSubscriptionService) {}

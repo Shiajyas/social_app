@@ -13,16 +13,20 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/appStore/AuthStore';
 import clsx from 'clsx';
+import { formatDistanceToNow } from 'date-fns';
 
 interface ProfilePostsProps {
   userId: string;
 }
+
+type SortOption = 'newest' | 'oldest' | 'mostLiked';
 
 const ProfilePosts: React.FC<ProfilePostsProps> = ({ userId }) => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<'all' | 'image' | 'video'>('all');
   const [activeTab, setActiveTab] = useState<'myPosts' | 'savedPosts'>('myPosts');
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
   const currentUserId = user?._id;
 
   const { data: mediaPosts, isLoading: isLoadingMedia } = useQuery({
@@ -57,7 +61,7 @@ const ProfilePosts: React.FC<ProfilePostsProps> = ({ userId }) => {
     const data = Array.isArray(posts.posts) ? posts.posts : posts;
     if (!Array.isArray(data)) return [];
 
-    return data.filter((post) => {
+    const filtered = data.filter((post) => {
       const mediaUrl = Array.isArray(post.mediaUrls) ? post.mediaUrls[0] : post.mediaUrls;
       const isOwner = post.userId === currentUserId;
       const isFollower = followers?.some((f: any) => f._id === currentUserId);
@@ -71,6 +75,18 @@ const ProfilePosts: React.FC<ProfilePostsProps> = ({ userId }) => {
       if (selectedType === 'image') return isImage(mediaUrl);
       if (selectedType === 'video') return isVideo(mediaUrl);
       return true;
+    });
+
+    return filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'oldest':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'mostLiked':
+          return (b.likes?.length || 0) - (a.likes?.length || 0);
+        case 'newest':
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
     });
   };
 
@@ -105,8 +121,8 @@ const ProfilePosts: React.FC<ProfilePostsProps> = ({ userId }) => {
         })}
       </div>
 
-      {/* Filter */}
-      <div className="flex justify-center gap-2 mb-6">
+      {/* Filter & Sort */}
+      <div className="flex flex-wrap justify-center gap-2 mb-6">
         {['all', 'image', 'video'].map((type) => {
           const Icon = type === 'image' ? ImageIcon : type === 'video' ? VideoIcon : ListIcon;
           return (
@@ -124,6 +140,21 @@ const ProfilePosts: React.FC<ProfilePostsProps> = ({ userId }) => {
             </Button>
           );
         })}
+
+        {(['newest', 'oldest', 'mostLiked'] as SortOption[]).map((option) => (
+          <Button
+            key={option}
+            onClick={() => setSortBy(option)}
+            className={clsx(
+              'text-xs px-3 py-1 rounded-full border',
+              sortBy === option
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:bg-gray-100'
+            )}
+          >
+            {option === 'mostLiked' ? 'Most Liked' : option}
+          </Button>
+        ))}
       </div>
 
       {/* Posts Grid */}
@@ -162,11 +193,24 @@ const ProfilePosts: React.FC<ProfilePostsProps> = ({ userId }) => {
                 )}
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-sm font-semibold px-2 text-center">
-                <p className="mb-1 truncate w-full">{post.description?.slice(0, 50) || 'View Post'}</p>
-               <p className="text-xs text-gray-200">{post.likes?.length || 0} Likes</p>
-               
+                  <p className="mb-1 truncate w-full">
+                    {post.description?.slice(0, 50) || 'View Post'}
+                  </p>
+                  <p
+                    className="text-xs text-gray-200"
+                    title={
+                      post.updatedAt && post.updatedAt !== post.createdAt
+                        ? `Created: ${new Date(post.createdAt).toLocaleString()}\nModified: ${new Date(
+                            post.updatedAt,
+                          ).toLocaleString()}`
+                        : `Sent: ${new Date(post.createdAt).toLocaleString()}`
+                    }
+                  >
+                    {post.likes?.length || 0} Likes •{' '}
+                    {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                    {post.updatedAt && post.updatedAt !== post.createdAt && ' (edited)'}
+                  </p>
                 </div>
-
               </div>
             );
           })}

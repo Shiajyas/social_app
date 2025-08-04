@@ -43,8 +43,10 @@ const Sidebar = () => {
         <div className="p-4 border-b border-gray-300 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-full" />
-              <h1 className="text-xl font-bold">Connect</h1>
+              <img src="/logo2.svg" alt="Logo" className="w-10 h-10 rounded-full" />
+                     <span className="mt-4 text-3xl md:text-2xl font-semibold text-gray-800 dark:text-white animate-pulse">
+       PingPod
+      </span>
             </div>
             <i
               className="fa fa-times cursor-pointer md:hidden"

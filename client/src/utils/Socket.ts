@@ -48,7 +48,7 @@ socket.on('newNotification', (notification) => {
 
     // Update Zustand store
     useNotificationStore.getState().incrementUnreadCount();
-    toast.success(notification.message);
+    // toast.success(notification.message);
   } catch (error) {
     console.error(
       `%c[${new Date().toISOString()}] ❌ Error processing notification`,
