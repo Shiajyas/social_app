@@ -43,9 +43,9 @@ const isToxic = isToxicResult.some((inner: any[]) =>
 );
 console.log("Is toxic:", isToxic); 
   
-    if (isToxic) {
-      throw new Error('Post contains toxic content and cannot be created');
-    }
+    // if (isToxic) {
+    //   throw new Error('Post contains toxic content and cannot be created');
+    // }
 
   // Regular user logic: check post count
   if (!isSubscribed) {

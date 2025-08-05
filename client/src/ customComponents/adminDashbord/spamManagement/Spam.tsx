@@ -11,6 +11,7 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
 import { useReportStore } from '@/appStore/useReportStore';
+import ConfirmationModal from '@/ customComponents/common/confirmationModel';
 
 interface Report {
   _id: string;
@@ -146,6 +147,7 @@ export default function Spam() {
   const blockSelected = () => {
     selected.forEach((id) => {
       const postId = reports.find((r) => r._id === id)?.post._id;
+        
       if (postId) blockMutation.mutate(postId);
     });
     clearSelection();
