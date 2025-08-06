@@ -9,6 +9,7 @@ interface FollowBtnProps {
   userId: string; // The current logged-in user
   isFollowing: boolean;
   followingId: string; // The user being followed
+  
 }
 
 interface FollowUpdateData {

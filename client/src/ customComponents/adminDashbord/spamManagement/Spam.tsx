@@ -61,6 +61,8 @@ export default function Spam() {
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+  const [blockPostIds, setBlockPostIds] = useState<string[]>([]);
 
   const { reportCount, setReportCount, increment: incRep, decrement: decRep } = useReportStore();
 
@@ -110,18 +112,8 @@ export default function Spam() {
     socket.emit('admin:join');
     adminReportService.getReportCount().then((r) => setReportCount(r.count));
 
-    // const onNewReport = (report: Report) => {
-    //   qc.setQueryData<Report[]>(['reports', 1], (prev) =>
-    //     prev ? [report, ...prev] : [report]
-    //   );
-    //   incRep();
-    //   toast.info('📨 New report received');
-    // };
-
-    // socket.on('admin:newReport', onNewReport);
-
     return () => {
-      // socket.off('admin:newReport', onNewReport);
+      // Clean up if needed
     };
   }, [qc, setReportCount, incRep]);
 
@@ -145,12 +137,17 @@ export default function Spam() {
   };
 
   const blockSelected = () => {
+    const idsToBlock: string[] = [];
+
     selected.forEach((id) => {
       const postId = reports.find((r) => r._id === id)?.post._id;
-        
-      if (postId) blockMutation.mutate(postId);
+      if (postId) idsToBlock.push(postId);
     });
-    clearSelection();
+
+    if (idsToBlock.length > 0) {
+      setBlockPostIds(idsToBlock);
+      setShowBlockConfirm(true);
+    }
   };
 
   return (
@@ -269,6 +266,25 @@ export default function Spam() {
           </Button>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showBlockConfirm}
+        onClose={() => {
+          setShowBlockConfirm(false);
+          setBlockPostIds([]);
+        }}
+        onConfirm={() => {
+          blockPostIds.forEach((postId) => blockMutation.mutate(postId));
+          setShowBlockConfirm(false);
+          setBlockPostIds([]);
+          clearSelection();
+        }}
+        title="Confirm Block"
+        message={`Are you sure you want to block ${blockPostIds.length} post(s)? This action is irreversible.`}
+        confirmText="Yes, Block"
+        cancelText="Cancel"
+      />
     </div>
   );
 }

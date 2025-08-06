@@ -1,4 +1,4 @@
-# Dockerfile inside ./server/
+# Dockerfile inside ./Chatserver : 3011/
 
 # --- Build Stage ---
 FROM node:20-alpine AS builder

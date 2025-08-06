@@ -28,7 +28,7 @@ export class App {
 
   constructor(port: number) {
     this.app = express();
-    this.port = port;
+    this.port = 3009;
 
     // Main server
     this.server = http.createServer(this.app);

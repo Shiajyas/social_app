@@ -10,6 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSearchStore } from '@/appStore/searchStore';
 import { userService } from '@/services/userService';
 import { postService } from '@/services/postService';
+import FollowBtn from '@/ customComponents/FollowBtn'; // ✅ fixed import
+import { useAuthStore } from '@/appStore/AuthStore';
 
 interface SearchSectionProps {
   hideInput?: boolean;
@@ -20,6 +22,7 @@ const isVideo = (url: string): boolean => /\.(mp4|webm|ogg)$/i.test(url);
 export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false }) => {
   const { query, setQuery } = useSearchStore();
   const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const { user: currentUser } = useAuthStore(); // ✅ current user
   const navigate = useNavigate();
 
   const debouncedSetQuery = useCallback(
@@ -34,7 +37,6 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
     return () => debouncedSetQuery.cancel();
   }, [query, debouncedSetQuery]);
 
-  // 🔍 Search query (only when user types)
   const {
     data: searchData,
     isLoading: isSearchLoading,
@@ -48,7 +50,6 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
     staleTime: 5 * 60 * 1000,
   });
 
-  // 🧊 Initial load (sample users and posts when input is empty)
   const {
     data: sampleUsers,
     isLoading: isUserLoading,
@@ -59,8 +60,6 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
     enabled: debouncedQuery.trim().length === 0,
     staleTime: 5 * 60 * 1000,
   });
-
-  // let sampleUsers: IUser[] = [];
 
   const {
     data: samplePosts,
@@ -73,7 +72,6 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
     staleTime: 5 * 60 * 1000,
   });
 
-  console.log('samplePosts', samplePosts);
   const handleUserClick = useCallback(
     (userId: string) => {
       navigate(`/home/profile/${userId}`);
@@ -81,9 +79,14 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
     [navigate],
   );
 
-  // 🧠 Choose data source
-  const users = debouncedQuery.trim() ? searchData?.users ?? [] : sampleUsers?.splice(0, 4) ?? [];
-  const posts = debouncedQuery.trim() ? searchData?.posts ?? [] : samplePosts?.posts ?? [];
+  const users = debouncedQuery.trim()
+    ? searchData?.users ?? []
+    : sampleUsers?.slice(0, 4) ?? [];
+
+  const posts = debouncedQuery.trim()
+    ? searchData?.posts ?? []
+    : samplePosts ?? [];
+
   const loading = debouncedQuery.trim()
     ? isSearchLoading || isSearchFetching
     : isUserLoading || isPostLoading;
@@ -95,7 +98,7 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
     : null;
 
   return (
-    <div className="p-4 bg-white dark:bg-gray-900 text-black dark:text-white rounded shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-700 max-w-full">
+    <div className="p-4 bg-white dark:bg-gray-900 text-black dark:text-white rounded shadow-md border border-gray-200 dark:border-gray-700 max-w-full">
       {!hideInput && (
         <Input
           placeholder="Search users or posts..."
@@ -131,22 +134,32 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
                     {users.map((user: IUser) => (
                       <div
                         key={user._id}
-                        onClick={() => handleUserClick(user._id)}
-                        className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 bg-white dark:bg-gray-900 shadow-sm"
+                        className="flex items-center justify-between gap-3 p-3 rounded-lg transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 bg-white dark:bg-gray-900 shadow-sm"
                       >
-                        <img
-                          src={user.avatar}
-                          alt={user.username}
-                          className="h-10 w-10 rounded-full object-cover ring-2 ring-offset-2 ring-blue-500/20"
-                        />
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">
-                            @{user.username}
-                          </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            View Profile
-                          </span>
+                        <div
+                          onClick={() => handleUserClick(user._id)}
+                          className="flex items-center gap-3 cursor-pointer"
+                        >
+                          <img
+                            src={user.avatar}
+                            alt={user.username}
+                            className="h-10 w-10 rounded-full object-cover ring-2 ring-offset-2 ring-blue-500/20"
+                          />
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                              @{user.username}
+                            </span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              View Profile
+                            </span>
+                          </div>
                         </div>
+
+                        <FollowBtn
+                          userId={currentUser?._id || ''}
+                          followingId={user._id}
+                          isFollowing={(user.followers ?? []).includes(currentUser?._id || '')}
+                        />
                       </div>
                     ))}
                   </div>

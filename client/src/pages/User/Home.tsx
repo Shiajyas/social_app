@@ -11,11 +11,16 @@ import { useAuthStore } from '@/appStore/AuthStore';
 import { socket } from '@/utils/Socket';
 import { chatSocket } from '@/utils/chatSocket';
 
+
+
 const HomeLayout: React.FC = () => {
   const { unreadCount } = useNotificationStore();
   const { user } = useAuthStore();
   const userId = user?._id || null;
   const location = useLocation();
+
+  let commuityTab = false;
+  if (location.pathname.includes('/community')) commuityTab = true;
 
   // ✅ Load selectedItem from localStorage or default to "Home"
   const [selectedItem, setSelectedItem] = useState(localStorage.getItem('selectedItem') || 'Home');
@@ -86,9 +91,7 @@ const HomeLayout: React.FC = () => {
         </Card>
 
         {/* Right Sidebar - Hidden on small screens */}
-        <div className="hidden lg:flex w-[320px] h-full">
-          <RightSideBar />
-        </div>
+       {!commuityTab && <RightSideBar />}
       </div>
 
       <BottomNav selectedItem={selectedItem} setSelectedItem={setSelectedItem} />

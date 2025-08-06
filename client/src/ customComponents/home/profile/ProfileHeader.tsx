@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import SubscriptionStatus from '@/ customComponents/common/SubscriptionModal';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
@@ -82,6 +82,21 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, userId, refetch, pa
   const [searchParams] = useSearchParams();
 
   const { updateUserFields, user: authUser } = useAuthStore();
+
+  const navigate = useNavigate()
+
+const handleSaveChanges = async () => {
+  const isValid = validateForm();
+  if (!isValid) return;
+   toast.success('Profile updated successfully!');  
+  updateProfile.mutate(undefined, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['userPosts', userId] });
+      setEditing(false);
+    },
+  });
+};
 
   console.log('authUser>>>>>>>>>', authUser);
   const queryClient = useQueryClient();
@@ -215,9 +230,16 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, userId, refetch, pa
     }
   };
 
-const isFollowing =
-  (user?.followers ?? [] as string[])?.includes(parentUserId) ||
-  (user?.following ?? [] as string[])?.includes(parentUserId);
+const [isFollowing, setIsFollowing] = useState(false);
+
+useEffect(() => {
+  const followingStatus =
+    (user?.followers ?? []).includes(parentUserId) ||
+    (user?.following ?? []).includes(parentUserId);
+
+  setIsFollowing(followingStatus);
+}, [user, parentUserId]);
+
   
   return (
     <Card className="max-w-3xl mx-auto">
@@ -249,15 +271,17 @@ const isFollowing =
               {editing ? 'Cancel' : 'Edit Profile'}
             </Button>
           ) : (
-            <FollowBtn followingId={userId} isFollowing={isFollowing} userId={parentUserId} />
+            <FollowBtn followingId={userId} isFollowing={isFollowing}  userId={parentUserId} />
           )}
         </div>
 
         <Separator className="my-4" />
 
-        <Button onClick={handleSubscriptionModalOpen} variant="outline" className="mb-4">
+         {parentUserId === userId && (
+              <Button onClick={handleSubscriptionModalOpen} variant="outline" className="mb-4">
           View Subscription Details
         </Button>
+         )}
 
         {showSubscriptionModal && (
           <Modal onClose={handleSubscritionModelClose}>
@@ -321,7 +345,7 @@ const isFollowing =
             </div>
 
             <Button
-              onClick={() => validateForm() && updateProfile.mutate()}
+              onClick={handleSaveChanges }
               className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition duration-200"
               disabled={loading}
             >

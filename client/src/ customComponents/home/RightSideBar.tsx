@@ -11,12 +11,16 @@ import { userService } from '@/services/userService';
 import FollowBtn from '../FollowBtn';
 import { IUser } from '@/types/userTypes';
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 
 const RightSideBar = () => {
   const { user, isUserAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { ref, inView } = useInView();
+
+  //i want hide suggestions on community page
+
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ['suggestions', isUserAuthenticated],
@@ -43,6 +47,9 @@ const RightSideBar = () => {
   useEffect(() => {
     const handleRemoveFollowedUser = (event: CustomEvent) => {
       queryClient.invalidateQueries({ queryKey: ['suggestions', isUserAuthenticated] });
+      queryClient.invalidateQueries({ queryKey: ['sampleUsers', isUserAuthenticated] });
+      queryClient.invalidateQueries({ queryKey: ['following', isUserAuthenticated] });
+      queryClient.invalidateQueries({ queryKey: ['followers', isUserAuthenticated] });
     };
 
     window.addEventListener('removeFollowedUser', handleRemoveFollowedUser as EventListener);

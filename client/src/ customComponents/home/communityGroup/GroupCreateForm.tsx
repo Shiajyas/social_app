@@ -206,7 +206,7 @@ const GroupDetails: React.FC<Props> = ({ groupData, onClose }) => {
       {/* Participant List */}
       <GroupParticipantsView
         groupId={groupData?._id || ''}
-        showTitle={false}
+        showTitle={true}
         layout="vertical"
       />
     </div>
