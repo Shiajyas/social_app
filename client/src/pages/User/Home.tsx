@@ -91,7 +91,12 @@ const HomeLayout: React.FC = () => {
         </Card>
 
         {/* Right Sidebar - Hidden on small screens */}
-       {!commuityTab && <RightSideBar />}
+     {!commuityTab && (
+  <div className="hidden xl:flex w-[300px] h-full">
+    <RightSideBar />
+  </div>
+)}
+
       </div>
 
       <BottomNav selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
