@@ -48,15 +48,13 @@ export const initializeSocket = (
     return io;
   }
 
-io = new Server(server, {
-  path: '/chat/socket.io',
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'PATCH'],
-    credentials: true,
-  },
-});
-
+  io = new Server(server, {
+    cors: {
+      origin:"*",
+      methods: ['GET', 'POST', 'PUT', 'PATCH'],
+      credentials: true,
+    },
+  });
 
   // Instantiate repositories
   const userRepository : IUserRepository = new UserRepository();
