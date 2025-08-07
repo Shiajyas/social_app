@@ -10,7 +10,13 @@ const CHAT_SOCKET_URL = (import.meta as any).env.VITE_CHAT_SOCKET_URL ;
 
 // console.log(CHAT_SOCKET_URL,">>>>>>");
 
+// export const chatSocket = io(CHAT_SOCKET_URL, {
+//   withCredentials: true,
+//   transports: ['websocket'],
+// });
+
 export const chatSocket = io(CHAT_SOCKET_URL, {
+  path: '/chat/socket.io', // crucial for matching the Nginx proxy
   withCredentials: true,
   transports: ['websocket'],
 });
