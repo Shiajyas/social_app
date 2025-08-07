@@ -41,6 +41,6 @@ services:
 
 networks:
   vconnect_net:
-    external: true
+   # external: true
 
 
