@@ -63,7 +63,7 @@ const pc = new RTCPeerConnection({
     {
       urls: 'turn:13.202.77.180:3478?transport=udp',
       username: 'myuser',
-      credential: 'mypassword',
+      credential: 'strongpassword',
     },
   ],
 });
