@@ -8,8 +8,6 @@ const CHAT_SOCKET_URL = (import.meta as any).env.VITE_CHAT_SOCKET_URL ;
 
 // const CHAT_SOCKET_URL = "http://localhost:3011"
 
-// console.log(CHAT_SOCKET_URL,">>>>>>");
-
 // export const chatSocket = io(CHAT_SOCKET_URL, {
 //   withCredentials: true,
 //   transports: ['websocket'],
@@ -30,9 +28,6 @@ chatSocket.on('connect', () => {
     'color: green; font-weight: bold;',
   );
 
-  // Emit a custom event to update the chatSocketId
-
-  // ✅ Emit chatSocketId update after connection is established
   
 });
   
