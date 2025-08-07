@@ -44,8 +44,7 @@ export const initializeSocket = (
   }
 
   io = new Server(server, {
-     path: '/chat/socket.io',
-    cors: {  
+    cors: {
       origin: "*",
       methods: ['GET', 'POST', 'PUT', 'PATCH','OPTIONS'],
       credentials: true,
