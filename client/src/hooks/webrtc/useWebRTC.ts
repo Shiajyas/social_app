@@ -61,12 +61,16 @@ const pc = new RTCPeerConnection({
       urls: 'stun:stun.l.google.com:19302',
     },
     {
-      urls: 'turn:13.202.77.180:3478?transport=udp',
-      username: 'myuser',
-      credential: 'strongpassword',
-    },
+    urls: [
+      "turn:13.202.77.180:3478?transport=udp",
+      "turns:13.202.77.180:5349?transport=tcp"
+    ],
+    username: "myuser",
+    credential: "strongpassword"
+  }
   ],
 });
+
 
 
 
