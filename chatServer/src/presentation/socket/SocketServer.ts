@@ -48,13 +48,23 @@ export const initializeSocket = (
     return io;
   }
 
-  io = new Server(server, {
-    cors: {
-      origin:"*",
-      methods: ['GET', 'POST', 'PUT', 'PATCH'],
-      credentials: true,
-    },
-  });
+  // io = new Server(server, {
+  //   cors: {
+  //     origin:"*",
+  //     methods: ['GET', 'POST', 'PUT', 'PATCH'],
+  //     credentials: true,
+  //   },
+  // });
+
+
+ io = new Server(server, {
+  cors: {
+    origin: "https://social-app-ten-nu.vercel.app", // ✅ specific origin only
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'OPTIONS'],
+    credentials: true
+  },
+  transports: ['polling', 'websocket'] // optional, but good
+});
 
   // Instantiate repositories
   const userRepository : IUserRepository = new UserRepository();
