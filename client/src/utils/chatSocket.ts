@@ -12,7 +12,7 @@ const CHAT_SOCKET_URL = (import.meta as any).env.VITE_CHAT_SOCKET_URL ;
 
 export const chatSocket = io(CHAT_SOCKET_URL, {
   withCredentials: true,
-  transports: ['websocket'],
+ transports: ['polling', 'websocket']
 });
 
 

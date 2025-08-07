@@ -47,6 +47,7 @@ export const initializeSocket = (
     cors: {
       origin: "*",
       methods: ['GET', 'POST', 'PUT', 'PATCH','OPTIONS'],
+      
       credentials: true,
     },
   });
