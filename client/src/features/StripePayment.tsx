@@ -5,7 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 import { userService } from '@/services/userService';
 
 const stripePromise = loadStripe(
-  'pk_test_51R96FJH8pkRmmJ6859FuaBwszQN9xD2Z46Tflj0UAyQ399Jbtas29w20el9NbCvhy2nWqY5y9p0kd9ANqMMe9fKy00X5qntRpU',
+  'pk_test_51R96FJH8pkRmmJ6859FuaBwszQN9xD2Z46Tflj0UAyQ399Jbtas29w20el9NbCvhy2nWqY5y9p0kd9ANqMMe9fKy00X5qntRpU'
 );
 
 interface StripePaymentProps {
@@ -30,6 +30,18 @@ const CheckoutForm = ({
   const [paymentProcessed, setPaymentProcessed] = useState(false);
   const [searchParams] = useSearchParams();
 
+  // Function to confirm subscription in backend
+  const confirmSubscription = async () => {
+    try {
+      await userService.confirmSubscription(userId); // Assuming this calls /api/stripe/confirm-subscription
+      onSubscriptionConfirmed();
+      refreshSubscription();
+    } catch (err) {
+      setMessage(`❌ Error confirming subscription: ${(err as Error).message}`);
+    }
+  };
+
+  // Check if payment succeeded after redirect
   useEffect(() => {
     const clientSecret = searchParams.get('payment_intent_client_secret');
     const redirectStatus = searchParams.get('redirect_status');
@@ -58,7 +70,6 @@ const CheckoutForm = ({
 
     setLoading(true);
     setMessage('');
-    console.log('return url:', window.location.href);
 
     const result = await stripe.confirmPayment({
       elements,
@@ -68,10 +79,10 @@ const CheckoutForm = ({
       redirect: 'if_required',
     });
 
-    console.log('Payment result:', result);
-
     if (result.error) {
       setMessage(`❌ ${result.error.message}`);
+    } else if (result.paymentIntent?.status === 'succeeded') {
+      confirmSubscription(); // No redirect success
     } else {
       setMessage('⚠️ Payment was not successful.');
     }
@@ -133,7 +144,3 @@ const StripePayment: React.FC<StripePaymentProps> = ({
 };
 
 export default StripePayment;
-function confirmSubscription() {
-console.log('confirmSubscription');
-}
-

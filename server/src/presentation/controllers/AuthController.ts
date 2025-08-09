@@ -20,14 +20,11 @@ export class AuthController {
     this._UserService = userService;  
     this._AdminService = adminService
   }
+async login(req: Request, res: Response): Promise<void> {
+  try {
+    const { email, password, role } = req.body;
 
-  async login(req: Request, res: Response): Promise<void> {
-    try {
-      const { email, password, role } = req.body;
-      console.log(email)
-   
     let loginResult;
-
     if (role === 'admin') {
       loginResult = await this._AdminService.login(email, password);
     } else {
@@ -38,36 +35,35 @@ export class AuthController {
       res.status(400).json({ message: 'Login failed.' });
       return;
     }
-      req.session.user = loginResult.user as IUser;
 
-      const { token, refreshToken, user } = loginResult;
+    req.session.user = loginResult.user as IUser;
 
-      // Check if the user is a Mongoose document, and convert to plain object if so
-      const userObject: IUser =
-        user instanceof mongoose.Document ? user.toObject() : user;
+    const { token, refreshToken, user } = loginResult;
 
-      const userWithoutPassword = { ...userObject, password: undefined };
-       setCookie(res, 'userToken', token);
-     
-       if ('role' in user && user.role !== 'admin') {
-        setCookie(res, 'userToken', token);
-       } else {
-        setCookie(res, 'adminToken', token);
-          }
+    // Convert Mongoose document to plain object
+    const userObject: IUser =
+      user instanceof mongoose.Document ? user.toObject() : user;
+    const userWithoutPassword = { ...userObject, password: undefined };
 
-
-      setCookie(res, 'refreshToken', refreshToken);
-
-         res.status(HttpStatus.OK).json({
-        msg: ResponseMessages.LOGIN_SUCCESS,
-        user: userWithoutPassword,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(HttpStatus.BAD_REQUEST).json({ message: getErrorMessage(error) });
-    
+    // ✅ Only set token for the logged-in role
+    if (role === 'admin') {
+      setCookie(res, 'adminToken', token);
+    } else {
+      setCookie(res, 'userToken', token);
     }
+
+    // Refresh token can be shared if you want, or also role-specific
+    setCookie(res, `${role}RefreshToken`, refreshToken);
+
+    res.status(HttpStatus.OK).json({
+      msg: ResponseMessages.LOGIN_SUCCESS,
+      user: userWithoutPassword,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(HttpStatus.BAD_REQUEST).json({ message: getErrorMessage(error) });
   }
+}
 
   async requestOtp(req: Request, res: Response): Promise<void> {
     try {

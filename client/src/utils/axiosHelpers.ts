@@ -52,7 +52,7 @@ axiosInstance.interceptors.response.use(
   },
 );
 
-// Optional helper if you want to update token manually (after login)
+
 export const setAccessToken = (token: string) => {
   accessToken = token;
 };
