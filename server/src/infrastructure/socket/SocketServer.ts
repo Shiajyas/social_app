@@ -54,7 +54,7 @@ export const initializeSocket = (
 
 io = new Server(server, {
   cors: {
-    origin: "https://social-app-ten-nu.vercel.app", // ✅ specific origin only
+    origin: ["https://social-app-ten-nu.vercel.app", "http://localhost:3001", "http://192.168.1.7:3001" ],// ✅ specific origin only
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'OPTIONS'],
     credentials: true
   },

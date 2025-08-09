@@ -29,6 +29,10 @@ const FollowBtn: React.FC<FollowBtnProps> = ({ followingId, isFollowing, userId 
   const { incrementUnreadCount } = useNotificationStore();
   const queryClient = useQueryClient();
 
+   useEffect(() => {
+    setFollowing(isFollowing);
+  }, [isFollowing]);
+
   useEffect(() => {
     const handleFollowUpdate = (data: FollowUpdateData) => {
       if (data.followingId === followingId) {

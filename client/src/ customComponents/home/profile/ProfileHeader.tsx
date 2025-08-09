@@ -85,6 +85,20 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, userId, refetch, pa
 
   const navigate = useNavigate()
 
+  const [isFollowing, setIsFollowing] = useState(false);
+
+useEffect(() => {
+  const followingStatus =
+    (user?.followers ?? []).includes(authUser?._id || parentUserId) ||
+    (user?.following ?? []).includes(authUser?._id || parentUserId);
+
+  setIsFollowing(followingStatus);
+}, [user, parentUserId]);
+
+
+  console.log(user?._id,"UserId>>>>>><")
+  console.log(authUser?._id,"AuthUser>>><")
+  console.log(isFollowing,"isFollowing>>><")
 const handleSaveChanges = async () => {
   const isValid = validateForm();
   if (!isValid) return;
@@ -230,15 +244,6 @@ const handleSaveChanges = async () => {
     }
   };
 
-const [isFollowing, setIsFollowing] = useState(false);
-
-useEffect(() => {
-  const followingStatus =
-    (user?.followers ?? []).includes(parentUserId) ||
-    (user?.following ?? []).includes(parentUserId);
-
-  setIsFollowing(followingStatus);
-}, [user, parentUserId]);
 
   
   return (

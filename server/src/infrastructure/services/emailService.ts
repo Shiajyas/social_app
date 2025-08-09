@@ -7,8 +7,8 @@ class EmailService implements IEmailService {
   constructor() {
     this.transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST || 'sandbox.smtp.mailtrap.io',
-      port: Number(process.env.EMAIL_PORT || 465),
-      secure: true, // true for 465, false for other ports
+      port: Number(process.env.EMAIL_PORT || 2525),
+      secure: false, // true for 465, false for other ports
       auth: {
         user: process.env.EMAIL_USER || "4b3f90b97896ee",
         pass: process.env.EMAIL_PASSWORD || '321001ff42ce4e',
