@@ -4,7 +4,8 @@ import { authService } from '../../../services/authService';
 import Spinner from '../../common/Spinner';
 import { toast } from 'react-toastify';
 import { useAuthStore } from '@/appStore/AuthStore';
-
+import { socket } from '@/utils/Socket';
+import ConfirmationModal from '@/ customComponents/common/confirmationModel';
 interface User {
   _id: string;
   username: string;
@@ -24,13 +25,17 @@ const UsersManagement = () => {
     order: 'asc',
   });
 
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
   const queryClient = useQueryClient();
   const { isAdminAuthenticated } = useAuthStore();
 
-  // Fetch all users once
   const {
     data: allUsersData,
     isError,
+    isLoading,
   } = useQuery({
     queryKey: ['allUsers'],
     queryFn: () => authService.getAllUsers(1, 1000),
@@ -39,38 +44,34 @@ const UsersManagement = () => {
 
   const blockUserMutation = useMutation({
     mutationFn: authService.blockUser,
-    onSuccess: () => {
+    onSuccess: (_, userId) => {
       queryClient.invalidateQueries({ queryKey: ['allUsers'] });
       toast.success('User has been blocked.');
+      socket.emit('admin:userBlocked', { userId });
     },
   });
 
   const unblockUserMutation = useMutation({
     mutationFn: authService.unblockUser,
-    onSuccess: () => {
+    onSuccess: (_, userId) => {
       queryClient.invalidateQueries({ queryKey: ['allUsers'] });
       toast.success('User has been unblocked.');
+      socket.emit('admin:userUnblocked', { userId });
     },
   });
 
-  // if (isLoading) return <Spinner />;
+  if (isLoading) return <Spinner />;
   if (isError) return <div>Error fetching user list.</div>;
 
   const allUsers = allUsersData?.users || [];
-
-  // Total number of users
   const totalUsers = allUsers.length;
 
-  // console.log("allUsers", allUsers);
-
-  // Filter users based on search term
   const filteredUsers = allUsers?.filter((user: User) =>
     [user.username, user.email, user.fullname].some((field) =>
       field?.toLowerCase()?.includes(searchTerm.toLowerCase()),
     ),
   );
 
-  // Sort users
   const sortedUsers = filteredUsers?.sort((a, b) => {
     if (sortBy.column === 'isBlocked') {
       return sortBy.order === 'asc'
@@ -83,17 +84,14 @@ const UsersManagement = () => {
     }
   });
 
-  // Paginate users on frontend
   const totalPages = Math.ceil(sortedUsers.length / itemsPerPage);
   const displayedUsers = sortedUsers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
 
-  // Handle page change
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  // Handle sorting
   const handleSort = (column: string) => {
     setSortBy((prev) => ({
       column,
@@ -101,13 +99,24 @@ const UsersManagement = () => {
     }));
   };
 
-  // Handle block/unblock
-  const toggleBlockStatus = (userId: string, isBlocked: boolean) => {
-    if (isBlocked) {
-      unblockUserMutation.mutate(userId);
+  // Open confirmation modal
+  const confirmToggleBlock = (user: User) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
+
+  // Confirm block/unblock action
+  const handleConfirm = () => {
+    if (!selectedUser) return;
+
+    if (selectedUser.isBlocked) {
+      unblockUserMutation.mutate(selectedUser._id);
     } else {
-      blockUserMutation.mutate(userId);
+      blockUserMutation.mutate(selectedUser._id);
     }
+
+    setIsModalOpen(false);
+    setSelectedUser(null);
   };
 
   return (
@@ -148,27 +157,27 @@ const UsersManagement = () => {
           <tbody>
             {displayedUsers?.map((user) => (
               <tr key={user._id} className="hover:bg-gray-100 dark:hover:bg-gray-700">
-                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
                   {user.username}
                 </td>
-                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
                   {user.fullname}
                 </td>
-                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
                   {user.email}
                 </td>
-                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
                   {user.isBlocked ? 'Yes' : 'No'}
                 </td>
-                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
                   {user.gender}
                 </td>
-                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-800 dark:text-gray-100">
+                <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
                   {user.role}
                 </td>
                 <td className="border border-gray-300 dark:border-gray-700 px-4 py-2">
                   <button
-                    onClick={() => toggleBlockStatus(user._id, user.isBlocked)}
+                    onClick={() => confirmToggleBlock(user)}
                     className={`px-4 py-2 rounded ${
                       user.isBlocked ? 'bg-red-500' : 'bg-green-500'
                     } text-white`}
@@ -221,10 +230,21 @@ const UsersManagement = () => {
         </button>
       </div>
 
-      {/* Total Users */}
-      <div className="mt-4 text-sm text-gray-600 dark:text-gray-300 text-center md:text-left">
+      <div className="mt-4 text-sm text-gray-600 dark:text-gray-300">
         Total Users: {totalUsers}
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirm}
+        title={selectedUser?.isBlocked ? 'Unblock User' : 'Block User'}
+        message={`Are you sure you want to ${selectedUser?.isBlocked ? 'unblock' : 'block'} "${
+          selectedUser?.username
+        }"?`}
+        confirmText={selectedUser?.isBlocked ? 'Yes, Unblock' : 'Yes, Block'}
+      />
     </div>
   );
 };

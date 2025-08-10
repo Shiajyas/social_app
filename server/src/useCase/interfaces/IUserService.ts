@@ -17,4 +17,5 @@ export interface IUserService {
   ): Promise<{ posts: IPost[]; nextPage: number | null }>;
   searchUsers(query: string): Promise<IUser[] | any>;
   getCallHistory(userId: string): Promise<ICallHistory[]> 
+  changePassword(userId: string,oldPassword: string, newPassword: string): Promise<boolean>
 }

@@ -8,6 +8,7 @@ export interface IPostSocketService {
     postId: string,
     type: string,
   ): Promise<void>;
+  getLikedUsers(socket: Socket, postId: string) : Promise<void>;
   savePost(socket: Socket, postId: any, userId: string): Promise<void>;
   deletePost(socket: Socket, postId: any, userId: string): Promise<void>;
   

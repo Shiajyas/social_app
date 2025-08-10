@@ -4,9 +4,12 @@ import GroupDetails from './GroupCreateForm';
 import GroupChatView from './GroupChatView';
 import GroupDetailsWrapper from './groupDetailsWrapper';
 import { GroupWelcomePage } from './groupWelcomePage';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 const CommunityLayout: React.FC = () => {
   const navigate = useNavigate();
+
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       <GroupSidebar

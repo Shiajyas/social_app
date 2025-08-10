@@ -1,5 +1,4 @@
 // src/infrastructure/utils/redisClient.ts
-
 import Redis from 'ioredis';
 import dotenv from 'dotenv';
 
@@ -35,8 +34,15 @@ redis.on('connect', () => {
   console.log('✅ Redis connection established');
 });
 
-redis.on('ready', () => {
+redis.on('ready', async () => {
   console.log('🚀 Redis is ready to use');
+
+  try {
+    await redis.flushall();
+    console.log('🧹 Redis cache cleared on startup');
+  } catch (err) {
+    console.error('❌ Failed to flush Redis on startup:', err);
+  }
 });
 
 redis.on('error', (err) => {

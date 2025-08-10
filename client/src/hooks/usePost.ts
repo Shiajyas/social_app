@@ -100,13 +100,20 @@ export const useLikePost = () => {
           pages: oldData.pages.map((page: any) => ({
             ...page,
             posts: page.posts.map((post: any) =>
-              post._id === postId ? { ...post, likes: [...post.likes, userId] } : post,
+              post._id === postId
+                ? {
+                    ...post,
+                    likes: [
+                      ...(Array.isArray(post?.likes) ? post.likes : []),
+                      userId,
+                    ],
+                  }
+                : post
             ),
           })),
         };
       });
 
-      // Emit socket event for real-time update
       socket.emit('like_post', { userId, postId, type: 'like' });
 
       return { previousData };
@@ -117,6 +124,7 @@ export const useLikePost = () => {
     },
   });
 };
+
 
 //  Optimized Unlike Post Hook
 export const useUnlikePost = () => {

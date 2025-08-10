@@ -245,6 +245,10 @@ export class PostRepository implements IPostRepository {
     }).limit(10);
   }
 
+  async getLikedUsers(postId: string): Promise<any> {
+    return await Post.findById(postId, 'likes').populate('likes', 'username avatar');
+  }
+
   async searchPostsByHashtags(query: string): Promise<IPost[]> {
     console.log(query, 'searchquery post by hashtags');
     return await Post.find({

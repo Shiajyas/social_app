@@ -60,17 +60,17 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
     enabled: debouncedQuery.trim().length === 0,
     staleTime: 5 * 60 * 1000,
   });
-
-  const {
-    data: samplePosts,
-    isLoading: isPostLoading,
-    isError: isPostError,
-  } = useQuery<IPost[]>({
-    queryKey: ['samplePosts'],
-    queryFn: () => postService.getPosts(),
-    enabled: debouncedQuery.trim().length === 0,
-    staleTime: 5 * 60 * 1000,
-  });
+  
+const {
+  data: samplePosts,
+  isLoading: isPostLoading,
+  isError: isPostError,
+} = useQuery<{ posts: IPost[]; nextPage: any; }>({
+  queryKey: ['samplePosts'],
+  queryFn: () => postService.getPosts(),
+  enabled: debouncedQuery.trim().length === 0,
+  staleTime: 5 * 60 * 1000,
+});
 
   const handleUserClick = useCallback(
     (userId: string) => {
@@ -158,7 +158,7 @@ export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false 
                         <FollowBtn
                           userId={currentUser?._id || ''}
                           followingId={user._id}
-                          isFollowing={(user.followers ?? []).includes(currentUser?._id || '')}
+                          isFollowing={(user.followers?? []).includes(currentUser?._id || '')}
                         />
                       </div>
                     ))}

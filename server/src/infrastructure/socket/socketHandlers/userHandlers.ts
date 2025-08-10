@@ -29,8 +29,16 @@ export const userHandlers = (
     userSocketHandlers.getOnlineUsers(socket);
   });
 
+socket.on('admin:userBlocked', ({ userId }) => {
+  userSocketHandlers.blockUser(socket, userId);
+});
+
   socket.on('disconnect', () => {
     console.log(`🔌 User disconnected with socket ${socket.id}`);
     userSocketHandlers.removeUser(socket, '');
   });
+
+  
+
+
 };

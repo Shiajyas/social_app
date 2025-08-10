@@ -58,6 +58,10 @@ export const ResponseMessages = {
   SUBSCRIPTION_FAILED: 'Subscription update failed',
   FILE_UPLOAD_ERROR: 'Error uploading media',
   SEARCH_QUERY_EMPTY: 'Empty search query',
+  PASSWORD_CHANGED: 'Password changed successfully',
+  PASSWORD_CHANGE_FAILED: "oldPassword not match!!",
+  
+  USER_FETCH_SUCCESS: 'User fetched successfully',
 
   //notification constants
 

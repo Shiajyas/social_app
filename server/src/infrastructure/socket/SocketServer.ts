@@ -45,7 +45,7 @@ export const initializeSocket = (
 
   // io = new Server(server, {
   //   cors: {
-  //     origin: "*",
+  //     origin: "*", 
   //     methods: ['GET', 'POST', 'PUT', 'PATCH','OPTIONS'],
       
   //     credentials: true,

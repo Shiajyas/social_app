@@ -40,6 +40,10 @@ export const postHandlers = (
       console.error('Error deleting post:', error);
     }
   });
+
+  socket.on("getLikedUsers", async (data) => {
+    await postSocketHandlers.getLikedUsers(socket, data.postId);
+  });
 };
 
 

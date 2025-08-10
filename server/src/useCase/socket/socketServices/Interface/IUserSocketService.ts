@@ -14,4 +14,5 @@ export interface IUserSocketService {
   ): Promise<void>;
   removeUser(socket: Socket, userId: string): Promise<void>;
   getOnlineUsers(socket: Socket): void;
+  blockUser(socket: Socket, userId: string): Promise<void>
 }

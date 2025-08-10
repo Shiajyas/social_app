@@ -69,11 +69,6 @@ export const adminHandlers = (
         await adminService.deletePost(postId);
         console.log(`🚫 Post ${postId} blocked by admin ${socket.id}`);
 
-        // Optional: Notify the post owner if needed
-        // const postOwnerSocketId = await adminService.getPostOwnerSocketId(postId);
-        // if (postOwnerSocketId) {
-        //   socket.to(postOwnerSocketId).emit("user:postBlocked", { postId });
-        // }
 
         callback({ success: true });
       } catch (error) {
@@ -82,6 +77,10 @@ export const adminHandlers = (
       }
     },
   );
+
+
+
+
 
   socket.on('disconnect', () => {
     adminService.unregisterAdmin(socket.id);

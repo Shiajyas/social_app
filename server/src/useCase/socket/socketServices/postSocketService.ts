@@ -184,6 +184,16 @@ export class PostSocketService implements IPostSocketService {
     }
   }
 
+  async getLikedUsers(socket: Socket, postId: string) {
+    try {
+      const likedUsers = await this._PostRepository.getLikedUsers(postId);
+      console.log('likedUsers', likedUsers);
+      socket.emit('likedUsersList', { postId: postId, users: likedUsers });
+    } catch (error) {
+      this.handleError(socket, error, 'likedUsersError');
+    }
+  }
+
   private handleError(socket: Socket, error: unknown, event: string) {
     console.error(
       `❌ ${event} Error:`,

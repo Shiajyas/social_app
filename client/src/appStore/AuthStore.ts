@@ -4,7 +4,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { IAdmin, IPermissions } from '@/types/adminTypes'; // Make sure path matches
 import { IUser } from '@/types/userTypes';
 import { authService } from '@/services/authService';
-
+import { socket } from '@/utils/Socket';
 interface AuthState {
   user: IUser | null;
   admin: IAdmin | null;
@@ -49,6 +49,7 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           await authService.logout();
+          socket.disconnect()
         } catch (error) {
           console.error('Logout error:', error);
         }

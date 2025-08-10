@@ -160,6 +160,35 @@ export class UserSocketService implements IUserSocketService {
     }
   }
 
+async blockUser(socket: Socket, userId: string): Promise<void> {
+  try {
+    // 1. Update DB to block the user
+    await this._UserRepository.updateById(userId, {
+      isBlocked: true,
+    });
+    console.log(userId, 'for block');
+
+    // 2. Notify admin who initiated the block
+    socket.emit('blockSuccess', { userId });
+
+    // 3. Find blocked user's socketId from the session repository
+    const blockedUserSession = await this._SessionUserRepository.findById(userId);
+
+    // 4. Notify the blocked user if they are online
+    if (blockedUserSession?.socketId) {
+      this._Io.to(blockedUserSession.socketId).emit('blockSuccess', { userId });
+      console.log(`🔴 Notified blocked user ${userId} (socket: ${blockedUserSession.socketId})`);
+    } else {
+      console.log(`⚪ Blocked user ${userId} is not online`);
+    }
+
+  } catch (error) {
+    this.handleError(socket, error, 'blockError');
+  }
+}
+
+
+
   private handleError(socket: Socket, error: unknown, event: string) {
     console.error(`❌ ${event} Error:`, error);
     socket.emit(event, {
@@ -167,3 +196,4 @@ export class UserSocketService implements IUserSocketService {
     });
   }
 }
+ 

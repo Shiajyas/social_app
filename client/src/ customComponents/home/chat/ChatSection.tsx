@@ -83,13 +83,13 @@ const ChatSection = () => {
   const { data: followers } = useQuery({
     queryKey: ['followers', userId],
     queryFn: () => userService.getFollowers(userId),
-    enabled: !!userId,
+    enabled: Boolean(userId),
   });
 
   const { data: following } = useQuery({
     queryKey: ['following', userId],
     queryFn: () => userService.getFollowing(userId),
-    enabled: !!userId,
+    enabled: Boolean(userId),
   });
 
   const allUsers: User[] = useMemo(() => {
@@ -107,6 +107,22 @@ const ChatSection = () => {
     setInCall(true);
     startCall(type);
   };
+
+  useEffect(() => {
+  if (!userId) return;
+  
+  socket.emit('getOnlineUsers');
+  
+  const handleUpdate = (onlineUserIds: string[]) => {
+    setOnlineUsers(onlineUserIds);
+  };
+  
+  socket.on('updateOnlineUsers', handleUpdate);
+  return () => {
+    socket.off('updateOnlineUsers', handleUpdate);
+  };
+}, [userId]);
+
 
   useEffect(() => {
     socket.emit('getOnlineUsers');
@@ -152,6 +168,12 @@ const ChatSection = () => {
   const handleBackToList = () => {
     setShowChatList(true);
   };
+
+
+  if (!userId) {
+  return <div className="p-4">Loading chat...</div>;
+}
+
 
   return (
     <div className="p-4 m-0 bg-white dark:bg-gray-900 text-black dark:text-white rounded shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-700 max-w-full">

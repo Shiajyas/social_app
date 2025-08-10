@@ -3,6 +3,7 @@ import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 import { useAuthStore } from '@/appStore/AuthStore';
 import { socket } from '@/utils/Socket';
 import { chatSocket } from '@/utils/chatSocket';
@@ -17,13 +18,18 @@ const handleMutationError = (error: any, message: string) => {
 };
 
 // Default function to manage success for mutations
-const handleMutationSuccess = (data: any, queryClient: any, navigate: any, setUser: any) => {
+const handleMutationSuccess = async(data: any, queryClient: any, navigate: any, setUser: any) => {
   const { user } = data;
-  // queryClient.setQueryData(['user'], user);
-    queryClient.setQueryData(['user', user.id], user);
-  setUser(user); // Setting user in context
-  navigate('/home');
+  queryClient.setQueryData(['user', user.id], user);
+  setUser(user);
+
+  // window.location.reload(); 
+   await queryClient.invalidateQueries(); 
+    
+
+    navigate('/home');
 };
+
 
 export const useUserAuth = () => {
   const queryClient = useQueryClient();

@@ -45,6 +45,14 @@ interface ProfileHeaderProps {
   parentUserId: string;
 }
 
+const intailRules = [
+  { label: "At least 6 characters", isValid: false },
+  { label: "One uppercase letter", isValid: false },
+  { label: "One lowercase letter", isValid: false },
+  { label: "One number", isValid: false },
+  { label: "One special character (!@#$%^&*)", isValid: false }
+]
+
 const Modal = ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
   <AnimatePresence>
     <motion.div
@@ -81,6 +89,25 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, userId, refetch, pa
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [searchParams] = useSearchParams();
 
+  const [passwordData, setPasswordData] = useState({
+  current: '',
+  new: '',
+  confirm: ''
+});
+const [passwordError, setPasswordError] = useState('');
+const [loadingPassword, setLoadingPassword] = useState(false);
+
+const [passwordRules, setPasswordRules] = useState(intailRules);
+
+const validatePassword = (password: string) => {
+  setPasswordRules([
+    { label: "At least 6 characters", isValid: password.length >= 6 },
+    { label: "One uppercase letter", isValid: /[A-Z]/.test(password) },
+    { label: "One lowercase letter", isValid: /[a-z]/.test(password) },
+    { label: "One number", isValid: /\d/.test(password) },
+    { label: "One special character (!@#$%^&*)", isValid: /[!@#$%^&*]/.test(password) }
+  ]);
+};
   const { updateUserFields, user: authUser } = useAuthStore();
 
   const navigate = useNavigate()
@@ -89,8 +116,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, userId, refetch, pa
 
 useEffect(() => {
   const followingStatus =
-    (user?.followers ?? []).includes(authUser?._id || parentUserId) ||
-    (user?.following ?? []).includes(authUser?._id || parentUserId);
+
+    (user?.followers ?? []).includes(authUser?._id );
 
   setIsFollowing(followingStatus);
 }, [user, parentUserId]);
@@ -170,6 +197,37 @@ const handleSaveChanges = async () => {
     website: user?.website || '',
     avatar: user?.avatar || '',
   });
+
+  const handlePasswordChange = async () => {
+  if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
+    setPasswordError('All fields are required.');
+    return;
+  }
+  if (passwordData.new !== passwordData.confirm) {
+    setPasswordError('New passwords do not match.');
+    return;
+  }
+
+  setPasswordError('');
+  setLoadingPassword(true);
+
+  try {
+    await userService.changePassword(userId,passwordData.current, passwordData.new);
+    // toast.success('Password updated successfully!');
+   
+      toast.success('Password updated successfully!');
+  
+    // console.log(res,">>>>")
+    setPasswordRules(intailRules);
+    setPasswordData({ current: '', new: '', confirm: '' });
+  } catch (err) {
+    console.error('Error updating password:', err);
+    toast.error(err.response?.data?.message || 'Old password is incorrect.');
+  } finally {
+    setLoadingPassword(false);
+  }
+};
+
 
   useEffect(() => {
     if (user) {
@@ -300,63 +358,131 @@ const handleSaveChanges = async () => {
         )}
 
         {editing ? (
-          <div className="space-y-4">
-            {[
-              { label: 'Full Name', key: 'fullname', required: true },
-              { label: 'Username', key: 'username', required: true },
-              { label: 'Bio', key: 'bio', textarea: true },
-              { label: 'Email', key: 'email', disabled: true },
-              { label: 'Mobile', key: 'mobile', required: true },
-              { label: 'Address', key: 'address' },
-              { label: 'Website', key: 'website' },
-            ].map(({ label, key, textarea, disabled, required }) => (
-              <div key={key}>
-                <label className="block text-sm font-medium text-gray-700">
-                  {label} {required && <span className="text-red-500">*</span>}
-                </label>
-                {textarea ? (
-                  <Textarea
-                    value={profileData[key as keyof typeof profileData]}
-                    onChange={(e) => setProfileData({ ...profileData, [key]: e.target.value })}
-                    placeholder={`Enter your ${label.toLowerCase()}`}
-                  />
-                ) : (
-                  <Input
-                    value={profileData[key as keyof typeof profileData]}
-                    onChange={(e) => setProfileData({ ...profileData, [key]: e.target.value })}
-                    placeholder={`Enter your ${label.toLowerCase()}`}
-                    disabled={disabled}
-                  />
-                )}
-                {errors[key] && <p className="text-red-500 text-sm">{errors[key]}</p>}
-              </div>
-            ))}
+         <div className="space-y-4">
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Gender</label>
-              <Select
-                value={profileData.gender}
-                onValueChange={(value) => setProfileData({ ...profileData, gender: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue>{profileData.gender}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+  {[
+    { label: 'Full Name', key: 'fullname', required: true },
+    { label: 'Username', key: 'username', required: true },
+    { label: 'Bio', key: 'bio', textarea: true },
+    { label: 'Email', key: 'email', disabled: true },
+    { label: 'Mobile', key: 'mobile', required: true },
+    { label: 'Address', key: 'address' },
+    { label: 'Website', key: 'website' },
+  ].map(({ label, key, textarea, disabled, required }) => (
+    <div key={key}>
+      <label className="block text-sm font-medium text-gray-700">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      {textarea ? (
+        <Textarea
+          value={profileData[key as keyof typeof profileData]}
+          onChange={(e) => setProfileData({ ...profileData, [key]: e.target.value })}
+          placeholder={`Enter your ${label.toLowerCase()}`}
+        />
+      ) : (
+        <Input
+          value={profileData[key as keyof typeof profileData]}
+          onChange={(e) => setProfileData({ ...profileData, [key]: e.target.value })}
+          placeholder={`Enter your ${label.toLowerCase()}`}
+          disabled={disabled}
+        />
+      )}
+      {errors[key] && <p className="text-red-500 text-sm">{errors[key]}</p>}
+    </div>
+  ))}
 
-            <Button
-              onClick={handleSaveChanges }
-              className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition duration-200"
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="animate-spin" /> : 'Save Changes'}
-            </Button>
-          </div>
+  {/* Gender Select */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700">Gender</label>
+    <Select
+      value={profileData.gender}
+      onValueChange={(value) => setProfileData({ ...profileData, gender: value })}
+    >
+      <SelectTrigger>
+        <SelectValue>{profileData.gender}</SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="male">Male</SelectItem>
+        <SelectItem value="female">Female</SelectItem>
+        <SelectItem value="other">Other</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+
+  {/* 🔹 Change Password Section */}
+<div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+    Change Password <span className="text-sm text-gray-500 dark:text-gray-400">🔒 Secure it</span>
+  </h3>
+
+  <div className="space-y-3 mt-3">
+    <Input
+      type="password"
+      placeholder="Current Password"
+      value={passwordData.current}
+      onChange={(e) => setPasswordData({ ...passwordData, current: e.target.value })}
+      className="bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600"
+    />
+
+    <Input
+      type="password"
+      placeholder="New Password"
+      value={passwordData.new}
+      onChange={(e) => {
+        const value = e.target.value;
+        setPasswordData({ ...passwordData, new: value });
+        validatePassword(value);
+      }}
+      className="bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600"
+    />
+
+    {/* Password rules */}
+    <div className="text-sm space-y-1">
+      {passwordRules.map(({ label, isValid }, i) => (
+        <div
+          key={i}
+          className={`flex items-center gap-2 ${
+            isValid ? "text-green-500" : "text-gray-500 dark:text-gray-400"
+          }`}
+        >
+          {isValid ? "✅" : "⚪"} {label}
+        </div>
+      ))}
+    </div>
+
+    <Input
+      type="password"
+      placeholder="Confirm New Password"
+      value={passwordData.confirm}
+      onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })}
+      className="bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600"
+    />
+
+    {passwordError && (
+      <p className="text-red-500 text-sm">{passwordError}</p>
+    )}
+
+    <Button
+      onClick={handlePasswordChange}
+      className="w-full bg-purple-600 text-white font-semibold py-2 rounded-xl hover:bg-purple-700 transition duration-200"
+      disabled={loadingPassword}
+    >
+      {loadingPassword ? <Loader2 className="animate-spin" /> : 'Update Password'}
+    </Button>
+  </div>
+</div>
+
+
+  {/* Save Profile Changes */}
+  <Button
+    onClick={handleSaveChanges}
+    className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition duration-200"
+    disabled={loading}
+  >
+    {loading ? <Loader2 className="animate-spin" /> : 'Save Changes'}
+  </Button>
+</div>
+
         ) : (
           <div>
             <p>{user?.bio || 'No bio available'}</p>

@@ -50,4 +50,6 @@ export interface IUserRepository {
   searchUsers(query: string): Promise<IUser[]>;
 
   searchSamples(): Promise<IUser[]> 
+
+   changePassword(userId: string,oldPassword: string, newPassword: string): Promise<boolean>
 }

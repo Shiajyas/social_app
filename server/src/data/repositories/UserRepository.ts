@@ -2,6 +2,8 @@ import { IUser } from '../../core/domain/interfaces/IUser';
 import { IUserRepository } from '../interfaces/IUserRepository';
 import User from '../../core/domain/models/UserModel';
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+
 
 export class UserRepository implements IUserRepository {
   // Find a user by email
@@ -236,6 +238,30 @@ export class UserRepository implements IUserRepository {
         { fullname: { $regex: query, $options: 'i' } },
       ],
     }).limit(5);
+  }
+
+  async changePassword(userId: string,oldPassword: string, newPassword: string): Promise<boolean> {
+    try {
+     
+      await User.findOne({ _id: userId }).then(async (user) => {
+        if (!user) {
+          return false;
+        }
+        const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+        if (!isPasswordValid) {
+         throw new Error('Old password is incorrect');
+         return false;
+        }
+      });
+
+    let user =  await User.findByIdAndUpdate(userId, { password: newPassword }, { new: true });
+    console.log(user, 'user');
+    
+      return true;
+    } catch (error) {
+      console.error('Error changing password:', error);
+      return false;
+    }
   }
 
    async searchSamples(): Promise<IUser[]> {

@@ -55,7 +55,7 @@ export const userService = {
       },
       'Failed to fetch user profile',
     );
-  },
+  },  
 
   // Get unread notification count
   getNotificationCount: (userId: string) => {
@@ -180,6 +180,17 @@ export const userService = {
         data: formData,
       },
       'Failed to upload media',
+    );
+  },
+
+  changePassword: (userId: string, oldPassword: string, newPassword: string) => {
+    return fetchData(
+      `/users/password/${userId}`,
+      {
+        method: 'PUT',
+        data: { oldPassword, newPassword  },
+      },
+      'Failed to change password',
     );
   },
 

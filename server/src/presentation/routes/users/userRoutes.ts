@@ -174,5 +174,18 @@ export function userRoutes() {
     },
   );
 
+  router.put(
+    '/password/:id',
+    userAuthMiddleware.authenticate,
+    async (req, res, next) => {
+      try {
+        await userController.changePassword(req, res);
+        next();
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
+
   return router;
 }

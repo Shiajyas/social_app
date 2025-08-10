@@ -27,11 +27,14 @@ const HomeLayout: React.FC = () => {
 
   useEffect(() => {
     if (!userId) return;
+    chatSocket.connect();
+    socket.connect();
     socket.emit('joinUser', userId);
     chatSocket.emit('updateChatSocketId', { userId: user?._id });
     return () => {
       socket.emit('leaveUser', userId);
       chatSocket.disconnect();
+      socket.disconnect();
     };
   }, [userId]);
 

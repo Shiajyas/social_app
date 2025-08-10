@@ -36,6 +36,7 @@ export interface IPostRepository {
     limit: number,
   ): Promise<{ posts: IPost[]; nextPage: number | null }>;
   searchPosts(query: string): Promise<IPost[]>;
+  getLikedUsers(postId: string): Promise<any>
   countUserPostsInRange(userId: string, startDate: Date, endDate: Date): Promise<number> 
   searchPostsByHashtags(query: string): Promise<IPost[]>
 }

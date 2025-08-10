@@ -11,6 +11,8 @@ import {
   Edit,
   Trash2,
   X,
+  User,
+  List,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
@@ -24,6 +26,8 @@ import { useQuery } from '@tanstack/react-query';
 import ReportButton from '@/ customComponents/common/ReportButton';
 import { useUserAuth } from '@/hooks/useUserAuth';
 import { FaStar } from 'react-icons/fa';
+import LikeButton from '@/ customComponents/common/LikeButton';
+import LikedUsersModal from '@/ customComponents/common/LikedUsersModal';
 
 interface Post {
   hashtags: string[] | string;
@@ -66,8 +70,25 @@ const PostCard = memo(
     const [isExpanded, setIsExpanded] = useState(false);
     const [isShareModalOpen, setShareModalOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+
+      const [likedUsers, setLikedUsers] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+
+  // Listen for liked users list from server
+  useEffect(() => {
+    socket.on("likedUsersList", ({ postId, users }) => {
+      if (postId === post._id) {
+        setLikedUsers(users.likes);
+        setShowModal(true);
+      }
+    });
+
+    return () => {
+      socket.off("likedUsersList");
+    };
+  }, [post._id]);
  
-    console.log('post in PostCard:', userId);
+    console.log('post in PostCard:',likedUsers);
 
     const { sharePostWithUser } = useChat(userId);
     
@@ -152,7 +173,12 @@ const PostCard = memo(
     : [];
 
 
-
+  const handleCountClick = (e) => {
+    e.stopPropagation();
+    console.log("clicked");
+    
+    socket.emit("getLikedUsers", { postId: post._id });
+  };
     // console.log('post in PostCard:', post);
     
 
@@ -293,7 +319,13 @@ const PostCard = memo(
             }}
           >
             <Heart className={`w-5 h-5 ${isLiked ? 'text-red-500' : 'text-gray-500'}`} />
-            <span>{post.likes.length}</span>
+              <span
+            onClick={handleCountClick}
+            className="cursor-pointer hover:underline"
+          >
+            {post.likes.length}
+          </span>
+         
           </Button>
 
           
@@ -385,7 +417,15 @@ const PostCard = memo(
             }}
           />
         )}
+              {showModal && (
+        <LikedUsersModal
+          users={likedUsers}
+          onClose={() => setShowModal(false)}
+        />
+      )}
       </div>
+
+      
     );
   },
 );

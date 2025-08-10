@@ -11,6 +11,7 @@ import { useGroupStore } from '@/appStore/groupStore';
 import { useAuthStore } from '@/appStore/AuthStore';
 
 import { useGroups } from '@/hooks/group/useGroups';
+import { useNavigate } from 'react-router-dom';
 
 interface SocketContextType {
   unreadNotifications: number;
@@ -23,19 +24,48 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const queryClient = useQueryClient(); // ✅ Use React Query's main instance
 
+  const navigate = useNavigate();
+
   const groups = useGroupStore((state) => state.groups);
 
   const { setGroups } = useGroupStore();
 
-  const { user } = useAuthStore();
+
+  const { user , logout} = useAuthStore();
 
   useGroups(user?._id);
+
+    const handleLogout = () => {
+      if (user?._id) socket.emit('logOut', user._id);
+      logout('user');
+      navigate('/');
+    };
+
+    useEffect(()=>{
+          const handleBlockSuccess = (userId: string) => {
+      console.log('🚫 User blocked successfully:', userId,user?._id);
+     if(userId?.userId === user?._id) {
+        toast.error('You have been blocked by an admin, contact support.');
+      setTimeout(() => {
+      
+        handleLogout();
+      },3000);
+     }
+    }
+
+     socket.on("blockSuccess", handleBlockSuccess) 
+
+     return () => {
+       socket.off("blockSuccess", handleBlockSuccess);
+     }
+    })
 
   useEffect(() => {
     const handleNewNotification = (notification: any) => {
       console.log('📩 New Notification:', notification);
       setUnreadNotifications((prev) => prev + 1);
     };
+
 
     const handleNewNotificationChat = (notification: any) => {
       console.log('📩 New Chat Notification:', notification);
@@ -46,6 +76,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     chatSocket.on('newNotification', handleNewNotificationChat);
     socket.on('newNotification', handleNewNotification);
+   
+
 
     const handleGroupMessage = ({ groupId }: { groupId: string }) => {
       const { activeGroupId, groups, incrementUnread } = useGroupStore.getState();

@@ -209,4 +209,22 @@ export class UserController {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.INTERNAL_ERROR });
     }
   }
+
+  async changePassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { id : userId } = req.params;
+      const { oldPassword, newPassword } = req.body;
+
+      console.log(req.params)
+
+     let result = await this._UserService.changePassword(userId,oldPassword, newPassword);
+       if(result){
+        res.status(HttpStatus.OK).json({ message: Msg.PASSWORD_CHANGED});
+       }else{
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.PASSWORD_CHANGE_FAILED });
+       }
+    } catch (error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.INTERNAL_SERVER_ERROR});
+    }
+  }
 }

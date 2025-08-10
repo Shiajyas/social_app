@@ -5,7 +5,7 @@ import { IPostRepository } from '../data/interfaces/IPostRepository';
 import { IPost } from '../core/domain/interfaces/IPost';
 import { ICallHistoryRepository } from '../data/interfaces/ICallHistoryRepository';
 import { ICallHistory } from '../core/domain/interfaces/ICallHistory';
-
+import bcrypt from 'bcryptjs';
 export class UserService implements IUserService {
   private _UserRepository: IUserRepository;
   private _PostRepository: IPostRepository;
@@ -100,6 +100,23 @@ export class UserService implements IUserService {
     console.log(users, posts, 'users and posts');
 
     return { users, posts };
+  }
+
+  async changePassword(userId: string,oldPassword: string, newPassword: string):Promise<boolean> {
+
+   try {
+         const hashedPassword = await bcrypt.hash(newPassword, 12);
+     console.log(hashedPassword, 'hashedPassword');
+   let res = await this._UserRepository.changePassword(userId,oldPassword, hashedPassword);
+    if(res){
+      return true
+    }else{
+      return false
+    }
+   } catch (error) {
+    throw error;
+    
+   }  
   }
 
   getCallHistory(userId: string): Promise<ICallHistory[]> {

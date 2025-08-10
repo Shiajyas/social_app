@@ -5,6 +5,7 @@ import { useAuthStore } from '@/appStore/AuthStore';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useGroups } from '@/hooks/group/useGroups';
 
@@ -21,6 +22,8 @@ const CommunityChatSection: React.FC = () => {
   const [input, setInput] = useState('');
   const [warning, setWarning] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const queryClient = useQueryClient();
+
 
   useEffect(() => {
     socket.emit('joinCommunity', { communityId, userId: user?._id });
