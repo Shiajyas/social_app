@@ -175,7 +175,7 @@ async blockUser(socket: Socket, userId: string): Promise<void> {
 const blockedUserSocketIds: string[] = await this._SessionUserRepository.getSocketIds(userId);
 if (blockedUserSocketIds.length > 0) {
   blockedUserSocketIds.forEach(socketId => {
-    this._Io.to(socketId).emit('blockSuccess', { userId });
+    socket.to(socketId).emit('blockSuccess', { userId });
   });
   console.log(`🔴 Notified blocked user ${userId} sockets:`, blockedUserSocketIds);
 } else {
