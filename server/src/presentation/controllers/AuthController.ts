@@ -235,8 +235,8 @@ async resetPassword(req: Request, res: Response): Promise<void> {
 
       setCookie(res, 'refreshToken', refreshToken);
       setCookie(res, 'userToken', token);
-      if (!user) throw new Error('Google login faild');
-      if (!token) throw new Error('Google login faild');
+      if (!user) throw new Error(  'Your account has been blocked. Please contact support.');
+      if (!token) throw new Error(  'Your account has been blocked. Please contact support.');
      
 
     res.status(HttpStatus.OK).json({
@@ -245,7 +245,7 @@ async resetPassword(req: Request, res: Response): Promise<void> {
     });
     } catch (error) {
       console.error(error);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ResponseMessages.ACCOUNT_BLOCKED});
     }
   }
 

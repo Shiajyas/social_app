@@ -46,6 +46,8 @@ export const ResponseMessages = {
   REFRESH_TOKEN_FAILED: 'Failed to refresh token.',
   REFRESH_TOKEN_SUCCESS: 'Token refreshed successfully.',
 
+  ACCOUNT_BLOCKED: 'Your account has been blocked. Please contact support.',
+
   //User constants
 
     USER_ID_MISSING: 'User ID is missing.',

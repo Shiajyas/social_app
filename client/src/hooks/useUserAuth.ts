@@ -140,7 +140,7 @@ export const useUserAuth = () => {
     },
     onError: (error) => {
       console.log(error);
-      toast.error('Google login failed');
+      toast.error(error.message);
     },
   });
 

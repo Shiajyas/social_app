@@ -396,6 +396,14 @@ export class AuthService implements IAuthService {
 
         user = await this._UserRepository.save(user);
       }
+
+           if (user.isBlocked) {
+        throw new Error(
+          'Your account has been blocked. Please contact support.',
+        );
+        
+      }
+
       const { accessToken, refreshToken } = this.generateTokens({
         id: user._id,
         role: user.role || 'user',
