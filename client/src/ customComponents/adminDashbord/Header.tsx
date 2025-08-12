@@ -57,7 +57,9 @@ const Header = () => {
       if (typeof count === 'number') setOnlineCount(count);
     };
 
-    socket.emit('admin:join');
+    console.log("admin",admin);
+
+    socket.emit('admin:join',admin?._id);
 
     const handleNewReport = (report: Report) => {
       queryClient.setQueryData<Report[]>(['reports', 1], (prev = []) => {
@@ -96,11 +98,11 @@ const Header = () => {
       <div className="flex items-center space-x-6 relative">
         {/* Online Count */}
         <div className="flex items-center text-black dark:text-white gap-2">
-          <span className="relative">
+          {/* <span className="relative">
             <span className="absolute -top-1 -left-1 w-2.5 h-2.5 rounded-full bg-green-500 animate-ping opacity-75" />
             <span className="w-2.5 h-2.5 rounded-full bg-green-500 relative" />
-          </span>
-          <UserCircle className="w-5 h-5" />
+          </span> */}
+          {/* <UserCircle className="w-5 h-5" />
           <motion.span
             key={onlineCount}
             initial={{ scale: 0.8, opacity: 0 }}
@@ -109,7 +111,7 @@ const Header = () => {
             className="font-medium"
           >
             Online: {onlineCount}
-          </motion.span>
+          </motion.span> */}
         </div>
 
         {/* Reports Count */}

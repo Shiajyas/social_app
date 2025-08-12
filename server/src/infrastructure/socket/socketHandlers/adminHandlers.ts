@@ -5,10 +5,10 @@ export const adminHandlers = (
   socket: Socket,
   adminService: ISocketAdminService,
 ) => {
-  socket.on('admin:join', () => {
+  socket.on('admin:join', (adminId) => {
     socket.join('admin');
-    console.log(`👨‍💻 Admin connected: ${socket.id}`);
-    adminService.registerAdmin(socket.id);
+    console.log(`👨‍💻 Admin connected: ${adminId}`);
+    adminService.registerAdmin(adminId,socket.id);
     adminService.sendOnlineUserCountTo(socket);
 
     adminService.getOverviewData().then((data) => {

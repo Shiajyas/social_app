@@ -22,7 +22,7 @@ const isVideo = (url: string): boolean => /\.(mp4|webm|ogg)$/i.test(url);
 export const SearchSection: React.FC<SearchSectionProps> = ({ hideInput = false }) => {
   const { query, setQuery } = useSearchStore();
   const [debouncedQuery, setDebouncedQuery] = useState(query);
-  const { user: currentUser } = useAuthStore(); // ✅ current user
+  const { user: currentUser } = useAuthStore(); 
   const navigate = useNavigate();
 
   const debouncedSetQuery = useCallback(
@@ -154,12 +154,14 @@ const {
                             </span>
                           </div>
                         </div>
-
-                        <FollowBtn
-                          userId={currentUser?._id || ''}
-                          followingId={user._id}
-                          isFollowing={(user.followers?? []).includes(currentUser?._id || '')}
-                        />
+                        {user._id !== currentUser?._id && (
+  <FollowBtn
+    userId={currentUser?._id || ''}
+    followingId={user._id}
+    isFollowing={(user.followers ?? [])
+      .some(f => f.toString() === currentUser?._id?.toString())}
+  />
+)}
                       </div>
                     ))}
                   </div>

@@ -172,15 +172,15 @@ async blockUser(socket: Socket, userId: string): Promise<void> {
     socket.emit('blockSuccess', { userId });
 
     // 3. Find blocked user's socketId from the session repository
-    const blockedUserSession = await this._SessionUserRepository.findById(userId);
-
-    // 4. Notify the blocked user if they are online
-    if (blockedUserSession?.socketId) {
-      this._Io.to(blockedUserSession.socketId).emit('blockSuccess', { userId });
-      console.log(`🔴 Notified blocked user ${userId} (socket: ${blockedUserSession.socketId})`);
-    } else {
-      console.log(`⚪ Blocked user ${userId} is not online`);
-    }
+const blockedUserSocketIds: string[] = await this._SessionUserRepository.getSocketIds(userId);
+if (blockedUserSocketIds.length > 0) {
+  blockedUserSocketIds.forEach(socketId => {
+    this._Io.to(socketId).emit('blockSuccess', { userId });
+  });
+  console.log(`🔴 Notified blocked user ${userId} sockets:`, blockedUserSocketIds);
+} else {
+  console.log(`⚪ Blocked user ${userId} is not online`);
+}
 
   } catch (error) {
     this.handleError(socket, error, 'blockError');

@@ -23,7 +23,7 @@ services:
       - "3011:3011"
     env_file:
       - ./chatServer/.env
-    environment:
+    environment:                 
       REDIS_HOST: my-redis
       REDIS_PORT: 6379
     networks:
@@ -41,6 +41,6 @@ services:
 
 networks:
   vconnect_net:
-   # external: true
+   # external: true 
 
 

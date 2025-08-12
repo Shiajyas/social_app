@@ -16,13 +16,14 @@ interface Notification {
   type: string;
   senderId: string;
   postId?: string;
+  groupId?: string;
   createdAt: string;
   senderName: string;
 }
 
 const Notification: React.FC = () => {
   const queryClient = useQueryClient();
-  const { unreadCount, setUnreadCount, resetUnreadCount } = useNotificationStore();
+  const { unreadCount, resetUnreadCount } = useNotificationStore();
   const { user } = useAuthStore();
   const userId = user?._id || null;
   const navigate = useNavigate();
@@ -39,16 +40,14 @@ const Notification: React.FC = () => {
       enabled: !!userId,
     });
 
-    // console.log(data,">>>>");
-
-  // ✅ Reset unread count once when component mounts
+  // Reset unread count on mount
   useEffect(() => {
     if (unreadCount > 0) {
       resetUnreadCount();
     }
   }, []);
 
-  // ✅ Optionally refetch when there were unread notifications
+  // Refetch if unread count changes
   useEffect(() => {
     if (unreadCount > 0) {
       refetch();
@@ -57,14 +56,12 @@ const Notification: React.FC = () => {
 
   /** Handles notification click */
   const handleNotificationClick = (notification: Notification) => {
-    console.log('Notification clicked:', notification);
-
-    // Redirect based on notification type
-    if (notification.senderId) {
-      navigate(`/home/profile/${notification.senderId}`);
-    }
-    if (notification.postId) {
+    if (notification.type === 'group-add' && notification.groupId) {
+      navigate(`/home/community/${notification.groupId}/edit`);
+    } else if (notification.postId) {
       navigate(`/home/post/${notification.postId}`);
+    } else if (notification.senderId) {
+      navigate(`/home/profile/${notification.senderId}`);
     }
   };
 
@@ -107,8 +104,6 @@ const Notification: React.FC = () => {
     },
     [isFetchingNextPage, fetchNextPage, hasNextPage],
   );
-
-  console.log(data,">>>>");
 
   return (
     <div className="p-4 bg-white dark:bg-gray-900 shadow-md rounded-lg flex-grow h-full flex flex-col">
@@ -156,7 +151,7 @@ const Notification: React.FC = () => {
                           navigate(`/home/profile/${notification.senderId}`);
                         }}
                       >
-                        {notification.senderName }
+                        {notification.senderName}
                       </span>{' '}
                       {notification.message.replace(notification.senderName, '')}{' '}
                       {notification.postId && (

@@ -101,7 +101,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       chatSocket.off('newNotification', handleNewNotificationChat);
       chatSocket.off('group-message', handleGroupMessage);
     };
-  }, [queryClient]);
+  }, );
 
   useEffect(() => {
     const handleMessage = (newMessage: any) => {

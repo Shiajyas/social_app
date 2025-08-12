@@ -9,4 +9,6 @@ export interface ISUserRepository {
   logActiveUsers(): Promise<{ userId: string; socketId: string }[]>;
   getActiveUserCount(): Promise<number>;
   updateChatSocketId(userId: string, chatSocketId: string): Promise<void>
+  getSocketIds(userId: string): Promise<string[]> 
 }
+

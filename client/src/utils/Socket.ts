@@ -21,13 +21,12 @@ socket.on('connect', () => {
 });
 
 // Log when disconnected
-socket.on('disconnect', (reason) => {
-  console.log(
-    `%c[${new Date().toISOString()}] ❌ Disconnected from Socket.IO. Reason: ${reason}`,
-    'color: red; font-weight: bold;',
-  );
+socket.on('disconnect', reason => {
+  console.warn(`Disconnected: ${reason}`);
+  if (reason === 'transport close' || reason === 'io server disconnect') {
+    socket.connect();
+  }
 });
-
 // Log connection errors
 socket.on('connect_error', (error) => {
   console.error(

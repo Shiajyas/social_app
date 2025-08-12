@@ -116,16 +116,48 @@ const SubscriptionManagement: React.FC = () => {
           <option value="active">Subscribed</option>
           <option value="inactive">Unsubscribed</option>
         </select>
+
+        {/* Start Date with validation */}
         <input
           type="date"
           className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded"
-          onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
+          onChange={(e) => {
+            const selectedDate = new Date(e.target.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (selectedDate > today) {
+              const confirmProceed = window.confirm(
+                'The start date is greater than today. Are you sure you want to continue?'
+              );
+              if (!confirmProceed) {
+                e.target.value = '';
+                return;
+              }
+            }
+
+            setDateRange((prev) => ({ ...prev, start: e.target.value }));
+          }}
         />
+
+        {/* End Date with validation */}
         <input
           type="date"
           className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-2 rounded"
-          onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
+          onChange={(e) => {
+            const selectedEnd = new Date(e.target.value);
+            const selectedStart = dateRange.start ? new Date(dateRange.start) : null;
+
+            if (selectedStart && selectedEnd < selectedStart) {
+              alert('End date cannot be earlier than the start date.');
+              e.target.value = '';
+              return;
+            }
+
+            setDateRange((prev) => ({ ...prev, end: e.target.value }));
+          }}
         />
+
         <button
           className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
           onClick={() => setPreviewOpen(true)}
@@ -139,7 +171,7 @@ const SubscriptionManagement: React.FC = () => {
         {isLoading ? (
           <div className="text-center p-4">Loading...</div>
         ) : (
-          <table className="min-w-full bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+          <table className="min-w-full bg-white dark:bg-gray-800 divide-y  divide-gray-200 dark:divide-gray-700 text-sm">
             <thead className="bg-gray-50 dark:bg-gray-700 text-left">
               <tr>
                 <th className="px-6 py-3">Username</th>

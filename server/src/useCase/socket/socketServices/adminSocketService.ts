@@ -34,11 +34,18 @@ export class AdminSocketService implements ISocketAdminService {
     this._PostRepository = postRepository;
   }
 
-  registerAdmin(socketId: string): void {
-    console.log(`Admin connected: ${socketId}`);
-    const count = this._SessionUserRepo.getActiveUserCount();
-    this._Io.to('admin').emit('admin:updateOnlineCount', count);
-  }
+async registerAdmin(userId: string, socketId: string) {
+  // Add this socketId for the admin user
+  await this._SessionUserRepo.addUser({ id: userId, socketId });
+
+  // Get count of unique admins online (by counting users, not sockets)
+  const count = await this._SessionUserRepo.getActiveUserCount();
+
+  // Notify all admins (all sockets in 'admin' room) about the current online admin count
+  this._Io.to('admin').emit('admin:updateOnlineCount', count);
+
+  console.log(`Admin registered: ${userId} (Socket ID: ${socketId})`);
+}
 
   unregisterAdmin(socketId: string): void {
     console.log(`Admin disconnected: ${socketId}`);

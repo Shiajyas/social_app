@@ -2,7 +2,7 @@
 import { Socket } from 'socket.io';
 
 export interface ISocketAdminService {
-  registerAdmin(socketId: string): void;
+  registerAdmin(userId: string, socketId: string) : Promise<void>; 
   unregisterAdmin(socketId: string): void;
   getOverviewData(): Promise<any>;
   pushOverviewUpdate(): Promise<void>;

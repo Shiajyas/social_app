@@ -3,6 +3,8 @@ import { SUser } from '../../core/domain/interfaces/SUser';
 export interface ISUserRepository {
   findById(id: string): Promise<SUser | undefined>;
 
+  
+
   addUser(user: SUser): Promise<void>;
 
   updateChatSocketId(userId: string, chatSocketId: string): Promise<void>;
@@ -20,4 +22,5 @@ export interface ISUserRepository {
   logActiveUsers(): Promise<{ userId: string; socketIds: string[] }[]>;
 
   findUserIdBySocket(socketId: string): Promise<string | null>
+
 }

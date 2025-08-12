@@ -12,12 +12,13 @@ import {
   AvatarFallback,
   AvatarImage,
 } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input'; // ✅ using your existing input component
 import { useQuery } from '@tanstack/react-query';
 import { userService } from '@/services/userService';
 import { useAuthStore } from '@/appStore/AuthStore';
 import { chatSocket as socket } from '@/utils/chatSocket';
 import { toast } from 'react-toastify';
-import { CheckCircle, RotateCcw } from 'lucide-react';
+import { CheckCircle, RotateCcw, Search } from 'lucide-react';
 
 interface User {
   _id: string;
@@ -35,11 +36,10 @@ type InviteStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export const GroupFriendsListModal: React.FC<Props> = ({ isOpen, onClose, groupId }) => {
   const [inviteStatusMap, setInviteStatusMap] = useState<Record<string, InviteStatus>>({});
+  const [participants, setParticipants] = useState<User[] | null>(null);
+  const [searchTerm, setSearchTerm] = useState(''); // ✅ search term
   const { user } = useAuthStore();
   const userId = user?._id;
-
-  console.log('inviteStatusMap:', inviteStatusMap);
-  
 
   const { data: followers } = useQuery({
     queryKey: ['followers', userId],
@@ -54,60 +54,61 @@ export const GroupFriendsListModal: React.FC<Props> = ({ isOpen, onClose, groupI
   });
 
   const showInviteToast = (success: boolean, message: string) => {
-    if (success) {
-      toast.success(message || 'User invited successfully');
-    } else {
-      toast.error(message || 'Failed to invite user');
-    }
+    success ? toast.success(message || 'User invited successfully') : toast.error(message || 'Failed to invite user');
   };
 
-  // ✅ Handle socket response
- useEffect(() => {
-  const handleMemberAdded = (data: { userId: string, memberId: string, groupId: string }) => {
-    setInviteStatusMap(prev => ({
-      ...prev,
-      [data?.memberId]: 'success',
-    }));
-    showInviteToast(true, 'User added successfully');
-  };
+  useEffect(() => {
+    socket.emit('get-group-members', { groupId });
 
-  const handleAddMemberError = (data: { userId: string; message?: string ,memberId: string}) => {
-    let message = data?.message || 'Failed to invite user';
-    if (typeof message === 'string') {
-      const words = message.split(' ');
-      if (words.length > 1) {
-        words.splice(1, 1); // remove 1st index word
+    const handleGroupMembers = (data: { groupId: string; members: User[] }) => {
+      setParticipants(data.members);
+    };
+
+    socket.on('group-members', handleGroupMembers);
+    socket.on('error', (err: { message: string }) => console.error('Socket error:', err.message));
+
+    return () => {
+      socket.off('group-members', handleGroupMembers);
+      socket.off('error');
+    };
+  }, [groupId]);
+
+  useEffect(() => {
+    socket.on('group-member-added', (data: { userId: string, memberId: string }) => {
+      setInviteStatusMap(prev => ({ ...prev, [data.memberId]: 'success' }));
+      showInviteToast(true, 'User added successfully');
+    });
+
+    socket.on('error-in-addMember', (data: { message?: string, memberId: string }) => {
+      let message = data?.message || 'Failed to invite user';
+      if (typeof message === 'string') {
+        const words = message.split(' ');
+        if (words.length > 1) words.splice(1, 1);
         message = words.join(' ');
       }
-    }
+      setInviteStatusMap(prev => ({ ...prev, [data.memberId]: 'error' }));
+      showInviteToast(false, message);
+    });
 
-    console.log(data,);
-    
-
-    setInviteStatusMap(prev => ({
-      ...prev,
-      [data?.memberId]: 'error',
-    }));
-    showInviteToast(false, message);
-  };
-
-  socket.on('group-member-added', handleMemberAdded);
-  socket.on('error-in-addMember', handleAddMemberError);
-
-  return () => {
-    socket.off('group-member-added', handleMemberAdded);
-    socket.off('error-in-addMember', handleAddMemberError);
-  };
-}, []);
-
+    return () => {
+      socket.off('group-member-added');
+      socket.off('error-in-addMember');
+    };
+  }, []);
 
   const allUsers: User[] = useMemo(() => {
     const userMap = new Map<string, User>();
-    [...(followers || []), ...(following || [])].forEach((user) => {
-      userMap.set(user._id, user);
-    });
-    return Array.from(userMap.values());
-  }, [followers, following]);
+    [...(followers || []), ...(following || [])].forEach((u) => userMap.set(u._id, u));
+
+    const participantIds = new Set(participants?.map((p) => p._id) || []);
+    return Array.from(userMap.values()).filter((u) => !participantIds.has(u._id));
+  }, [followers, following, participants]);
+
+  // ✅ Filter by search
+  const filteredUsers = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return allUsers.filter(u => u.username.toLowerCase().includes(term));
+  }, [searchTerm, allUsers]);
 
   const onSelectUser = (user: User) => {
     setInviteStatusMap((prev) => ({ ...prev, [user._id]: 'loading' }));
@@ -115,9 +116,7 @@ export const GroupFriendsListModal: React.FC<Props> = ({ isOpen, onClose, groupI
   };
 
   const getStatusIcon = (status: InviteStatus, user: User) => {
-    if (status === 'success') {
-      return <CheckCircle className="text-green-500 w-5 h-5" />;
-    }
+    if (status === 'success') return <CheckCircle className="text-green-500 w-5 h-5" />;
     if (status === 'error') {
       return (
         <button onClick={() => onSelectUser(user)} className="text-red-500 hover:text-red-600">
@@ -135,14 +134,25 @@ export const GroupFriendsListModal: React.FC<Props> = ({ isOpen, onClose, groupI
           <DialogTitle className="text-lg font-semibold">Select a Friend</DialogTitle>
         </DialogHeader>
 
+        {/* ✅ Search Bar */}
+        <div className="relative mb-3">
+          <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-500" />
+          <Input
+            placeholder="Search friends..."
+            className="pl-9"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
         <ScrollArea className="h-64 pr-2">
-          {allUsers.length === 0 && (
+          {filteredUsers.length === 0 && (
             <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-4">
               No friends found
             </p>
           )}
           <ul className="space-y-2">
-            {allUsers.map((user) => {
+            {filteredUsers.map((user) => {
               const status = inviteStatusMap[user._id] || 'idle';
               return (
                 <li

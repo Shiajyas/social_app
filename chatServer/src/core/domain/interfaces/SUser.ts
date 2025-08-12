@@ -2,5 +2,6 @@ export interface SUser {
   _id?: string;
   id: string;
   socketId: string;
-  chatSocketId?: any
+  chatSocketId?: string;
+    sockets?: string[]
 }
