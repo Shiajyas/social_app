@@ -39,7 +39,7 @@ export class CallHandlers {
     }
   };
 
-  private HANDLE_ICE_CANDIDATE = async (data: {from: string, to: string, candidate: string}) => {
+  private HANDLE_ICE_CANDIDATE = async (data: {from: string, to: string, candidate: RTCIceCandidateInit}) => {
     try {
       console.log(`❄️ ICE candidate from ${data.from} to ${data.to}`);
       await this._CallSocketService.handleIceCandidate(this._Socket, data);

@@ -54,17 +54,15 @@ const pc = new RTCPeerConnection({
     // Your TURN server over UDP and TCP/TLS
     {
       urls: [
+        "stun:16.16.247.179:3478",
         "turn:16.16.247.179:3478?transport=udp",
-        "turns:16.16.247.179:5349?transport=tcp"
+        "turns:16.16.247.179:3478?transport=tcp"
       ],
       username: "myuser",
       credential: "strongpassword",
     },
   ],
 });
-
-
-
 
 
 
