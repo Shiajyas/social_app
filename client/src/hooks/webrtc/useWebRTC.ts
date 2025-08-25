@@ -44,28 +44,52 @@ export const useWebRTC = ({
 
   const createPeerConnection = () => {
 
-const pc = new RTCPeerConnection({
-  iceTransportPolicy: 'all',
+    const pcConfig: RTCConfiguration = {
   iceServers: [
-    // Google public STUN server
+    // Public STUN server
+    { urls: 'stun:stun.l.google.com:19302' },
+    // Your own STUN server (UDP)
+    { urls: 'stun:16.16.247.179:3478' },
+    // TURN server (UDP)
     {
-      urls: 'stun:stun.l.google.com:19302',
+      urls: 'turn:16.16.247.179:3478?transport=udp',
+      username: 'myuser',
+      credential: 'strongpassword'
     },
-    // Your TURN server over UDP and TCP/TLS
+    // TURN server (TCP) - optional, fallback for blocked UDP
     {
-      urls: [
-        "stun:16.16.247.179:3478",
-        "turn:16.16.247.179:3478?transport=udp",
-        "turns:16.16.247.179:3478?transport=tcp"
-      ],
-      username: "myuser",
-      credential: "strongpassword",
-    },
+      urls: 'turn:16.16.247.179:5349?transport=tcp',
+      username: 'myuser',
+      credential: 'strongpassword'
+    }
   ],
-});
+  iceTransportPolicy: 'all',     // allow relay, host, srflx candidates
+  bundlePolicy: 'max-bundle',    // send all media over single transport
+  rtcpMuxPolicy: 'require',      // mux RTP/RTCP on one port
+  iceCandidatePoolSize: 0         // keep at 0 for MediaSoup usage
+};
+
+// Create PeerConnection
+const pc = new RTCPeerConnection(pcConfig);
+
+// Optional: Logging ICE candidate events
+pc.onicecandidate = (event) => {
+  if (event.candidate) {
+    console.log('New ICE candidate:', event.candidate);
+    // send candidate to remote peer via signaling
+  }
+};
+
+pc.onconnectionstatechange = () => {
+  console.log('Connection state:', pc.connectionState);
+};
+
+pc.oniceconnectionstatechange = () => {
+  console.log('ICE connection state:', pc.iceConnectionState);
+};
 
 
-
+    
     pc.ontrack = (event) => {
       const inboundStream = new MediaStream();
       event.streams[0].getTracks().forEach((track) => inboundStream.addTrack(track));
