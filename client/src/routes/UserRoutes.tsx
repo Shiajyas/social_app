@@ -12,6 +12,8 @@ import { SearchSection } from '@/ customComponents/home/search/SearchSection';
 import { HashtagSearchResults } from '@/ customComponents/home/search/HashtagSearchResults';
 import CommunityChatSection from '@/ customComponents/home/communityGroup/communitySection';
 import CommunityLayout from '@/ customComponents/home/communityGroup/CommunityLayout';
+
+import SubscriptionStatus from '@/ customComponents/common/SubscriptionModal';
 const UserRoutes = () => (
   <Route
     path="/home/*"
@@ -31,7 +33,7 @@ const UserRoutes = () => (
     <Route path="search" element={<SearchSection />} />
     <Route path="search/hashtag/:tag" element={<HashtagSearchResults />} />
    <Route path="community/*" element={<CommunityLayout />} />
-
+   <Route path="subscription/:userId" element={<SubscriptionStatus />}  />
 
   </Route>
 );

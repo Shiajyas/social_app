@@ -50,13 +50,13 @@ export class UserService implements IUserService {
     return this._UserRepository.findById(userId);
   }
 
-  async getUserPost(userId: string): Promise<any> {
+  async getUserPost(userId: string): Promise<IPost[]> {
     return this._PostRepository.getUserPosts(userId, 1, 50);
   }
 
   async updateUserProfile(
     userId: string,
-    updatedData: any,
+    updatedData: Partial<IUser>,
   ): Promise<IUser | null> {
     try {
       const updatedUser = await this._UserRepository.updateUserById(

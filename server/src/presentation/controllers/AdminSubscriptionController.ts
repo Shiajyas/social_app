@@ -1,4 +1,3 @@
-
 import { Request, Response } from 'express';
 import { IAdminSubscriptionService } from '../../useCase/interfaces/IAdminSubscriptionService';
 import { HttpStatus, ResponseMessages } from '../../infrastructure/constants/constants';
@@ -6,7 +5,22 @@ import { HttpStatus, ResponseMessages } from '../../infrastructure/constants/con
 export class AdminSubscriptionController {
   constructor(private readonly subscriptionService: IAdminSubscriptionService) {}
 
-  getSubscriptions = async (req: Request, res: Response): Promise<void> => {
+  // ✅ Fetch paginated plans
+
+  getSubscriptionPlans = async (req: Request, res: Response): Promise<void> => {
+    try {
+      console.log('getSubscriptionPlans>>>>>>>>>>>>>>>>>>>>>>>><<<<');
+      const data = await this.subscriptionService.getSubscriptionPlans();
+      console.log(data, 'getSubscriptionPlans');
+      res.status(HttpStatus.OK).json(data);
+    } catch (error) {
+      console.error('getSubscriptionPlans error:', error);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ResponseMessages.SUBSCRIPTION_FETCH_FAILED });
+    }
+  };
+
+  getPlans = async (req: Request, res: Response): Promise<void> => {
+    console.log(req.query,1236);
     try {
       const {
         search = '',
@@ -17,53 +31,71 @@ export class AdminSubscriptionController {
         limit = '10',
       } = req.query;
 
-      const data = await this.subscriptionService.getSubscriptions({
-        search: String(search),
-        status: String(status),
-        startDate: String(startDate),
-        endDate: String(endDate),
-        page: parseInt(page as string),
-        limit: parseInt(limit as string),
-      });
+      const data = await this.subscriptionService.getPlans(
+        { search: String(search), status: String(status), startDate: String(startDate), endDate: String(endDate) },
+        parseInt(page as string),
+        parseInt(limit as string),
+      );
+
+      console.log(data, 'getPlans');
 
       res.status(HttpStatus.OK).json(data);
     } catch (error) {
-      console.error('getSubscriptions error:', error);
+      console.error('getPlans error:', error);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ResponseMessages.SUBSCRIPTION_FETCH_FAILED });
     }
   };
 
-  getAllSubscriptions = async (req: Request, res: Response): Promise<void> => {
+  // ✅ Fetch all plans without pagination
+  getAllPlans = async (req: Request, res: Response): Promise<void> => {
+      console.log(req.query,1236);
     try {
       const {
         search = '',
         status = 'all',
         startDate = '',
         endDate = '',
+        page = '1',
+        limit = '1000', // big number to fetch all
       } = req.query;
 
-      const data = await this.subscriptionService.getAllSubscriptions({
-        search: String(search),
-        status: String(status),
-        startDate: String(startDate),
-        endDate: String(endDate),
-      });
+      const data = await this.subscriptionService.getAllPlans(
+        { search: String(search), status: String(status), startDate: String(startDate), endDate: String(endDate) },
+        parseInt(page as string),
+        parseInt(limit as string),
+      );
+
+      console.log(data, 'getAllPlans');
 
       res.status(HttpStatus.OK).json(data);
     } catch (error) {
-      console.error('getAllSubscriptions error:', error);
+      console.error('getAllPlans error:', error);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ResponseMessages.SUBSCRIPTION_FETCH_FAILED });
     }
   };
 
-  updateSubscription = async (req: Request, res: Response): Promise<void> => {
+  // ✅ Toggle plan active/inactive
+  togglePlanStatus = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = req.params.id;
-      const result = await this.subscriptionService.toggleSubscriptionStatus(id);
+      const result = await this.subscriptionService.togglePlanStatus(id);
       res.status(HttpStatus.OK).json(result);
     } catch (error) {
-      console.error('updateSubscription error:', error);
+      console.error('togglePlanStatus error:', error);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ResponseMessages.SUBSCRIPTION_UPDATE_FAILED });
+    }
+  };
+
+  // ✅ Create or update a plan
+  createOrUpdatePlan = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { name, amount, duration, description, _id :planId} = req.body;
+      // console.log( _id,">>>>");
+      const result = await this.subscriptionService.createOrUpdatePlan(name, amount, duration, description, planId);
+      res.status(HttpStatus.OK).json(result);
+    } catch (error) {
+      console.error('createOrUpdatePlan error:', error);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ResponseMessages.SUBSCRIPTION_UPDATE_FAILED});
     }
   };
 }

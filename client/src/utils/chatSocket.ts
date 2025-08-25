@@ -1,50 +1,50 @@
-import { io } from 'socket.io-client';
-import 'react-toastify/dist/ReactToastify.css';
-import useNotificationStore from '@/store/notificationStore';
-import { toast } from 'react-toastify';
-import { useEffect } from 'react';
+// import { io } from 'socket.io-client';
+// import 'react-toastify/dist/ReactToastify.css';
+// import useNotificationStore from '@/store/notificationStore';
+// import { toast } from 'react-toastify';
+// import { useEffect } from 'react';
 
-const CHAT_SOCKET_URL = (import.meta as any).env.VITE_CHAT_SOCKET_URL ;
+// const CHAT_SOCKET_URL = (import.meta as any).env.VITE_SOCKET_URL 
 
-// const CHAT_SOCKET_URL = "http://localhost:3011"
+// // const CHAT_SOCKET_URL = "http://localhost:3011"
 
-console.log(CHAT_SOCKET_URL,">>>>>>");
+// console.log(CHAT_SOCKET_URL,">>>>>>");
 
-export const chatSocket = io(CHAT_SOCKET_URL, {
-  withCredentials: true,
- transports: ['polling', 'websocket']
-});
+// export const chatSocket = io(CHAT_SOCKET_URL, {
+//   withCredentials: true,
+//  transports: ['polling', 'websocket']
+// });
 
 
 
-// When connectedus
-chatSocket.on('connect', () => {
-  console.log(
-    `%c[${new Date().toISOString()}] ✅ Connected to ChatSocket.IO Chat server with ID: ${chatSocket.id}`,
-    'color: green; font-weight: bold;',
-  );
+// // When connectedus
+// chatSocket.on('connect', () => {
+//   console.log(
+//     `%c[${new Date().toISOString()}] ✅ Connected to ChatSocket.IO Chat server with ID: ${chatSocket.id}`,
+//     'color: green; font-weight: bold;',
+//   );
 
-  // Emit a custom event to update the chatSocketId
+//   // Emit a custom event to update the chatSocketId
 
-  // ✅ Emit chatSocketId update after connection is established
+//   // ✅ Emit chatSocketId update after connection is established
   
-});
+// });
   
-// When disconnected
-chatSocket.on('disconnect', (reason) => {
-  console.log(
-    `%c[${new Date().toISOString()}] ❌ Disconnected from Chat Socket.IO. Reason: ${reason}`,
-    'color: red; font-weight: bold;',
-  );
-});
+// // When disconnected
+// chatSocket.on('disconnect', (reason) => {
+//   console.log(
+//     `%c[${new Date().toISOString()}] ❌ Disconnected from Chat Socket.IO. Reason: ${reason}`,
+//     'color: red; font-weight: bold;',
+//   );
+// });
 
-// On connection error
-chatSocket.on('connect_error', (error) => {
-  console.error(
-    `%c[${new Date().toISOString()}] ⚠️ Connection error`,
-    'color: orange; font-weight: bold;',
-    error,
-  );
+// // On connection error
+// chatSocket.on('connect_error', (error) => {
+//   console.error(
+//     `%c[${new Date().toISOString()}] ⚠️ Connection error`,
+//     'color: orange; font-weight: bold;',
+//     error,
+//   );
 
 
-});
+// });

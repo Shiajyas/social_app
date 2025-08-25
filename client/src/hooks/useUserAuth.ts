@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { useAuthStore } from '@/appStore/AuthStore';
 import { socket } from '@/utils/Socket';
-import { chatSocket } from '@/utils/chatSocket';
+
 
 const handleMutationError = (error: any, message: string) => {
   console.error(error);
@@ -55,6 +55,7 @@ export const useUserAuth = () => {
     },
     onSuccess: (data) => {
       console.log('Login successful, navigating to /home');
+      socket.connect();
       handleMutationSuccess(data, queryClient, navigate, setUser);
       queryClient.invalidateQueries({ queryKey: ['user'] }); // Invalidate user query to ensure it's up-to-date
     },
@@ -133,8 +134,9 @@ export const useUserAuth = () => {
     },
     onSuccess: (data) => {
       console.log(data.user._id, '>>>>>>>>>>>>>>>');
-      socket.emit('joinUser', data.user._id);
-      chatSocket.emit('updateChatSocketId', {userId: data?.user?._id});
+      // socket.emit('joinUser', data.user._id);
+      // socket.emit('updateChatSocketId', {userId: data?.user?._id});
+      socket.connect()
       handleMutationSuccess(data, queryClient, navigate, setUser);
       toast.success('User verified');
     },

@@ -9,7 +9,6 @@ import Header from '@/ customComponents/home/Header';
 import useNotificationStore from '@/store/notificationStore';
 import { useAuthStore } from '@/appStore/AuthStore';
 import { socket } from '@/utils/Socket';
-import { chatSocket } from '@/utils/chatSocket';
 
 
 
@@ -25,18 +24,23 @@ const HomeLayout: React.FC = () => {
   // ✅ Load selectedItem from localStorage or default to "Home"
   const [selectedItem, setSelectedItem] = useState(localStorage.getItem('selectedItem') || 'Home');
 
-  useEffect(() => {
-    if (!userId) return;
-    chatSocket.connect();
-    socket.connect();
-    socket.emit('joinUser', userId);
-    chatSocket.emit('updateChatSocketId', { userId: user?._id });
-    return () => {
-      socket.emit('leaveUser', userId);
-      chatSocket.disconnect();
-      socket.disconnect();
-    };
-  }, [userId]);
+useEffect(() => {
+  if (!userId) return;
+
+  const updateChatSocketIdHandler = () => {
+    socket.emit('updateChatSocketId', { userId: user?._id });
+  };
+
+  // socket.connect();
+  socket.emit('joinUser', userId);
+  socket.on('updateChatSocketId', updateChatSocketIdHandler);
+
+  return () => {
+    socket.emit('leaveUser', userId);
+    socket.off('updateChatSocketId', updateChatSocketIdHandler);
+    // socket.disconnect();
+  };
+}, [userId]);
 
   // ✅ Update selectedItem when the route changes & save to localStorage
   useEffect(() => {

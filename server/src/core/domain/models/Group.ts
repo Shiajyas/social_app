@@ -1,5 +1,3 @@
-
-
 import mongoose, { Schema, Model } from 'mongoose';
 import { GroupDocument } from '../interfaces/IGroups';
 
@@ -27,7 +25,7 @@ const groupSchema = new Schema<GroupDocument>(
   {
     name: { type: String, required: true },
 
-     admins: [{ type: Schema.Types.ObjectId, ref: 'user' }],
+    admins: [{ type: Schema.Types.ObjectId, ref: 'user' }],
     description: String,
     coverImageUrl: String,
     iconUrl: String,
@@ -37,7 +35,12 @@ const groupSchema = new Schema<GroupDocument>(
       required: true,
     },
     participants: [participantSchema],
-    
+
+    // 🔥 NEW: keep reference to latest message
+    lastMessage: {
+      type: Schema.Types.ObjectId,
+      ref: 'GroupMessage',
+    },
   },
   { timestamps: true }
 );

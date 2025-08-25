@@ -8,6 +8,7 @@ import { IPostRepository } from '../../../data/interfaces/IPostRepository';
 import { Server } from 'socket.io';
 import mongoose from 'mongoose';
 import { IPost } from '../../../core/domain/interfaces/IPost';
+import { IComment } from '../../../core/domain/interfaces/Icomment';
 
 export class CommentSocketService implements ICommentSocketService {
   private _Io: Server;
@@ -56,19 +57,16 @@ export class CommentSocketService implements ICommentSocketService {
       const parentCommentId =
         parentId && mongoose.Types.ObjectId.isValid(parentId)
           ? new mongoose.Types.ObjectId(parentId)
-          : null;
+          : undefined;
 
-      const commentData: any = {
-        postId: new mongoose.Types.ObjectId(postId),
-        userId: new mongoose.Types.ObjectId(userId),
-        content,
-        likes: [],
-        parentCommentId,
-        mentions: [],
-      };
+const commentData = {
+  userId: userId.toString(),
+  postId: postId.toString(),
+  content,
+  parentCommentId: parentCommentId?.toString(),
+};
 
       const newComment = await this._CommentRepository.addComment(commentData);
-
       if (parentCommentId) {
         await this._CommentRepository.addReply(parentCommentId, newComment._id);
 

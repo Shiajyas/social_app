@@ -9,6 +9,8 @@ import { IReportRepository } from '../../../data/interfaces/IReportRepository';
 import { INotificationService } from '../../interfaces/InotificationService';
 import { SYSTEM_ADMIN_ID } from '../../../infrastructure/config/system';
 import { IPostRepository } from '../../../data/interfaces/IPostRepository';
+import { IPost } from '../../../core/domain/interfaces/IPost';
+import { AdminOverview } from '../../../data/interfaces/IAdminOverviewRepository';
 
 export class AdminSocketService implements ISocketAdminService {
   private _Io: Server;
@@ -51,7 +53,7 @@ async registerAdmin(userId: string, socketId: string) {
     console.log(`Admin disconnected: ${socketId}`);
   }
 
-  async getOverviewData(): Promise<any> {
+  async getOverviewData(): Promise<AdminOverview> {
     const defaultRange: '7d' | '1m' | '1y' = '7d';
     const defaultLikesRange = { min: 0, max: Infinity };
     return await this._AdminOverviewService.getOverview(defaultRange, defaultLikesRange);
@@ -107,7 +109,7 @@ async registerAdmin(userId: string, socketId: string) {
 
   async deletePost(postId: string): Promise<void> {
     try {
-      const post: any = await this._PostRepository.getPost(postId);
+      const post = await this._PostRepository.getPost(postId);
       if (!post) {
         console.warn(`Post ${postId} not found`);
         return;

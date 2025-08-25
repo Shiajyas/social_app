@@ -10,5 +10,6 @@ export interface ISUserRepository {
   getActiveUserCount(): Promise<number>;
   updateChatSocketId(userId: string, chatSocketId: string): Promise<void>
   getSocketIds(userId: string): Promise<string[]> 
+  findUserBySocketId(socketId: string): Promise<SUser | undefined>
 }
 

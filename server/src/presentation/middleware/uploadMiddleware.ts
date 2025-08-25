@@ -5,7 +5,7 @@ import s3 from '../../infrastructure/utils/s3Client';
 // const bucketName = process.env.AWS_S3_BUCKET_NAME!;
 // const cloudFrontUrl = process.env.AWS_CLOUDFRONT_URL!;
 
-const bucketName = 'vconnect-bucket';
+const bucketName = "vconnect-bucket-ap-south-1-shijay"
 console.log('🔹 AWS S3 Bucket Name:', bucketName);
 
 const upload = multer({

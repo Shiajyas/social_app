@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState, useContext } from 'react';
 import { socket } from '@/utils/Socket';
-import { chatSocket } from '@/utils/chatSocket';
+
 import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -12,6 +12,8 @@ import { useAuthStore } from '@/appStore/AuthStore';
 
 import { useGroups } from '@/hooks/group/useGroups';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { log } from 'util';
 
 interface SocketContextType {
   unreadNotifications: number;
@@ -25,6 +27,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const queryClient = useQueryClient(); // ✅ Use React Query's main instance
 
   const navigate = useNavigate();
+
+  const location = useLocation();
 
   const groups = useGroupStore((state) => state.groups);
 
@@ -42,6 +46,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     useEffect(()=>{
+    console.log("for blocked")
           const handleBlockSuccess = (userId: string) => {
       console.log('🚫 User blocked successfully:', userId,user?._id);
      if(userId?.userId === user?._id) {
@@ -58,48 +63,55 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
      return () => {
        socket.off("blockSuccess", handleBlockSuccess);
      }
-    })
+    },)
 
   useEffect(() => {
     const handleNewNotification = (notification: any) => {
       console.log('📩 New Notification:', notification);
-      setUnreadNotifications((prev) => prev + 1);
+      // setUnreadNotifications((prev) => prev + 1);
     };
 
 
     const handleNewNotificationChat = (notification: any) => {
       console.log('📩 New Chat Notification:', notification);
       // toast.success(notification.message);
-      useNotificationStore.getState().incrementUnreadCount();
+      // useNotificationStore.getState().incrementUnreadCount();
       setUnreadNotifications((prev) => prev + 1);
     };
 
-    chatSocket.on('newNotification', handleNewNotificationChat);
+   +socket.on('newNotification', handleNewNotificationChat);
     socket.on('newNotification', handleNewNotification);
    
 
 
     const handleGroupMessage = ({ groupId }: { groupId: string }) => {
-      const { activeGroupId, groups, incrementUnread } = useGroupStore.getState();
+      const { activeGroupId, groups, incrementUnread, } = useGroupStore.getState();
 
       const isGroupExists = groups.some((group) => group._id === groupId);
       const isActiveGroup = activeGroupId === groupId;
 
+      const isCommunityUrl = location.pathname.includes('community'); 
+
       console.log('📨 Group message:', groupId, 'isActiveGroup:', isActiveGroup);
 
-      if (isGroupExists && !isActiveGroup) {
+      if(!isCommunityUrl){
+        const setActiveGroup = useGroupStore.getState().setActiveGroup;
+        setActiveGroup(null);
+      }
+
+      if (isGroupExists && !isActiveGroup ) {
         incrementUnread(groupId);
       }
 
       queryClient.invalidateQueries({ queryKey: ['groups'] });
     };
 
-    chatSocket.on('group-message', handleGroupMessage);
+   socket.on('group-message', handleGroupMessage);
 
     return () => {
       socket.off('newNotification', handleNewNotification);
-      chatSocket.off('newNotification', handleNewNotificationChat);
-      chatSocket.off('group-message', handleGroupMessage);
+     socket.off('newNotification', handleNewNotificationChat);
+      socket.off('group-message', handleGroupMessage);
     };
   }, );
 

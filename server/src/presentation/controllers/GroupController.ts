@@ -38,7 +38,7 @@ async updateGroup(req: Request, res: Response): Promise<void> {
       [fieldname: string]: Express.MulterS3.File[];
     };
 
-    console.log('files', files);
+    // console.log('files', files);
 
     if (files?.coverImage?.[0]) {
       groupData.coverImageUrl = files.coverImage[0].location;
@@ -59,7 +59,7 @@ async updateGroup(req: Request, res: Response): Promise<void> {
    async getGroups(req: Request, res: Response): Promise<void> {
      try {
        const groups = await this._GroupService.getGroups();
-       console.log(groups, 'groups');
+      //  console.log(groups, 'groups');
        res.status(HttpStatus.OK).json(groups);
      } catch (error) {
         console.log(error, 'error');
@@ -68,7 +68,7 @@ async updateGroup(req: Request, res: Response): Promise<void> {
    }
 
    async deleteGroup(req: Request, res: Response): Promise<void> {
-    console.log(req.params.id, 'req.params.id');
+    // console.log(req.params.id, 'req.params.id');
      try {
        const groupId = req.params.id;
        await this._GroupService.deleteGroup(groupId);
@@ -80,10 +80,11 @@ async updateGroup(req: Request, res: Response): Promise<void> {
    }
 
    async getUserGroups(req: Request, res: Response): Promise<void> {
-    console.log(req.params.id, 'req.params.id');
+    // console.log(req.params.id, 'req.params.id');
      try {
        const userId = req.params.id;
        const groups = await this._GroupService.getUserGroups(userId);
+      //  console.log(groups, 'groups');
        res.status(HttpStatus.OK).json(groups);
      } catch (error) {
         console.log(error, 'error');

@@ -38,16 +38,16 @@ const newAdmin: Partial<IAdmin> = {
     }));
   }
 
-  async deleteAdmin(id: string): Promise<void> {
-    return this._adminRepo.deleteById(id);
+  async deleteAdmin(adminId: string): Promise<void> {
+    return this._adminRepo.deleteById(adminId);
   }
 
-  async updateAdmin(id: string, data: Partial<IAdmin>): Promise<IAdmin | null> {
+  async updateAdmin(adminId: string, data: Partial<IAdmin>): Promise<IAdmin | null> {
     if (data.password) {
       data.hashedPassword = await bcrypt.hash(data.password, 10);
-      delete (data as any).password;
+      delete (data as Partial<IAdmin>).password;
     }
-    const updated = await this._adminRepo.updateById(id, data);
+    const updated = await this._adminRepo.updateById(adminId, data);
     return updated ? { ...updated, _id: updated._id?.toString() || '' } : null;
   }
 
@@ -99,8 +99,8 @@ const newAdmin: Partial<IAdmin> = {
     };
   }
 
-  getUserById(id: string): Promise<IAdmin | null> {
-    console.log(id,"id");
-    return this._adminRepo.findById(id);
+  getUserById(adminId: string): Promise<IAdmin | null> {
+ 
+    return this._adminRepo.findById(adminId);
   }
 }

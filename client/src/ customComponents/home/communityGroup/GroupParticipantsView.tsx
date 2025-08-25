@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { chatSocket as socket } from '@/utils/chatSocket';
+import { socket } from '@/utils/Socket';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserAuth } from '@/hooks/useUserAuth';
@@ -14,6 +14,7 @@ import { MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
 import { socket as mainSocket } from '@/utils/Socket';
+import { useQueryClient } from '@tanstack/react-query';
 
 
 interface User {
@@ -37,6 +38,7 @@ const GroupParticipantsView: React.FC<Props> = ({ groupId, showTitle = true, lay
   const navigate = useNavigate();
 
   const location = useLocation()
+  const queryClient = useQueryClient();
 
   let   last = location.pathname.split('/').pop();
 // console.log(last, 'last 1');
@@ -93,11 +95,13 @@ const GroupParticipantsView: React.FC<Props> = ({ groupId, showTitle = true, lay
 
 useEffect(() => {
   const handleMemberRemoved = ({ groupId, memberId }: { groupId: string; memberId: string }) => {
+        // console.log('Group updated');
     setParticipants((prev) => prev?.filter((p) => p._id !== memberId));
  
   };
 
   const handleMemberAdded = ({ groupId, memberId }: { groupId: string; memberId: string }) => {
+    // console.log('Group updated12');
     socket.emit('get-group-members', { groupId });
   };
 

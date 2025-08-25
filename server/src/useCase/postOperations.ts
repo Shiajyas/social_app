@@ -36,13 +36,8 @@ async createPost(
   const isToxicResult = await analyzeSentiment(`${title} ${description}`);
  console.log("isToxicResult",isToxicResult);
  
-const THRESHOLD = 0.041
 
-const isToxic = isToxicResult.some((inner: any[]) =>
-  inner.some((item: any) => item.label === 'negative' && item.score > THRESHOLD)
-);
-console.log("Is toxic:", isToxic); 
-  
+
     // if (isToxic) {
     //   throw new Error('Post contains toxic content and cannot be created');
     // }

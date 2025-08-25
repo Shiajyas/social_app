@@ -81,7 +81,7 @@ async createPost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
         hashtags: string
       };
 
-      console.log(req.body,">>>123");
+      // console.log(req.body,">>>123");
 
           // Convert hashtags string to array
     const hashtagsArray = hashtags ? hashtags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : [];

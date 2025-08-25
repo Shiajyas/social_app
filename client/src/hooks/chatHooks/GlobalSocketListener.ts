@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { chatSocket as socket } from '@/utils/chatSocket';
+import { socket } from '@/utils/Socket';
 import useMessageStore from '@/appStore/useMessageStore';
 
 const GlobalSocketListener = () => {
@@ -11,7 +11,7 @@ const GlobalSocketListener = () => {
 
       // Increment unread count for the chat if it's not the currently open chat
       if (newMessage?.chatId !== currentlyOpenChatId) {
-        incrementUnreadCount(newMessage?.chatId);
+        // incrementUnreadCount(newMessage?.chatId);
       }
     };
 

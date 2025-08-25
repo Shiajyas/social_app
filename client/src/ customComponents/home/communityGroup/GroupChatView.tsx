@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { chatSocket as socket } from '@/utils/chatSocket';
+import { socket } from '@/utils/Socket';
 import { useAuthStore } from '@/appStore/AuthStore';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { Divide } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useCallback } from "react";
+
 
 
 interface Message {
@@ -89,27 +91,36 @@ useEffect(() => {
     }
   };
 
-  useEffect(() => {
-    if (!communityId || !user?._id) return;
 
-    socket.emit('joinGroup', { communityId, userId: user._id });
+useEffect(() => {
+  if (!communityId || !user?._id) return;
 
-    const handleReceive = (msg: Message) => {
-    
-      queryClient.invalidateQueries({ queryKey: ['groupMessages', communityId] });
-      // ✅ If not at bottom, add to unread
-      if (!isAtBottom && msg.senderId !== user._id) {
-        setUnreadMessages((prev) => [...prev, msg]);
-      }
-    };
+  // Join once per communityId + user change
+  socket.emit("joinGroup", { communityId, userId: user._id });
 
-    socket.on('new-message', handleReceive);
+  return () => {
+    socket.emit("leaveGroup", { communityId, userId: user._id });
+  };
+}, [communityId, user?._id]);
 
-    return () => {
-      socket.emit('leaveGroup', { communityId, userId: user._id });
-      socket.off('new-message', handleReceive);
-    };
-  }, [communityId, user?._id, isAtBottom]);
+const handleReceive = useCallback(
+  (msg: Message) => {
+    queryClient.invalidateQueries({ queryKey: ["groupMessages", communityId] });
+
+    if (!isAtBottom && msg.senderId !== user._id) {
+      setUnreadMessages((prev) => [...prev, msg]);
+    }
+  },
+  [communityId, isAtBottom, user?._id]
+);
+
+useEffect(() => {
+  socket.on("new-message", handleReceive);
+
+  return () => {
+    socket.off("new-message", handleReceive);
+  };
+}, );
 
   useEffect(() => {
     if (initialLoadRef.current && flattenedMessages.length && chatContainerRef.current) {
@@ -147,6 +158,9 @@ useEffect(() => {
       message: newMessage,
     });
 
+        queryClient.invalidateQueries({ queryKey: ['groups'] })
+
+
     queryClient.setQueryData(['groupMessages', communityId], (prev: any) => {
       if (!prev) return { pages: [{ messages: [newMessage] }], pageParams: [] };
 
@@ -165,6 +179,7 @@ useEffect(() => {
         pages: updatedPages,
       };
     });
+
 
     setInput('');
     setReplyTarget(null);

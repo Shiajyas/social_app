@@ -121,13 +121,14 @@ const PostList: React.FC = () => {
 return (
   <div className="min-h-screen my-2 flex justify-center px-2 sm:px-4 transition-colors duration-300 bg-white dark:bg-gray-900">
     <div className="w-full max-w-2xl text-black dark:text-white">
-      {data?.pages.map((page) =>
-        page.posts.map((post) => (
+      {data?.pages?.map((page) =>
+        page?.posts?.map((post) => (
           <PostCard
             key={post._id}
             post={post}
-            isLiked={post.likes.includes(userId)}
-            onLike={() => handleLike(post?._id, post?.likes?.includes(userId))}
+            isLiked={Array.isArray(post.likes) && post.likes.includes(userId)}
+             onLike={() => handleLike(post._id, Array.isArray(post.likes) && post.likes.includes(userId))}
+
             onToggleComments={() => handleToggleComments(post._id)}
             isCommentsOpen={openPostId === post._id}
             onClick={() => handlePostClick(post._id)}

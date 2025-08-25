@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient, useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useInfiniteQuery, useQuery, keepPreviousData } from '@tanstack/react-query';
 import { postService } from '../services/postService';
 import { imageUpload } from '../features/imageUpload';
 import { socket } from '@/utils/Socket';
@@ -9,14 +9,19 @@ export const useGetPosts = (token: string) => {
     queryKey: ['posts', token],
     queryFn: async ({ pageParam = 1 }) => {
       const { posts, nextPage } = await postService.getPosts(pageParam as number, 10);
-      return posts;
+
+      return {
+        posts,
+        nextPage,
+      }; // ✅ Always return an object
     },
-    getNextPageParam: (lastPage: any[], pages) =>
-      lastPage.length > 0 ? pages.length + 1 : undefined,
+    getNextPageParam: (lastPage, pages) =>
+      lastPage?.posts?.length > 0 ? pages.length + 1 : undefined,
     initialPageParam: 1,
     staleTime: 30000,
   });
 };
+
 
 // ✅ Create Post (Fixed Cache Update)
 export const useUploadPost = () => {
@@ -34,16 +39,17 @@ export const useUploadPost = () => {
     },
   });
 };
-
 export const useGetPostDetails = (postId?: string) => {
   return useQuery({
-    queryKey: ['post', postId], // Unique query key for caching
+    queryKey: ['post', postId],
     queryFn: async () => {
       if (!postId) throw new Error('Post ID is required');
-      return postService.getPost(postId); // Fetch post details
+      return postService.getPost(postId);
     },
-    enabled: !!postId, // Only fetch when postId exists
-    staleTime: 60000, // Cache for 1 minute
+    enabled: !!postId,
+    staleTime: 60 * 1000,        // data fresh for 1 min
+    placeholderData: keepPreviousData,  // ✅ v5 way to keep old data
+    retry: 1,
   });
 };
 

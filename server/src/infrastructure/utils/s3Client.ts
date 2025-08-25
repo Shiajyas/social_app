@@ -8,6 +8,8 @@ dotenv.config();
 // Validate required AWS env vars
 const { AWS_REGION, AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY } = process.env;
 
+// console.log(AWS_REGION, AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY,">>>>>>>>>>>>>");
+
 if (!AWS_REGION || !AWS_ACCESS_KEY || !AWS_SECRET_ACCESS_KEY) {
   throw new Error('Missing AWS S3 environment variables');
 }

@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { chatSocket as socket } from '@/utils/chatSocket';
+import { socket } from '@/utils/Socket';
 import { useGroupStore } from '@/appStore/groupStore';
 
 export const useGroupSocket = () => {

@@ -18,4 +18,5 @@ export interface GroupDocument extends mongoose.Document {
   participants: Participant[];
   createdAt: Date;
   updatedAt: Date;
+  lastMessage?: mongoose.Types.ObjectId;  
 }

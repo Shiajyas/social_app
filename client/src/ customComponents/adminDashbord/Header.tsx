@@ -24,7 +24,7 @@ const Header = () => {
   const { reportCount, increment, setReportCount } = useReportStore();
   const queryClient = useQueryClient();
 
-  console.log(admin, 'admin');
+  // console.log(admin, 'admin');
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [onlineCount, setOnlineCount] = useState(0);
@@ -57,7 +57,7 @@ const Header = () => {
       if (typeof count === 'number') setOnlineCount(count);
     };
 
-    console.log("admin",admin);
+    // console.log("admin",admin);
 
     socket.emit('admin:join',admin?._id);
 

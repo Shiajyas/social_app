@@ -114,6 +114,7 @@ export class UserController {
   async getSubscription(req: Request, res: Response): Promise<void> {
     try {
       const { id: userId } = req.params;
+      console.log(userId, 'userId222');
       const subscription = await this._SubscriptionUseCase.getUserSubscription(userId);
 
       if (!subscription){
@@ -128,41 +129,99 @@ export class UserController {
     }
   }
 
+  // Step 1: Create payment intent
   async subscribe(req: Request, res: Response): Promise<void> {
-    const { userId } = req.body;
-
+    const { userId, planId } = req.body;
+    console.log(planId, 'planId');
+      const plan = await this._SubscriptionUseCase.getPlanById(planId)
+      
+      console.log(plan, 'ammount');
     try {
+      const planAmount = plan?.amount; // Or fetch from DB using planId
+      const currency = "usd";
+
+      if (planAmount === undefined) {
+  throw new Error('Plan amount is not defined');
+}
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: 1000,
-        currency: 'usd',
+        amount: planAmount,
+        currency,
+        metadata: { userId, planId },
         automatic_payment_methods: { enabled: true },
       });
 
       if (!paymentIntent.client_secret) {
-       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.PAYMENT_FAILED });
-         return
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ message: Msg.PAYMENT_FAILED });
+        return;
       }
 
-      res.status(HttpStatus.OK).json({ clientSecret: paymentIntent.client_secret });
+      res.status(HttpStatus.OK).json({
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+      });
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.PAYMENT_ERROR });
+      console.error("Error creating payment intent:", error);
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: Msg.PAYMENT_ERROR });
     }
   }
 
+  // Step 2: Confirm payment + create subscription
   async confirmSubscription(req: Request, res: Response): Promise<void> {
     try {
-      const { userId } = req.body;
+      const { userId, planId, paymentIntentId } = req.body;
+
+      console.log(req.body,"in >>>>>>>>>>>>>>>>>>>>>>");
+
+      // 🔑 Verify payment status
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+      if (paymentIntent.status !== "succeeded") {
+        res
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ message: "Payment not completed" });
+        return;
+      }
+
       const startDate = new Date();
       const endDate = new Date();
       endDate.setMonth(startDate.getMonth() + 1);
 
-      const subscription = await this._SubscriptionUseCase.createOrUpdateSubscription(userId, startDate, endDate);
+      const subscription =
+        await this._SubscriptionUseCase.createOrUpdateSubscription(
+          userId,
+          planId,
+          startDate,
+          endDate
+        );
 
-      res.status(HttpStatus.OK).json({ message: Msg.SUBSCRIPTION_CONFIRMED, subscription });
+      res.status(HttpStatus.OK).json({
+        message: Msg.SUBSCRIPTION_CONFIRMED,
+        subscription,
+      });
     } catch (error) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.SUBSCRIPTION_FAILED });
+      console.error("Error confirming subscription:", error);
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: Msg.SUBSCRIPTION_FAILED });
     }
   }
+
+  async getPaymentIntent(req: Request, res: Response): Promise<void> {
+  try {
+    const { paymentIntentId } = req.params;
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    res.json({ paymentIntent });
+  } catch (error) {
+    console.error("Error retrieving payment intent:", error);
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Failed to retrieve payment intent" });
+  }
+}
 
   async getSubscriptionHistory(req: Request, res: Response): Promise<void> {
     try {
@@ -226,5 +285,33 @@ export class UserController {
     } catch (error) {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.INTERNAL_SERVER_ERROR});
     }
+  }
+
+  async getAllPlans(req: Request, res: Response): Promise<void> {
+    res.setHeader('Cache-Control', 'no-store'); 
+  console.log(req.query,1236);
+     try {
+       const {
+         search = '',
+         status = 'all',
+         startDate = '',
+         endDate = '',
+         page = '1',
+         limit = '1000', // big number to fetch all
+       } = req.query;
+ 
+       const data = await this._SubscriptionUseCase.getAllPlans(
+         { search: String(search), status: String(status), startDate: String(startDate), endDate: String(endDate) },
+         parseInt(page as string),
+         parseInt(limit as string),
+       );
+ 
+       console.log(data, 'getAllPlans');
+ 
+       res.status(HttpStatus.OK).json(data);
+     } catch (error) {
+       console.error('getAllPlans error:', error);
+       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: Msg.INTERNAL_ERROR });
+     }
   }
 }

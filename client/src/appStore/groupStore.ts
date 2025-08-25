@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 type Group = {
+  lastMessageAt: string | number | Date;
   _id: string;
   name: string;
   description: string;
@@ -11,8 +12,10 @@ type Group = {
 interface GroupStore {
   groups: Group[];
   unreadCounts: Record<string, number>;
-  activeGroupId: string | null; 
+  activeGroupId: string | null;
+
   setGroups: (groups: Group[]) => void;
+  setActiveGroup: (groupId: string) => void;
   addGroup: (group: Group) => void;
   updateGroup: (updated: Group) => void;
   removeGroup: (groupId: string) => void;
@@ -35,23 +38,50 @@ const saveToStorage = (counts: Record<string, number>) => {
   localStorage.setItem(UNREAD_KEY, JSON.stringify(counts));
 };
 
-export const useGroupStore = create<GroupStore>((set, get) => ({
+// 🔥 helper for consistent ordering
+const sortGroups = (groups: Group[]) =>
+  [...groups].sort(
+    (a, b) =>
+      new Date(b.lastMessageAt).getTime() -
+      new Date(a.lastMessageAt).getTime()
+  );
+
+  export const useGroupStore = create<GroupStore & { moveGroupToTop: (groupId: string) => void }>((set, get) => ({
   groups: [],
   unreadCounts: loadFromStorage(),
-  activeGroupId: null, 
+  activeGroupId: null,
 
-  setGroups: (groups) => set({ groups }),
-  setActiveGroup: (groupId) => set({ activeGroupId: groupId }), 
+  setGroups: (groups) => set({ groups: sortGroups(groups) }),
+  setActiveGroup: (groupId) => set({ activeGroupId: groupId }),
 
-  addGroup: (group) => set((state) => ({ groups: [group, ...state.groups] })),
-  updateGroup: (updated) =>
+  addGroup: (group) =>
     set((state) => ({
-      groups: state.groups.map((g) => (g._id === updated._id ? updated : g)),
+      groups: sortGroups([group, ...state.groups]),
     })),
+
+  updateGroup: (updated) =>
+    set((state) => {
+      const newGroups = state.groups.map((g) =>
+        g._id === updated._id ? updated : g
+      );
+      return { groups: sortGroups(newGroups) };
+    }),
+
   removeGroup: (groupId) =>
     set((state) => ({
       groups: state.groups.filter((g) => g._id !== groupId),
     })),
+
+  // 🆕 Move group to top (used when new message arrives)
+  moveGroupToTop: (groupId) =>
+    set((state) => {
+      const updatedGroups = state.groups.map((g) =>
+        g._id === groupId
+          ? { ...g, lastMessageAt: new Date().toISOString() }
+          : g
+      );
+      return { groups: sortGroups(updatedGroups) };
+    }),
 
   getUnreadCount: (groupId) => get().unreadCounts[groupId] || 0,
 

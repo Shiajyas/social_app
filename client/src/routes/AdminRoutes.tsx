@@ -1,7 +1,7 @@
 import { Route, Navigate, Outlet } from 'react-router-dom';
 import AdminLayout from '@/ customComponents/adminDashbord/AdminLayout';
 import Main from '@/ customComponents/adminDashbord/main/Main';
-import SubscriptionManagement from '@/ customComponents/adminDashbord/adminManagement/AdminManagement';
+import SubscriptionManagement from '@/ customComponents/adminDashbord/adminManagement/SubscriptionManagement';
 import Spam from '@/ customComponents/adminDashbord/spamManagement/Spam';
 import UsersManagement from '@/ customComponents/adminDashbord/usersManagemen/UsersManagemen';
 import RoleManagement from '@/ customComponents/adminDashbord/adminManagement/RoleManagement';

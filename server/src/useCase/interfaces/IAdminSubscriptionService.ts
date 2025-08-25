@@ -1,39 +1,73 @@
-import { Types } from 'mongoose';
-import SubscriptionModel from '../../core/domain/models/SubscriptionModel';// Adjust path based on actual export
-import User from '../../core/domain/models/UserModel';
+import { IPlan } from '../../core/domain/interfaces/IPlan';
+import { ISubscription } from '../../core/domain/interfaces/ISubscription';
+import { IPlanRepository } from '../../data/interfaces/IPlanRepo';
+import { ISubscriptionRepository } from '../../data/interfaces/ISubscriptionRepository';
 
 export interface QueryParams {
-  search: string;
-  status: string;
-  startDate: string;
-  endDate: string;
+  search?: string;
+  status?: 'active' | 'inactive';
+  startDate?: string;
+  endDate?: string;
   page: number;
   limit: number;
 }
 
 export interface AllQueryParams {
-  search: string;
-  status: string;
-  startDate: string;
-  endDate: string;
+  search?: string;
+  status?: 'active' | 'inactive';
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface SubscriptionResult {
-  subscriptions: Array<any>; // Ideally use a DTO or lean document type here
+  subscriptions: Array<any>; // ideally DTO/lean doc
   total: number;
   page: number;
   hasMore: boolean;
 }
 
 export interface IAdminSubscriptionService {
-  getSubscriptions(params: QueryParams): Promise<SubscriptionResult>;
+  // ---- Plan Management ----
+  createOrUpdatePlan(
+    name: string,
+    amount: number,
+    duration: number,
+    description: string,
+    postId?: string
+  ): Promise<IPlan>;
 
-  getAllSubscriptions(params: AllQueryParams): Promise<{
-    subscriptions: Array<any>; // Or use a `SubscriptionDTO` if you want a stricter structure
-  }>;
+  getPlans(
+    filters: any,
+    page: number,
+    limit: number
+  ): Promise<SubscriptionResult>;
 
-  toggleSubscriptionStatus(subscriptionId: string): Promise<{
-    message: string;
-    isSubscribed: boolean;
-  }>;
+  getAllPlans(
+    filters: any,
+    page: number,
+    limit: number
+  ): Promise<SubscriptionResult>;
+
+  togglePlanStatus(planId: string): Promise<{ message: string; isActive: boolean }>;
+
+  // ---- Subscription Management ----
+  assignSubscriptionToUser(
+    userId: string,
+    planId: string,
+    startDate: Date,
+    endDate: Date
+  ): Promise<ISubscription>;
+
+  updateUserSubscription(
+    userId: string,
+    planId: string,
+    startDate: Date,
+    endDate: Date
+  ): Promise<ISubscription | null>;
+
+  findUserSubscription(userId: string): Promise<ISubscription | null>;
+
+  findAllUserSubscriptions(userId: string): Promise<ISubscription[]>;
+
+  getSubscriptionPlans(): Promise<any>;
 }

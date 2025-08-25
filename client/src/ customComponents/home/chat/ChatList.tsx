@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/appStore/AuthStore';
 import { NormalizedChat, normalizeChat } from '@/utils/normalizeChat';
 import { useQueryClient } from '@tanstack/react-query';
-import { chatSocket } from '@/utils/chatSocket';
+
 import { socket as mainSocket } from '@/utils/Socket';
 import useMessageStore from '@/appStore/useMessageStore';
 
@@ -53,10 +53,10 @@ const ChatList: React.FC<ChatListProps> = ({
       }
     };
 
-    chatSocket.on('chatUpdated', handleMessageReceived);
+    mainSocket.on('chatUpdated', handleMessageReceived);
 
     return () => {
-      chatSocket.off('chatUpdated', handleMessageReceived);
+     mainSocket.off('chatUpdated', handleMessageReceived);
     };
   }, [queryClient, userId]);
 
@@ -68,12 +68,12 @@ const ChatList: React.FC<ChatListProps> = ({
       setOnlineUsers(onlineUserIds);
     };
 
-    chatSocket.emit('getOnlineUsers');
-    chatSocket.on('updateOnlineUsers', handleUpdate);
+    mainSocket.emit('getOnlineUsers');
+    mainSocket.on('updateOnlineUsers', handleUpdate);
     mainSocket.on('updateOnlineUsers', handleUpdate);
 
     return () => {
-      chatSocket.off('updateOnlineUsers', handleUpdate);
+      mainSocket .off('updateOnlineUsers', handleUpdate);
       mainSocket.off('updateOnlineUsers', handleUpdate);
     };
   }, []);

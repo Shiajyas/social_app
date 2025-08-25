@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { chatSocket as socket } from '@/utils/chatSocket';
+import { socket } from '@/utils/Socket';
 import { useIncomingCallStore } from '@/appStore/useIncomingCallStore';
 
 interface UseWebRTCProps {
@@ -43,16 +43,6 @@ export const useWebRTC = ({
   const remoteDescSetRef = useRef(false);
 
   const createPeerConnection = () => {
-// const pc = new RTCPeerConnection({
-//   iceServers: [
-//     { urls: 'stun:stun.l.google.com:19302' }, // STUN (fallback)
-//     {
-//       urls: 'turn:15.207.66.184:3478',
-//       username: 'myuser', // must match your Coturn config
-//       credential: 'mypassword', // must match your Coturn config
-//     },
-//   ],
-// });
 
 const pc = new RTCPeerConnection({
   iceTransportPolicy: 'all',

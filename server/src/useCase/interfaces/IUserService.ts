@@ -8,8 +8,8 @@ export interface IUserService {
   getFollowing(userId: string): Promise<IUser[]>;
   unfollowUser(userId: string, targetUserId: string): Promise<void>;
   getProfile(userId: string): Promise<IUser | null>;
-  getUserPost(userId: string): Promise<any>;
-  updateUserProfile(userId: string, updatedData: any): Promise<IUser | null>;
+  getUserPost(userId: string): Promise<IPost[]>;
+  updateUserProfile(userId: string, updatedData: Partial<IUser>): Promise<IUser | null>;
   getUserSavedPost(
     userId: string,
     page: number,

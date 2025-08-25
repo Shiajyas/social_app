@@ -157,6 +157,19 @@ async getSocketIds(userId: string): Promise<string[]> {
       return 0;
     }
   }
+
+  async findUserBySocketId(socketId: string): Promise<SUser | undefined> {
+    try {
+      const userId = await redis.hget(SOCKET_TO_USER_KEY, socketId);
+      if (userId) {
+        return this.findById(userId);
+      }
+      return undefined;
+    } catch (error) {
+      console.error(`❌ Failed to find user by socket ID ${socketId}:`, error);
+      return undefined;
+    }
+  }
 async logActiveUsers(): Promise<{ userId: string; socketId: string }[]> {
   try {
     const users = await this.getActiveUsers();

@@ -26,7 +26,6 @@ import { useQuery } from '@tanstack/react-query';
 import ReportButton from '@/ customComponents/common/ReportButton';
 import { useUserAuth } from '@/hooks/useUserAuth';
 import { FaStar } from 'react-icons/fa';
-import LikeButton from '@/ customComponents/common/LikeButton';
 import LikedUsersModal from '@/ customComponents/common/LikedUsersModal';
 
 interface Post {

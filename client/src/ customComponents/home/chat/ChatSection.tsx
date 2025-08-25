@@ -11,7 +11,7 @@ import ChatMessages from './ChatMessages';
 import FriendsListModal from './FriendsListModal';
 import CallUI from './CallUI';
 import { useWebRTC } from '@/hooks/webrtc/useWebRTC';
-import { chatSocket as socket } from '@/utils/chatSocket';
+import { socket } from '@/utils/Socket';
 import { CallHistoryList } from './CallHistoryList';
 
 import { useIncomingCallStore } from '@/appStore/useIncomingCallStore';

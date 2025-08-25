@@ -4,98 +4,82 @@ import { ISUserRepository } from '../data/interfaces/ISUserRepository';
 import { IUserRepository } from '../data/interfaces/IUserRepository';
 import { InotificationRepo } from '../data/interfaces/InotificationRepo';
 import { INotification } from '../core/domain/interfaces/INotification';
-
 import { Server } from 'socket.io';
 
 export class NotificationService implements INotificationService {
   private _Io: Server;
   private _OnlineUserRepository: ISUserRepository;
   private _MainUserRepo: IUserRepository;
-  private _NotificationRepo : InotificationRepo
+  private _NotificationRepo: InotificationRepo;
 
   constructor(
     io: Server,
     userRepository: ISUserRepository,
     mainRepo: IUserRepository,
-    notificationRepo : InotificationRepo
+    notificationRepo: InotificationRepo
   ) {
     this._Io = io;
     this._OnlineUserRepository = userRepository;
     this._MainUserRepo = mainRepo;
-    this._NotificationRepo = notificationRepo
+    this._NotificationRepo = notificationRepo;
   }
 
   async sendNotification(
     senderId: string,
     receiverIds: string[],
-    type:
-      | 'follow'
-      | 'unfollow'
-      | 'like'
-      | 'comment'
-      | 'mention'
-      | 'post'
-      | 'replay',
+    type: 'follow' | 'unfollow' | 'like' | 'comment' | 'mention' | 'post' | 'replay',
     message: string,
     postId?: string,
-    senderName?: string,
+    senderName?: string
   ): Promise<void> {
     try {
-      console.log(`🔔 Sending notifications to ${receiverIds.length} users`);
+      console.log(`🔔 Sending notifications to ${receiverIds?.length ?? 0} users`);
 
       if (!receiverIds || receiverIds.length === 0) {
         console.log('⚠️ No receiver IDs provided. Skipping notification.');
         return;
       }
 
-      // Fetch users from the main database
+      // Normalize and fetch users
       const allReceivers = await Promise.all(
         receiverIds.map(async (id) => {
-          if (!id) return null; // Ensure ID is valid before querying
+          if (!id) return null;
 
-          if (typeof id === 'object' && id !== null && '_id' in id) {
-            id = (id as any)._id.toString(); // Extract `_id` from object and convert to string
-          }
+          const normalizedId =
+            typeof id === 'object' && id !== null && '_id' in id
+              ? (id as { _id: string })._id.toString()
+              : id.toString();
 
-          const user = await this._MainUserRepo.findById(id.toString());
-          const onlineUser = await this._OnlineUserRepository.findById(id.toString());
-          console.log(user, 'formm save');
-          if (!user) return null; // Ensure user exists
+          const user = await this._MainUserRepo.findById(normalizedId);
+          if (!user) return null;
 
-          return { _id: user._id, socketId: onlineUser?.socketId || null };
-        }),
+          // Get ALL socket IDs for this user
+          const socketIds = await this._OnlineUserRepository.getSocketIds(normalizedId);
+
+          return { _id: user._id.toString(), socketIds };
+        })
       );
 
-      // Filter out invalid users
-      const validReceivers = allReceivers.filter(
-        (receiver) => receiver !== null,
-      );
+      // Filter valid users
+      const validReceivers = allReceivers.filter(Boolean) as {
+        _id: string;
+        socketIds: string[];
+      }[];
 
       console.log('✅ Valid Receivers:', validReceivers);
 
       if (!validReceivers.length) {
-        console.log(
-          `⚠️ No valid receivers found. Notification will not be stored.`,
-        );
+        console.log(`⚠️ No valid receivers found. Skipping notification.`);
         return;
       }
 
-      // Extract user IDs for storage
-      const receiverUserIds = validReceivers
-        .map((receiver) => receiver?._id)
-        .filter(Boolean);
+      // Extract IDs for storage
+      const receiverUserIds = validReceivers.map((r) => r._id);
 
-      if (receiverUserIds.length === 0) {
-        console.log(
-          `⚠️ No valid receiver IDs found. Skipping notification storage.`,
-        );
-        return;
-      }
-
-      // Create a single notification object for all receivers
+      // Save notification in DB
       const notification = new Notification({
         senderId,
-        receiverId: receiverUserIds, // Store all valid receivers
+        receiverId: receiverUserIds, // store array
         type,
         message,
         postId,
@@ -103,53 +87,51 @@ export class NotificationService implements INotificationService {
         isRead: false,
       });
 
-      // Save the notification in DB
       await notification.save();
       console.log(`✅ Notification saved for ${validReceivers.length} users`);
 
-      // Emit real-time notifications **only to online users**
-      validReceivers.forEach((receiver) => {
-        if (receiver?.socketId) {
-          this._Io.to(receiver.socketId).emit('newNotification', {
-            type,
-            message,
-            senderId,
-            receiverId: receiverUserIds,
-            postId,
-            senderName,
-            isRead: false,
-            timestamp: new Date(),
-          });
-
-          console.log(
-            `📩 Notification sent to online user ${receiver._id} (Socket ID: ${receiver.socketId})`,
-          );
+      // Emit per user, across all their sockets
+      for (const receiver of validReceivers) {
+        if (receiver.socketIds.length > 0) {
+          for (const sid of receiver.socketIds) {
+            this._Io.to(sid).emit('newNotification', {
+              type,
+              message,
+              senderId,
+              receiverId: receiver._id,
+              postId,
+              senderName,
+              isRead: false,
+              timestamp: new Date(),
+            });
+          }
+          console.log(`📩 Notification sent to ${receiver._id} (${receiver.socketIds.length} sockets)`);
         } else {
-          console.log(
-            `⚠️ User ${receiver?._id} is offline. Notification stored in DB.`,
-          );
+          console.log(`⚠️ User ${receiver._id} is offline. Notification stored only in DB.`);
         }
-      });
+      }
     } catch (error) {
       console.error('❌ Error in sendNotification:', error);
     }
   }
 
-getUnreadCount(userId: string): Promise<number> {
-  return this._NotificationRepo.getUnreadCount(userId);
+  getUnreadCount(userId: string): Promise<number> {
+    return this._NotificationRepo.getUnreadCount(userId);
   }
 
-markNotificationsAsRead(userId: string): Promise<void> {
-  return this._NotificationRepo.markNotificationsAsRead(userId);  
-
+  markNotificationsAsRead(userId: string): Promise<void> {
+    return this._NotificationRepo.markNotificationsAsRead(userId);
   }
 
-  getNotifications(userId: string, page: number, limit: number): Promise<{ notifications: INotification[]; nextPage: number | null }> {
+  getNotifications(
+    userId: string,
+    page: number,
+    limit: number
+  ): Promise<{ notifications: INotification[]; nextPage: number | null }> {
     return this._NotificationRepo.getNotifications(userId, page, limit);
   }
 
   deleteNotification(notificationId: string): Promise<void> {
     return this._NotificationRepo.deleteNotification(notificationId);
   }
-
 }

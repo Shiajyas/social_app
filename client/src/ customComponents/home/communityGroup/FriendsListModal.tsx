@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input'; // ✅ using your existing input 
 import { useQuery } from '@tanstack/react-query';
 import { userService } from '@/services/userService';
 import { useAuthStore } from '@/appStore/AuthStore';
-import { chatSocket as socket } from '@/utils/chatSocket';
+import { socket } from '@/utils/Socket';
 import { toast } from 'react-toastify';
 import { CheckCircle, RotateCcw, Search } from 'lucide-react';
 

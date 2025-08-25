@@ -16,8 +16,8 @@ import { groupRoutes }from "../presentation/routes/users/groupsRoutes";
 
 
 // === SocketIO Chat/Call ===
-import { initializeSocket } from "../infrastructure/socket/SocketServer";
-import { getSocketInstance } from "../infrastructure/socket/SocketServer";
+import { initializeSocket } from "../presentation/socket/SocketServer";
+import { getSocketInstance } from "../presentation/socket/SocketServer";
 
 
 
@@ -102,6 +102,7 @@ export class App {
   // 2. Now register group routes with socket instance
   this.app.use("/api/groups", groupRoutes(io));
 }
+
 
 
 

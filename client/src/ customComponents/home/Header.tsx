@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { useThemeStore } from '@/appStore/useThemeStore';
 import useMessageStore from '@/appStore/useMessageStore';
 import { socket } from '@/utils/Socket';
-import { chatSocket } from '@/utils/chatSocket';
 import { useAuthStore } from '@/appStore/AuthStore';
 import { useLocation } from 'react-router-dom';
 
@@ -36,12 +35,12 @@ const Header: React.FC<HeaderProps> = ({ unreadCount }) => {
   useEffect(() => {
     if (!userId) return;
     socket.emit('joinUser', userId);
-    chatSocket.emit('updateChatSocketId', { userId });
+    socket.emit('updateChatSocketId', { userId });
 
     return () => {
       socket.emit('leaveUser', userId);
     
-      chatSocket.disconnect()
+     socket.disconnect()
     };
   }, []);
 

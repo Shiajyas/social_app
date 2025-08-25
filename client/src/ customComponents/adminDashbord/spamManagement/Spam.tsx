@@ -100,7 +100,7 @@ export default function Spam() {
         )
       ),
     onSuccess: () => {
-      qc.invalidateQueries(["reports", page]);
+      qc.invalidateQueries({ queryKey: ["reports", page] });
       decRep();
       toast.success("🚫 Post blocked");
     },

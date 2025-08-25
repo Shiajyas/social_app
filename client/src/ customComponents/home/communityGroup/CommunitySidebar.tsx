@@ -6,28 +6,34 @@ import { useGroupStore } from '@/appStore/groupStore';
 import { useGroups } from '@/hooks/group/useGroups';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { chatSocket as socket } from '@/utils/chatSocket';
 import { socket as mainSocket } from '@/utils/Socket';
 import { toast } from 'react-toastify';
+import { set } from 'date-fns';
 
 const LOCAL_STORAGE_KEY = 'isOpen';
 
 export const GroupSidebar = ({ onSelectGroup }) => {
   const { user } = useAuthStore();
-  const { groups } = useGroupStore();
-const [isOpen, setIsOpen] = useState<boolean>(() => {
-  const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-  return stored !== null ? JSON.parse(stored) : true; // default to true if not present
-});
+  const { groups, activeGroupId, setActiveGroup } = useGroupStore();
+
+  const [isOpen, setIsOpen] = useState<boolean>(() => {
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return stored !== null ? JSON.parse(stored) : true;
+  });
   const [menuGroupId, setMenuGroupId] = useState<string | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<{ type: 'delete' | 'leave'; groupId: string } | null>(null);
-  const menuRef = useRef(null);
+  const [message, setMessage] = useState("");
+  const [timer, setTimer] = useState(4);
+
+  const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  // Fetch groups
   useGroups(user?._id);
 
+  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -38,79 +44,129 @@ const [isOpen, setIsOpen] = useState<boolean>(() => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Store sidebar state in localStorage
   useEffect(() => {
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(isOpen));
-}, [isOpen]);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(isOpen));
+  }, [isOpen]);
 
-  useEffect(() => {
-    socket.on('group-deleted', ({ groupId }) => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] });
-      toast.success('Group deleted successfully');
-      if (selectedGroupId === groupId) {
-        setSelectedGroupId(null);
-      }
-      navigate('/home/community');
+  // Move group to top function
+  const moveGroupToTop = (groupId: string) => {
+    useGroupStore.setState((state) => {
+      const updatedGroups = [...state.groups];
+      const index = updatedGroups.findIndex((g) => g._id === groupId);
+      if (index === -1) return state;
+      const [group] = updatedGroups.splice(index, 1);
+      updatedGroups.unshift({
+        ...group,
+        updatedAt: new Date().toISOString(),
+      });
+      return { groups: updatedGroups };
     });
+  };
+
+  // 🚀 Navigate cleanly when timer ends
+  useEffect(() => {
+    if ( timer === 0) {
+      navigate('/home/community/*');
+    }
+  }, [ timer]);
+
+  // Socket listeners
+  useEffect(() => {
+    const handleGroupDeleted = (data :{ groupId : string, user : string}) => {
+      
+      if((data.groupId == selectedGroupId)||(data.groupId == activeGroupId)){
+        setMessage("This group has been deleted")
+        setTimer(4)
+          setSelectedGroupId(null);
+        setActiveGroup(null);
+            let countdown = setInterval(() => {
+          setTimer((prev) => {
+            if (prev <= 1) {
+              setMessage("");
+                queryClient.invalidateQueries({ queryKey: ['groups'] });
+              clearInterval(countdown);
+              return 0;
+            }
+            
+            return prev - 1;
+          });
+        }, 1000);
+
+        return
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+
+     
+    };
+
+    const handleGroupUpdated = () => {
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+    };
+
+    const handleGroupCreated = () => {
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+    };
+
+    const handleGroupRemoved = (data) => {
+      if (
+        (data.groupId === selectedGroupId && data.memberId === user?._id) ||
+        (data.groupId === activeGroupId && data.memberId === user?._id)
+      ) {
+        setMessage("You have been removed by the admin");
+        setTimer(4);
+
+        setSelectedGroupId(null);
+        setActiveGroup(null);
+
+        // start countdown
+        let countdown = setInterval(() => {
+          setTimer((prev) => {
+            if (prev <= 1) {
+              setMessage("");
+                queryClient.invalidateQueries({ queryKey: ['groups'] });
+              clearInterval(countdown);
+              return 0;
+            }
+            
+            return prev - 1;
+          });
+        }, 1000);
+
+        return;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+    };
+
+    const handleGroupMessage = ({ groupId }) => {
+      moveGroupToTop(groupId);
+    };
+
+    mainSocket.on('group-deleted', handleGroupDeleted);
+    mainSocket.on('group-updated', handleGroupUpdated);
+    mainSocket.on('group-created', handleGroupCreated);
+    mainSocket.on('group-message', handleGroupMessage);
+    mainSocket.on('group-member-added', handleGroupUpdated);
+    mainSocket.on('group-member-removed', handleGroupRemoved);
 
     return () => {
-      socket.off('group-deleted');
+      mainSocket.off('group-deleted', handleGroupDeleted);
+      mainSocket.off('group-updated', handleGroupUpdated);
+      mainSocket.off('group-created', handleGroupCreated);
+      mainSocket.off('group-message', handleGroupMessage);
+      mainSocket.off('group-member-added', handleGroupUpdated);
+      mainSocket.off('group-member-removed', handleGroupRemoved);
     };
-  }, [selectedGroupId]);
+  }, [selectedGroupId, navigate, queryClient, user?._id, activeGroupId, setActiveGroup]);
 
-
-  useEffect(() => {
-  const moveGroupToTop = (groupId: string) => {
-    const updatedGroups = [...groups];
-    const index = updatedGroups.findIndex(g => g._id === groupId);
-    if (index !== -1) {
-      const [group] = updatedGroups.splice(index, 1);
-      updatedGroups.unshift(group);
-      useGroupStore.setState({ groups: updatedGroups });
-    }
-  };
-
-  mainSocket.on('group-updated', ({ group }) => {
-
-     queryClient.invalidateQueries({ queryKey: ['groups'] });
-  });
-
-  mainSocket.on('group-created', ({ group }) => {
-    // useGroupStore.setState({ groups: [group, ...groups] });
-    queryClient.invalidateQueries({ queryKey: ['groups'] });
-  });
-
-    socket.on('group-message', ({ groupId }) => {
-       const activeGroup = useGroupStore.getState().activeGroupId;
-       const isGroupExists = useGroupStore.getState().groups.some((group) => group._id === groupId);
-
-      if (selectedGroupId !== groupId && activeGroup !== groupId && isGroupExists) {
-        console.log('Incrementing unread count for group:', groupId);
-    useGroupStore.getState().incrementUnread(groupId);
-  }
-    moveGroupToTop(groupId);
-  });
-  
-  socket.on('group-deleted', ({ groupId }) => {
-    queryClient.invalidateQueries({ queryKey: ['groups'] });
-    toast.success('Group deleted successfully');
-    if (selectedGroupId === groupId) {
-      setSelectedGroupId(null);
-    }
-  });
-
- 
-  return () => {
-    mainSocket.off('group-updated');
-    mainSocket.off('group-created');
-    socket.off('group-message');
-  };
-}, [groups]);
-
-
+  // Handlers
   const handleSelectGroup = (groupId: string) => {
     setSelectedGroupId(groupId);
+    setActiveGroup(groupId);
     onSelectGroup(groupId);
-      useGroupStore.getState().clearUnread(groupId);
+    useGroupStore.getState().clearUnread(groupId);
   };
 
   const handleEdit = (groupId: string) => {
@@ -126,21 +182,21 @@ const [isOpen, setIsOpen] = useState<boolean>(() => {
   };
 
   const viewGroup = (groupId: string) => {
-   navigate(`/home/community/${groupId}/edit`);
+    navigate(`/home/community/${groupId}/edit`);
   };
 
   const executeConfirmAction = () => {
     if (confirmAction?.type === 'delete') {
-      socket.emit('delete-group', { groupId: confirmAction.groupId });
+      mainSocket.emit('delete-group', { groupId: confirmAction.groupId });
     } else if (confirmAction?.type === 'leave') {
-      socket.emit('leave-group', { groupId: confirmAction.groupId, userId: user._id });
+      mainSocket.emit('leave-group', { groupId: confirmAction.groupId, userId: user?._id });
     }
     setConfirmAction(null);
   };
 
   return (
     <div className="relative h-full">
-      {/* Sidebar toggle button */}
+      {/* Sidebar toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="absolute -right-4 top-4 z-10 bg-white dark:bg-gray-900 rounded-full p-1 shadow-md border dark:border-gray-700"
@@ -148,7 +204,7 @@ const [isOpen, setIsOpen] = useState<boolean>(() => {
         {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
       </button>
 
-      {/* Sidebar Content */}
+      {/* Sidebar */}
       <div
         className={`transition-all duration-300 h-full bg-white dark:bg-gray-900 border-r ${
           isOpen ? 'w-64' : 'w-0 overflow-hidden'
@@ -161,23 +217,24 @@ const [isOpen, setIsOpen] = useState<boolean>(() => {
             <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">Groups</span>
           </div>
 
-          {/* Create Button */}
+          {/* Create group */}
           {isOpen && (
             <Button onClick={onCreateGroup} className="w-full mb-4">
               + Create Group
             </Button>
           )}
 
-          {/* Group List */}
+          {/* Group list */}
           <div className="flex-grow overflow-y-auto space-y-2 pr-2">
             {groups.map((group) => {
-              const isAdmin = group?.creatorId?._id === user?._id;
+              const isAdmin = group?.creatorId._id === user?._id;
               const isSelected = selectedGroupId === group._id;
+              const unreadCount = useGroupStore.getState().getUnreadCount(group._id);
 
               return (
                 <div
                   key={group._id}
-                  className={`relative group-item hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded cursor-pointer ${
+                  className={`relative hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded cursor-pointer ${
                     isSelected ? 'bg-gray-100 dark:bg-gray-800' : ''
                   }`}
                 >
@@ -187,24 +244,26 @@ const [isOpen, setIsOpen] = useState<boolean>(() => {
                   >
                     <img
                       src={group?.iconUrl}
-                      alt={group?.creatorId?.name}
+                      alt={group?.creatorId?.name || 'Group Icon'}
                       className="w-10 h-10 rounded-full"
                     />
-                   <div className="flex-1 overflow-hidden">
-  <div className="flex items-center justify-between">
-    <div className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-      {group.name}
-    </div>
-    {useGroupStore.getState().getUnreadCount(group._id) >  0 && (
-      <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium bg-blue-500 text-white dark:bg-blue-600 rounded-full">
-        {useGroupStore.getState().getUnreadCount(group._id)}
-      </span>
-    )}
-  </div>
-  <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-    {group.description}
-  </div>
-</div>
+                    <div className="flex-1 overflow-hidden">
+                      <div className="flex items-center justify-between">
+                        <div className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                          {group.name}
+                        </div>
+                        {unreadCount > 0 && (
+                          <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium bg-blue-500 text-white dark:bg-blue-600 rounded-full">
+                            {unreadCount}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        <span className={group.lastMessage?.content ? "text-blue-500" : "text-gray-400 italic"}>
+                          {group.lastMessage?.content || "no message yet"}
+                        </span>
+                      </div>
+                    </div>
 
                     {isSelected && (
                       <button
@@ -219,7 +278,19 @@ const [isOpen, setIsOpen] = useState<boolean>(() => {
                     )}
                   </div>
 
-                  {/* Dropdown Menu */}
+                  {/* Modal for removal */}
+                  {message && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                      <div className="bg-white text-black p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
+                        <h2 className="text-2xl font-bold mb-4">{message}</h2>
+                        <p className="text-lg">
+                          Redirecting in <span className="font-semibold">{timer}</span> seconds...
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Dropdown */}
                   {menuGroupId === group._id && (
                     <div
                       ref={menuRef}
@@ -257,7 +328,7 @@ const [isOpen, setIsOpen] = useState<boolean>(() => {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
+      {/* Confirmation modal */}
       {confirmAction && (
         <div className="fixed inset-0 z-30 bg-black bg-opacity-40 flex items-center justify-center">
           <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-sm">
@@ -275,10 +346,7 @@ const [isOpen, setIsOpen] = useState<boolean>(() => {
               <Button variant="outline" onClick={() => setConfirmAction(null)}>
                 Cancel
               </Button>
-              <Button
-                variant="destructive"
-                onClick={executeConfirmAction}
-              >
+              <Button variant="destructive" onClick={executeConfirmAction}>
                 Confirm
               </Button>
             </div>

@@ -8,4 +8,5 @@ export interface IGroupService {
   deleteGroup(id: string): Promise<void>;
   updateGroup(id: string, data: Partial<Group>): Promise<Group>;
   getUserGroups(userId: string): Promise<Group[]>;
+  
 }

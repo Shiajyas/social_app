@@ -62,20 +62,20 @@ const Modal = ({ children, onClose }: { children: React.ReactNode; onClose: () =
       className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-center items-center"
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
+        initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
+        exit={{ scale: 0.95, opacity: 0 }}
         transition={{ duration: 0.25 }}
-        className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl max-w-lg w-full relative border border-gray-200"
+        className="w-full h-full bg-white dark:bg-gray-900 p-6 md:p-12 overflow-auto relative"
       >
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
           aria-label="Close modal"
         >
-          <span className="text-xl font-bold">×</span>
+          <span className="text-2xl font-bold">×</span>
         </button>
-        <div className="space-y-4">{children}</div>
+        <div className="h-full">{children}</div>
       </motion.div>
     </motion.div>
   </AnimatePresence>
@@ -86,8 +86,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, userId, refetch, pa
   const [loading, setLoading] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  const [searchParams] = useSearchParams();
+
 
   const [passwordData, setPasswordData] = useState({
   current: '',
@@ -123,9 +122,7 @@ useEffect(() => {
 }, [user, parentUserId]);
 
 
-  console.log(user?._id,"UserId>>>>>><")
-  console.log(authUser?._id,"AuthUser>>><")
-  console.log(isFollowing,"isFollowing>>><")
+
 const handleSaveChanges = async () => {
   const isValid = validateForm();
   if (!isValid) return;
@@ -139,52 +136,8 @@ const handleSaveChanges = async () => {
   });
 };
 
-  console.log('authUser>>>>>>>>>', authUser);
   const queryClient = useQueryClient();
 
-  const {
-    data: subscription,
-    isLoading: subscriptionLoading,
-    refreshSubscription,
-  } = useSubscription({ parentUserId });
-
-  const confirmSubscription = async () => {
-    try {
-      await userService.confirmSubscription(userId);
-
-      refreshSubscription(); // refresh only here
-    } catch (err) {
-      console.error('Error confirming subscription:', err);
-    }
-  };
-
-  useEffect(() => {
-    const clientSecret = searchParams.get('payment_intent_client_secret');
-    const redirectStatus = searchParams.get('redirect_status');
-
-    // Only trigger after navigation type is 'navigate' or 'reload' (i.e., full page load)
-    const navEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-    const isRedirect = navEntry?.type === 'navigate' || navEntry?.type === 'reload';
-
-    if (isRedirect && clientSecret) {
-      if (redirectStatus === 'succeeded') {
-        confirmSubscription();
-        toast.success('Payment successful! Subscription confirmed.');
-      } else {
-        toast.error('Payment failed! Please try again.');
-      }
-    }
-  }, [searchParams]);
-
-  const handleSubscritionModelClose = async () => {
-    // refreshSubscription();
-    setShowSubscriptionModal(false);
-  };
-
-  const handleSubscriptionModalOpen = () => {
-    refreshSubscription();
-    setShowSubscriptionModal(true);
-  };
 
   const [profileData, setProfileData] = useState({
     fullname: user?.fullname || '',
@@ -281,7 +234,7 @@ const handleSaveChanges = async () => {
       // Update the React Query cache with the new user data
       queryClient.setQueryData(['user', data.id], data);
 
-      console.log('Updated user data>>>>>>>>>:', data);
+      // console.log('Updated user data>>>>>>>>>:', data);
 
       // Update your auth store's user state
       updateUserFields({
@@ -340,23 +293,15 @@ const handleSaveChanges = async () => {
 
         <Separator className="my-4" />
 
-         {parentUserId === userId && (
-              <Button onClick={handleSubscriptionModalOpen} variant="outline" className="mb-4">
+              {parentUserId === userId && (
+        <Button
+          onClick={() => navigate(`/home/subscription/${userId}`)}
+          variant="outline"
+          className="mb-4"
+        >
           View Subscription Details
         </Button>
-         )}
-
-        {showSubscriptionModal && (
-          <Modal onClose={handleSubscritionModelClose}>
-            <SubscriptionStatus
-              subscription={subscription}
-              isLoading={subscriptionLoading}
-              userId={userId}
-              refreshSubscription={refreshSubscription}
-            />
-          </Modal>
-        )}
-
+      )}
         {editing ? (
          <div className="space-y-4">
 

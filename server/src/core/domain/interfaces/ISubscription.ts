@@ -1,9 +1,9 @@
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export interface ISubscription extends Document {
-  userId: string;
-  isSubscribed: boolean;
+  userId: Types.ObjectId;   // subscribed user
+  planId: Types.ObjectId;   // reference to the plan
+  isSubscribed: boolean;    // active or not
   startDate: Date;
   endDate: Date;
-  amount: number;
 }

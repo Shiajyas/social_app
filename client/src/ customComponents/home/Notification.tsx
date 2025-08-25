@@ -143,29 +143,52 @@ const Notification: React.FC = () => {
                 hover:bg-gray-50 dark:hover:bg-gray-800 hover:shadow-md`}
                 >
                   <div className="flex-1">
-                    <p className="text-sm text-gray-800 dark:text-gray-200">
-                      <span
-                        className="font-semibold text-blue-600 hover:underline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/home/profile/${notification.senderId}`);
-                        }}
-                      >
-                        {notification.senderName}
-                      </span>{' '}
-                      {notification.message.replace(notification.senderName, '')}{' '}
-                      {notification.postId && (
-                        <span
-                          className="font-semibold text-blue-600 hover:underline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/home/post/${notification.postId}`);
-                          }}
-                        >
-                          Post
-                        </span>
-                      )}
-                    </p>
+                   <p className="text-sm text-gray-800 dark:text-gray-200">
+  {/* Sender name clickable if senderId exists */}
+  {notification.senderId ? (
+    <span
+      className="font-semibold text-blue-600 hover:underline"
+      onClick={(e) => {
+        e.stopPropagation();
+        navigate(`/home/profile/${notification.senderId}`);
+      }}
+    >
+      {notification.senderName}
+    </span>
+  ) : (
+    <span className="font-semibold">{notification.senderName}</span>
+  )}{' '}
+  
+  {/* Message text */}
+  {notification.message.replace(notification.senderName, '')}{' '}
+
+  {/* Post clickable only if postId exists */}
+  {notification.postId && (
+    <span
+      className="font-semibold text-blue-600 hover:underline"
+      onClick={(e) => {
+        e.stopPropagation();
+        navigate(`/home/post/${notification.postId}`);
+      }}
+    >
+      Post
+    </span>
+  )}
+
+  {/* Group clickable only if groupId exists */}
+  {notification.groupId && notification.type === 'group-add' && (
+    <span
+      className="font-semibold text-blue-600 hover:underline"
+      onClick={(e) => {
+        e.stopPropagation();
+        navigate(`/home/community/${notification.groupId}/edit`);
+      }}
+    >
+      Group
+    </span>
+  )}
+</p>
+
                     <span className="text-xs text-gray-400 dark:text-gray-500">
                       {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                     </span>

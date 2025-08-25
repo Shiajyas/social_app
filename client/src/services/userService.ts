@@ -140,26 +140,28 @@ export const userService = {
     );
   },
 
-  subscribe: (userId: string, token: string) => {
-    return fetchData(
-      `/users/subscribe/${userId}`,
-      {
-        method: 'POST',
-        data: { userId, token },
-      },
-      'Failed to subscribe',
-    );
-  },
-  confirmSubscription: (userId: string) => {
-    return fetchData(
-      `/users/confirm-subscription`,
-      {
-        method: 'POST',
-        data: { userId },
-      },
-      'Failed to confirm subscription',
-    );
-  },
+subscribe: async (userId: string, planId: string) => {
+  const res = await fetchData(
+    `/users/subscribe`,
+    {
+      method: 'POST',
+      data: { userId, planId },
+    },
+    'Failed to subscribe',
+  );
+  return res; // should contain { clientSecret, paymentIntentId, planId }
+},
+
+confirmSubscription: (userId: string, planId: string, paymentIntentId: string) => {
+  return fetchData(
+    `/users/confirm-subscription`,
+    {
+      method: 'POST',
+      data: { userId, planId, paymentIntentId }, // ✅ pass it here
+    },
+    'Failed to confirm subscription',
+  );
+},
 
   getSubscriptionHistory: (userId: string) => {
     return fetchData(
@@ -194,5 +196,32 @@ export const userService = {
     );
   },
 
+  getPaymentIntent: (paymentIntentId: string) => {
+  return fetchData(
+    `/users/payment-intent/${paymentIntentId}`,
+    { method: "GET" },
+    "Failed to fetch payment intent"
+  );
+},
+
+    getPlans() {
+      return fetchData(
+        "/users/subscriptions/plan",
+        {
+          method: "GET",
+        },
+        "Failed to get plans"
+      );
+    },
+
+    getUserSubscriptions(userId: string) {
+      return fetchData(
+        `/users/subscriptions/user/${userId}`,
+        {
+          method: "GET",
+        },
+        "Failed to get user subscriptions"
+      );
+    },
 
 };

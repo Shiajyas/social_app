@@ -7,7 +7,7 @@ import AddParticipant from './ParticipantManager';
 import { groupService } from '@/services/gropuService';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftCircleIcon } from '@heroicons/react/24/solid';
-import { chatSocket as socket } from '@/utils/chatSocket';
+import { socket } from '@/utils/Socket';
 import { toast } from 'react-toastify';
 import GroupParticipantsView from './GroupParticipantsView';
 import { useLocation } from 'react-router-dom';
@@ -53,10 +53,9 @@ const GroupDetails: React.FC<Props> = ({ groupData, onClose }) => {
 
   const canEdit = editMode && (isAdmin || isCreateMode);
 
-  
+  console.log(groupData, 'groupData');
 
-
-  // Cover preview effect
+// Cover preview effect
   useEffect(() => {
     if (cover) setCoverPreview(URL.createObjectURL(cover));
     return () => cover && URL.revokeObjectURL(coverPreview);

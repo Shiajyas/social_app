@@ -98,7 +98,7 @@ export function userRoutes() {
   );
 
   router.post(
-    '/subscribe/:id',
+    '/subscribe',
     userAuthMiddleware.authenticate,
     async (req, res, next) => {
       try {
@@ -137,6 +137,17 @@ export function userRoutes() {
       }
     },
   );
+
+  router.get("/payment-intent/:paymentIntentId",userAuthMiddleware.authenticate,
+    async (req, res, next) => {
+      try {
+        await userController.getSubscriptionHistory(req, res);
+        next();
+      } catch (error) {
+        next(error);
+      }
+    },);
+
 
   router.get(
     '/call_history/:id',
@@ -186,6 +197,18 @@ export function userRoutes() {
       }
     },
   );
+
+  router.get("/subscriptions/plan",
+    userAuthMiddleware.authenticate,
+    async (req, res, next) => {
+      try {
+        await userController.getAllPlans(req, res);
+        next();
+      } catch (error) {
+        next(error);
+      }
+    },
+  )
 
   return router;
 }
