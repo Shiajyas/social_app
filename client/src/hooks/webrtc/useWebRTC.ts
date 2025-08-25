@@ -47,17 +47,19 @@ export const useWebRTC = ({
 const pc = new RTCPeerConnection({
   iceTransportPolicy: 'all',
   iceServers: [
+    // Google public STUN server
     {
       urls: 'stun:stun.l.google.com:19302',
     },
+    // Your TURN server over UDP and TCP/TLS
     {
-    urls: [
-      "turn:13.202.77.180:3478?transport=udp",
-      "turns:13.202.77.180:5349?transport=tcp"
-    ],
-    username: "myuser",
-    credential: "strongpassword"
-  }
+      urls: [
+        "turn:16.16.247.179:3478?transport=udp",
+        "turns:16.16.247.179:5349?transport=tcp"
+      ],
+      username: "myuser",
+      credential: "strongpassword",
+    },
   ],
 });
 
