@@ -1,29 +1,13 @@
-
 services:
   mainserver:
     build:
       context: ./server
     container_name: mainserver
     ports:
-      - "3009:3009"
+      - "3009:3009"   # Your main API + socket
     env_file:
       - ./server/.env
     environment:
-      REDIS_HOST: my-redis
-      REDIS_PORT: 6379
-    networks:
-      - vconnect_net
-    restart: unless-stopped
-
-  chatserver:
-    build:
-      context: ./chatServer
-    container_name: chatserver
-    ports:
-      - "3011:3011"
-    env_file:
-      - ./chatServer/.env
-    environment:                 
       REDIS_HOST: my-redis
       REDIS_PORT: 6379
     networks:
@@ -41,6 +25,4 @@ services:
 
 networks:
   vconnect_net:
-   # external: true 
-
-
+    driver: bridge
