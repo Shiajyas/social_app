@@ -255,4 +255,8 @@ export class PostRepository implements IPostRepository {
       hashtags: { $regex: query, $options: 'i' },
     }).populate('userId', 'username ').limit(15);
   }
+
+  async userPostcount(userId: string): Promise<number> {
+    return await Post.countDocuments({ userId });
+  }
 }

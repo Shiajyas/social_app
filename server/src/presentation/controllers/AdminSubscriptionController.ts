@@ -9,7 +9,7 @@ export class AdminSubscriptionController {
 
   getSubscriptionPlans = async (req: Request, res: Response): Promise<void> => {
     try {
-      console.log('getSubscriptionPlans>>>>>>>>>>>>>>>>>>>>>>>><<<<');
+      // console.log('getSubscriptionPlans>>>>>>>>>>>>>>>>>>>>>>>><<<<');
       const data = await this.subscriptionService.getSubscriptionPlans();
       console.log(data, 'getSubscriptionPlans');
       res.status(HttpStatus.OK).json(data);

@@ -36,11 +36,12 @@ async createPost(
   const isToxicResult = await analyzeSentiment(`${title} ${description}`);
  console.log("isToxicResult",isToxicResult);
  
+   const postCount = await this._PostRepository.userPostcount(userId);
 
-
-    // if (isToxic) {
-    //   throw new Error('Post contains toxic content and cannot be created');
-    // }
+   
+    if(postCount >= 10 && !isSubscribed){
+      throw new Error("unSubscribed user have not able to uplod post more than 10")
+    }
 
   // Regular user logic: check post count
   if (!isSubscribed) {
