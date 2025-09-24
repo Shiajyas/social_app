@@ -10,20 +10,17 @@ export interface SubscriptionResult {
   hasMore: boolean;
 }
 
-
 class SubscriptionUseCase implements ISubscriptionUseCase {
-  private readonly subscriptionRepository: ISubscriptionRepository;
+  private readonly _SubscriptionRepository: ISubscriptionRepository;
 
   constructor(subscriptionRepository: ISubscriptionRepository) {
-    this.subscriptionRepository = subscriptionRepository;
+    this._SubscriptionRepository = subscriptionRepository;
   }
 
   async getUserSubscription(userId: string): Promise<ISubscription | null> {
     try {
-      console.log('Fetching subscription for user:', userId);
-      return await this.subscriptionRepository.findByUserId(userId);
-    } catch (error) {
-      console.error('Error fetching subscription:', error);
+      return await this._SubscriptionRepository.findByUserId(userId);
+    } catch {
       throw new Error('Failed to fetch subscription');
     }
   }
@@ -35,48 +32,52 @@ class SubscriptionUseCase implements ISubscriptionUseCase {
     endDate: Date,
   ): Promise<ISubscription> {
     try {
-      return await this.subscriptionRepository.createSubscription(
+      return await this._SubscriptionRepository.createSubscription(
         userId,
         planId,
         startDate,
         endDate,
       );
-    } catch (error) {
-      console.error('Error creating/updating subscription:', error);
+    } catch {
       throw new Error('Failed to create/update subscription');
     }
   }
 
   async getUserSubscriptionHistory(userId: string): Promise<ISubscription[]> {
     try {
-      console.log('Fetching all subscriptions for user:', userId);
-      return await this.subscriptionRepository.findAllByUserId(userId);
-    } catch (error) {
-      console.error('Error fetching subscription history:', error);
+      return await this._SubscriptionRepository.findAllByUserId(userId);
+    } catch {
       throw new Error('Failed to fetch subscription history');
     }
   }
 
-  async getPlanById(planId: string): Promise<IPlan| null> {
+  async getPlanById(planId: string): Promise<IPlan | null> {
     try {
-      return await this.subscriptionRepository.getPlanById(planId);
-    } catch (error) {
-      console.error('Error fetching plan:', error);
+      return await this._SubscriptionRepository.getPlanById(planId);
+    } catch {
       throw new Error('Failed to fetch plan');
     }
-  } 
+  }
 
+  async getAllPlans(
+    filters: any,
+    page: number,
+    limit: number,
+  ): Promise<SubscriptionResult> {
+    try {
+      const { subscriptions, total } =
+        await this._SubscriptionRepository.getAllPlans(filters, page, limit);
 
-  async getAllPlans(filters: any, page: number, limit: number): Promise<SubscriptionResult> {
-  const { subscriptions, total } = await this.subscriptionRepository.getAllPlans(filters, page, limit);
-  return {
-    subscriptions,
-    total,
-    page,
-    hasMore: total > page * limit,
-  };
-}
-  
+      return {
+        subscriptions,
+        total,
+        page,
+        hasMore: total > page * limit,
+      };
+    } catch {
+      throw new Error('Failed to fetch plans');
+    }
+  }
 }
 
 export default SubscriptionUseCase;

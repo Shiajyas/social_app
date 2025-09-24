@@ -35,8 +35,6 @@ export class SUserRepositoryImpl implements ISUserRepository {
 
       // Map socketId to userId
       await redis.hset(SOCKET_TO_USER_KEY, user.socketId, user.id);
-
-      console.log(`✅ User socket added: ${user.id} (Socket ID: ${user.socketId})`);
     } catch (error) {
       console.error(`❌ Failed to add user socket ${user.id}:`, error);
     }
@@ -53,7 +51,6 @@ export class SUserRepositoryImpl implements ISUserRepository {
       await redis.hset(SOCKET_TO_USER_KEY, chatSocketId, userId);
       await redis.sadd(USER_SOCKET_SET(userId), chatSocketId);
 
-      console.log(`🗨️ Chat socket ID updated for user ${userId}: ${chatSocketId}`);
     } catch (error) {
       console.error(`❌ Failed to update chatSocketId for user ${userId}:`, error);
     }
@@ -63,7 +60,7 @@ export class SUserRepositoryImpl implements ISUserRepository {
     try {
       const userId = await redis.hget(SOCKET_TO_USER_KEY, socketId);
       if (!userId) {
-        console.warn(`⚠️ No user found for Socket ID: ${socketId}`);
+        console.warn(` No user found for Socket ID: ${socketId}`);
         return;
       }
 
@@ -80,12 +77,11 @@ export class SUserRepositoryImpl implements ISUserRepository {
         // No sockets left, remove user metadata and socket set
         await redis.hdel(ONLINE_USERS_KEY, userId);
         await redis.del(USER_SOCKET_SET(userId));
-        console.log(`🗑️ All sockets removed, user ${userId} logged out.`);
       } else {
-        console.log(`🗑️ Socket removed: ${socketId} (User: ${userId}), remaining sockets: ${remaining}`);
+        console.log(` Socket removed: ${socketId} (User: ${userId}), remaining sockets: ${remaining}`);
       }
     } catch (error) {
-      console.error(`❌ Failed to remove user by socket ID ${socketId}:`, error);
+      console.error(` Failed to remove user by socket ID ${socketId}:`, error);
     }
   }
 
@@ -100,7 +96,7 @@ async getSocketIds(userId: string): Promise<string[]> {
       const sockets = await redis.smembers(USER_SOCKET_SET(userId));
 
       if (sockets.length === 0) {
-        console.warn(`⚠️ No sockets found for user ID: ${userId}`);
+        console.warn(`No sockets found for user ID: ${userId}`);
         return;
       }
 
@@ -116,8 +112,6 @@ async getSocketIds(userId: string): Promise<string[]> {
       pipeline.hdel(ONLINE_USERS_KEY, userId);
 
       await pipeline.exec();
-
-      console.log(`🗑️ User fully removed by ID: ${userId}`);
     } catch (error) {
       console.error(`❌ Failed to remove user by ID ${userId}:`, error);
     }
@@ -138,8 +132,6 @@ async getSocketIds(userId: string): Promise<string[]> {
           // ignore parse errors
         }
       }
-
-      console.log(`📡 Active Users [${users.length}]:`, users);
       return users;
     } catch (error) {
       console.error('❌ Failed to fetch active users:', error);
@@ -150,7 +142,6 @@ async getSocketIds(userId: string): Promise<string[]> {
   async getActiveUserCount(): Promise<number> {
     try {
       const count = await redis.hlen(ONLINE_USERS_KEY);
-      console.log('📡 Active User Count:', count);
       return count;
     } catch (error) {
       console.error('❌ Failed to get active user count:', error);
@@ -174,7 +165,7 @@ async logActiveUsers(): Promise<{ userId: string; socketId: string }[]> {
   try {
     const users = await this.getActiveUsers();
  const active = users.filter((u) => (u.sockets ?? []).length > 0).map((u) => ({ userId: u.id, socketId: (u.sockets ?? [])[0] }));
-    console.log('📋 Currently Active Users:', active);
+  
     return active;
   } catch (error) {
     console.error('❌ Failed to log active users:', error);

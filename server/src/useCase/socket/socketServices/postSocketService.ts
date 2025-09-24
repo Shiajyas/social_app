@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 import { IPostSocketService } from './Interface/IPostSocketService';
 import { IPostRepository } from '../../../data/interfaces/IPostRepository';
 import { IUserRepository } from '../../../data/interfaces/IUserRepository';
-import { NotificationService } from '../../notificationService';
+import { NotificationService } from '../../notificationServiceUsecase';
 import { Server } from 'socket.io';
 import { INotificationService } from '../../interfaces/InotificationService';
 
@@ -30,7 +30,6 @@ export class PostSocketService implements IPostSocketService {
       if (!userId || !postId)
         throw new Error('Invalid request. User ID and Post ID are required.');
 
-      // console.log(` Post uploaded by ${userId} (Post ID: ${postId})`);
 
       let owner = await this._UserRepository.findById(userId);
       if (!owner) throw new Error('User not found.');
@@ -62,10 +61,6 @@ export class PostSocketService implements IPostSocketService {
     try {
       if (!userId || !postId)
         throw new Error('Invalid request. User ID and Post ID are required.');
-
-      console.log(
-        `❤️ ${type === 'unlike' ? 'Unlike' : 'Like'} received from ${userId} for Post ID: ${postId}`,
-      );
 
       if (type === 'unlike') {
         await this._PostRepository.unlikePost(userId, postId);
@@ -118,10 +113,7 @@ export class PostSocketService implements IPostSocketService {
           'Invalid request. User ID, Post ID, and Content are required.',
         );
 
-      console.log(
-        `💬 Comment added by ${data.userId} on Post ID: ${data.postId}`,
-      );
-
+   
       const post = await this._PostRepository.getPost(data.postId);
       if (!post) throw new Error('Post not found.');
 
@@ -160,10 +152,7 @@ export class PostSocketService implements IPostSocketService {
   async savePost(socket: Socket, postId: string, userId: string) {
     try {
       let res = await this._PostRepository.savePost(postId, userId);
-      if (res) {
-        console.log('saved post', postId);
-      }
-
+ 
       socket.emit('postSaved', { userId, saved: res });
     } catch (error) {
       this.handleError(socket, error, 'savePostError');
@@ -172,11 +161,7 @@ export class PostSocketService implements IPostSocketService {
 
   async deletePost(socket: Socket, postId: string, userId: string) {
     try {
-      console.log('delete post>>>>', postId);
       let res = await this._PostRepository.deletePost(postId, userId);
-      if (res) {
-        console.log('deleted post', postId);
-      }
 
       socket.emit('deletePost', { userId });
     } catch (error) {
@@ -187,7 +172,7 @@ export class PostSocketService implements IPostSocketService {
   async getLikedUsers(socket: Socket, postId: string) {
     try {
       const likedUsers = await this._PostRepository.getLikedUsers(postId);
-      console.log('likedUsers', likedUsers);
+  
       socket.emit('likedUsersList', { postId: postId, users: likedUsers });
     } catch (error) {
       this.handleError(socket, error, 'likedUsersError');

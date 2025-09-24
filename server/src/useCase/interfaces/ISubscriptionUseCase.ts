@@ -1,6 +1,6 @@
 import { IPlan } from '../../core/domain/interfaces/IPlan';
 import { ISubscription } from '../../core/domain/interfaces/ISubscription';
-import { SubscriptionResult } from '../adminSubscriptionService';
+import { SubscriptionResult } from '../adminSubscriptionUsecase';
 
 export interface ISubscriptionUseCase {
   getUserSubscription(userId: string): Promise<ISubscription | null>;

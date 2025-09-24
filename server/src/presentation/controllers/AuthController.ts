@@ -97,8 +97,7 @@ async login(req: Request, res: Response): Promise<void> {
         (req as AuthenticatdRequest).user?.id ||
         (req as AuthenticatdRequest).admin?.id;
 
-      // console.log(userId, 'userId');
-
+    
       if (!userId) {
         res
           .status(HttpStatus.BAD_REQUEST)
@@ -109,8 +108,6 @@ async login(req: Request, res: Response): Promise<void> {
       const getUser =
         (await this._UserService.getUser(userId)) ||
         (await this._AdminService.getUserById(userId));
-
-      // console.log(getUser, 'getUser');
 
       if (!getUser) {
         res.status(HttpStatus.NOT_FOUND).json({ message: ResponseMessages.USER_NOT_FOUND });

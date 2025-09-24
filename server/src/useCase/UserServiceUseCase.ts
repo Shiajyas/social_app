@@ -79,25 +79,19 @@ export class UserService implements IUserService {
     page: number,
     limit: number,
   ): Promise<{ posts: IPost[]; nextPage: number | null }> {
-    // console.log(userId, page, limit, ">>>>userId 2*");
     let { posts, nextPage } = await this._PostRepository.getSavedPosts(
       userId,
       page,
       limit,
     );
-    // console.log(posts, ">>>>posts 2*");
-
     return { posts, nextPage };
   }
 
   async searchUsers(
     query: string,
   ): Promise<{ users: IUser[]; posts: IPost[] }> {
-    console.log(query, 'searchquery 2');
     const users = await this._UserRepository.searchUsers(query);
     const posts = await this._PostRepository.searchPosts(query);
-
-    console.log(users, posts, 'users and posts');
 
     return { users, posts };
   }
@@ -106,7 +100,6 @@ export class UserService implements IUserService {
 
    try {
          const hashedPassword = await bcrypt.hash(newPassword, 12);
-     console.log(hashedPassword, 'hashedPassword');
    let res = await this._UserRepository.changePassword(userId,oldPassword, hashedPassword);
     if(res){
       return true

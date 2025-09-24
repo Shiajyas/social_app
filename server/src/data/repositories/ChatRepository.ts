@@ -14,7 +14,7 @@ export class ChatRepository implements IChatRepository {
    */
   async saveMessage(message: Partial<IMessage>): Promise<INormalizedMessage> {
     try {
-      console.log(message, 'for send messageLast');
+
 
       const newMessage = new MessageModel(message);
       const savedMessage = await newMessage.save();
@@ -29,7 +29,7 @@ export class ChatRepository implements IChatRepository {
         },
       ]);
 
-      console.log(savedMessage, 'savedMessage from chatRepository');
+ 
 
       return {
         _id: savedMessage._id,

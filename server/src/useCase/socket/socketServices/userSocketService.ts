@@ -2,7 +2,7 @@ import { Socket } from 'socket.io';
 import { IUserSocketService } from './Interface/IUserSocketService';
 import { ISUserRepository } from '../../../data/interfaces/ISUserRepository';
 import { IUserRepository } from '../../../data/interfaces/IUserRepository';
-import { NotificationService } from '../../notificationService';
+import { NotificationService } from '../../notificationServiceUsecase';
 import { ObjectId } from 'mongodb';
 import { Server } from 'socket.io';
 import { INotificationService } from '../../interfaces/InotificationService';
@@ -33,7 +33,6 @@ export class UserSocketService implements IUserSocketService {
 
   async addUser(socket: Socket, userId: string): Promise<void> {
     try {
-      console.log(`🔹 Adding user ${userId} with socket ID ${socket.id}`);
 
       await this._SessionUserRepository.addUser({ id: userId, socketId: socket.id });
 
@@ -166,7 +165,6 @@ async blockUser(socket: Socket, userId: string): Promise<void> {
     await this._UserRepository.updateById(userId, {
       isBlocked: true,
     });
-    console.log(userId, 'for block');
 
     // 2. Notify admin who initiated the block
     socket.emit('blockSuccess', { userId });
@@ -177,9 +175,7 @@ if (blockedUserSocketIds.length > 0) {
   blockedUserSocketIds.forEach(socketId => {
     socket.to(socketId).emit('blockSuccess', { userId });
   });
-  console.log(`🔴 Notified blocked user ${userId} sockets:`, blockedUserSocketIds);
 } else {
-  console.log(`⚪ Blocked user ${userId} is not online`);
 }
 
   } catch (error) {

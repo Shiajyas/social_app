@@ -23,7 +23,6 @@ export class PostRepository implements IPostRepository {
       hashtags,
     });
 
-    // console.log(newPost, '>>>>>>>>>');
     
     return await newPost.save();
   }
@@ -115,7 +114,6 @@ export class PostRepository implements IPostRepository {
       }
 
       await Post.findOneAndDelete({ _id: postId, userId });
-      // console.log("success delete");
       return true;
     } catch (error) {
       console.log('delete post error', error);

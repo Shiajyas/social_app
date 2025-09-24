@@ -7,7 +7,7 @@ import { GroupController } from "../../controllers/GroupController";
 import { IGroupService } from "../../../useCase/interfaces/IGroupService";
 import { IGroupRepository } from "../../../data/interfaces/IGroupRepository";
 import { GroupRepository } from "../../../data/repositories/GroupRepository";
-import { GroupService } from "../../../useCase/GroupService";
+import { GroupService } from "../../../useCase/GroupServiceUsecase";
 
 import { Server as SocketIOServer } from "socket.io";
 import { IGroupMessageRepository } from "../../../data/interfaces/IGroupMessageRepository";

@@ -114,7 +114,7 @@ export class UserController {
   async getSubscription(req: Request, res: Response): Promise<void> {
     try {
       const { id: userId } = req.params;
-      console.log(userId, 'userId222');
+   
       const subscription = await this._SubscriptionUseCase.getUserSubscription(userId);
 
       if (!subscription){
@@ -132,10 +132,9 @@ export class UserController {
   // Step 1: Create payment intent
   async subscribe(req: Request, res: Response): Promise<void> {
     const { userId, planId } = req.body;
-    console.log(planId, 'planId');
+
       const plan = await this._SubscriptionUseCase.getPlanById(planId)
-      
-      console.log(plan, 'ammount');
+
     try {
       const planAmount = plan?.amount; // Or fetch from DB using planId
       const currency = "usd";
@@ -174,7 +173,6 @@ export class UserController {
     try {
       const { userId, planId, paymentIntentId } = req.body;
 
-      console.log(req.body,"in >>>>>>>>>>>>>>>>>>>>>>");
 
       // 🔑 Verify payment status
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);

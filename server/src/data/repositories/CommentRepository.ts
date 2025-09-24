@@ -53,7 +53,7 @@ export class CommentRepository implements ICommentRepository {
         throw new Error('Post ID not found for this comment');
       }
 
-      console.log('Post ID:', postId.toString()); // Debugging log
+    
 
       let deletedCount = 1; // Start with deleting the main comment
 
@@ -63,14 +63,13 @@ export class CommentRepository implements ICommentRepository {
           parentCommentId: commentId,
         });
         // Ensure count includes deleted replies
-        console.log('Replies deleted:', replies.deletedCount);
+     
       }
 
       // Delete the comment itself
       const deleted = await CommentModel.findByIdAndDelete(commentId);
 
       if (deleted) {
-        console.log(`Decreasing commendCount by: ${deletedCount}`);
 
         // Fetch the post first to check the current comment count
         const post = await Post.findById(postId);
@@ -85,8 +84,6 @@ export class CommentRepository implements ICommentRepository {
             { commendCount: newCommendCount },
             { new: true },
           );
-
-          console.log('Updated Post after delete:', updatedPost); // Debugging log
         }
       } else {
         console.log('Comment was not deleted successfully.');

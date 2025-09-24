@@ -4,12 +4,12 @@ import { OtpService } from '../../../infrastructure/services/otpService';
 import { IOtpService } from '../../../infrastructure/services/interfaces/IOtpService';
 import { UserRepository } from '../../../data/repositories/UserRepository';
 import { IUserRepository } from '../../../data/interfaces/IUserRepository';
-import { AuthService } from '../../../useCase/authOperations';
+import { AuthService } from '../../../useCase/authUsecase';
 import { IAuthService } from '../../../useCase/interfaces/IAuthService';
 import userAuthMiddleware from '../../middleware/userAuthMiddleware';
 import { loginRateLimiter } from '../../middleware/rateLimitMiddleware';
 import { IAdminUseCase } from '../../../useCase/interfaces/IAdminUseCase';
-import { AdminUseCaseImpl } from '../../../useCase/adminUseCaseImpl';
+import { AdminUseCaseImpl } from '../../../useCase/adminUsecase';
 import { IAdminRepository } from '../../../data/interfaces/IAdminRepository';
 import { AdminRepository } from '../../../data/repositories/AdminRepository';
 

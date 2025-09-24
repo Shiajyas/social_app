@@ -73,7 +73,6 @@ export class PlanRepository implements IPlanRepository {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-      console.log(subscriptions,">>>>");
     return { subscriptions, total };
   }
 

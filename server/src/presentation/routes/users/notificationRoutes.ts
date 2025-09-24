@@ -4,7 +4,7 @@ import { NotificationRepo } from '../../../data/repositories/NotificationRepo';
 import { NotificationController } from '../../controllers/NotificationController';
 import { InotificationRepo } from '../../../data/interfaces/InotificationRepo';
 import { INotificationService } from '../../../useCase/interfaces/InotificationService';
-import { NotificationService } from '../../../useCase/notificationService';
+import { NotificationService } from '../../../useCase/notificationServiceUsecase';
 import { UserRepository } from '../../../data/repositories/UserRepository';
 import { Server } from 'socket.io';
 import { IUserRepository } from '../../../data/interfaces/IUserRepository';
