@@ -33,10 +33,8 @@ export class NotificationService implements INotificationService {
     senderName?: string
   ): Promise<void> {
     try {
-      console.log(`🔔 Sending notifications to ${receiverIds?.length ?? 0} users`);
 
       if (!receiverIds || receiverIds.length === 0) {
-        console.log('⚠️ No receiver IDs provided. Skipping notification.');
         return;
       }
 
@@ -66,10 +64,7 @@ export class NotificationService implements INotificationService {
         socketIds: string[];
       }[];
 
-      console.log('✅ Valid Receivers:', validReceivers);
-
       if (!validReceivers.length) {
-        console.log(`⚠️ No valid receivers found. Skipping notification.`);
         return;
       }
 
@@ -88,7 +83,6 @@ export class NotificationService implements INotificationService {
       });
 
       await notification.save();
-      console.log(`✅ Notification saved for ${validReceivers.length} users`);
 
       // Emit per user, across all their sockets
       for (const receiver of validReceivers) {
@@ -105,13 +99,13 @@ export class NotificationService implements INotificationService {
               timestamp: new Date(),
             });
           }
-          console.log(`📩 Notification sent to ${receiver._id} (${receiver.socketIds.length} sockets)`);
+          console.log(` Notification sent to ${receiver._id} (${receiver.socketIds.length} sockets)`);
         } else {
-          console.log(`⚠️ User ${receiver._id} is offline. Notification stored only in DB.`);
+          console.log(`User ${receiver._id} is offline. Notification stored only in DB.`);
         }
       }
     } catch (error) {
-      console.error('❌ Error in sendNotification:', error);
+      console.error(' Error in sendNotification:', error);
     }
   }
 

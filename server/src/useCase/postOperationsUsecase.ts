@@ -31,16 +31,14 @@ async createPost(
 
   const isSubscribed = await this._SubscriptionRepo.findByUserId(userId)
 
-  // console.log(isSubscribed,">>>>>>>>>>")
-
-  const isToxicResult = await analyzeSentiment(`${title} ${description}`);
- console.log("isToxicResult",isToxicResult);
- 
 
 
-    // if (isToxic) {
-    //   throw new Error('Post contains toxic content and cannot be created');
-    // }
+   const postCount = await this._PostRepository.userPostcount(userId);
+
+   
+    if(postCount >= 10 && !isSubscribed){
+      throw new Error("unSubscribed user have not able to uplod post more than 10")
+    }
 
   // Regular user logic: check post count
   if (!isSubscribed) {
@@ -72,13 +70,11 @@ async createPost(
     page: number,
     limit: number,
   ): Promise<{ posts: IPost[]; nextPage: number | null }> {
-    // console.log(userId, page, limit, ">>>>userId 2*");
     let { posts, nextPage } = await this._PostRepository.getPosts(
       userId,
       page,
       limit,
     );
-    // console.log(posts, ">>>>posts 2*");
 
     return { posts, nextPage };
   }
@@ -97,8 +93,7 @@ async createPost(
     mediaUrls: string[],
     hashtags: string[]
   ): Promise<IPost> {
-    // console.log(hashtags,">>>>>");
-    
+  
     const updatedPost = await this._PostRepository.updatePost(
       postId,
       userId,
@@ -124,7 +119,7 @@ async createPost(
   async likePost(userId: string, postId: string): Promise<void> {
     await this._PostRepository.likePost(userId, postId);
     const post = await this._PostRepository.getPost(postId);
-    console.log('likre >>>');
+    
     if (!post) throw new Error('Post not found');
   }
 
@@ -132,7 +127,7 @@ async createPost(
   async unlikePost(userId: string, postId: string): Promise<void> {
     await this._PostRepository.unlikePost(userId, postId);
     const post = await this._PostRepository.getPost(postId);
-    console.log('unlikre >>>');
+   
     if (!post) throw new Error('Post not found');
   }
 
@@ -176,14 +171,4 @@ async createPost(
     return await this._PostRepository.searchPostsByHashtags(query);
   }
 
-  // async searchSamples(): Promise<IPost[]> {
-  //   try {
-  //        let posts: IPost[] = await this._PostRepository.searchSamples();
-  //   let users = await this._UserRepository.searchSamples();
-  //   return [...posts, ...users];
-  //   } catch (error) {
-  //     console.log(error);
-  //     return [];
-  //   }
-  // }
 }

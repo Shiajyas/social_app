@@ -38,7 +38,7 @@ export class AuthService implements IAuthService {
     }
 
     const otp = this._OtpService.generateOtp(email);
-    console.log('otp for register use : ', otp);
+  
 
     const userData: IUser = { ...user, otp } as unknown as IUser;
 
@@ -155,7 +155,7 @@ export class AuthService implements IAuthService {
         refreshToken: refreshToken,
       };
     } catch (error) {
-      console.error(error);
+    
       if (error instanceof Error) {
         throw new Error(error.message);
       } else {
@@ -195,7 +195,6 @@ export class AuthService implements IAuthService {
         },
       });
 
-      console.log('✅ Tokens Generated:', { accessToken, refreshToken });
 
       return {
         userData: user,
@@ -214,9 +213,9 @@ export class AuthService implements IAuthService {
     email: string,
     enterdOtp: string,
   ): Promise<{ accessToken: string; refreshToken: string; user: IUser }> {
-    console.log(enterdOtp, 'Enterd Otp');
+   
     const { valid, expired } = this._OtpService.verifyOtp(email, enterdOtp);
-    console.log(valid, expired);
+   
 
     if (expired) {
       throw new Error('OTP has expired, please request a new one.');
@@ -231,7 +230,6 @@ export class AuthService implements IAuthService {
       throw new Error('User data not found.');
     }
 
-    console.log('User Data:', userData);
 
     // Create the user and save to the database
     const user = await this.createUser(userData as IUser);
@@ -263,14 +261,14 @@ export class AuthService implements IAuthService {
         const prev = this._OtpService.getUserData(email);
         existingUserData = { ...(prev as object) };
       } catch {
-        console.log('No previous OTP session found.');
+            throw new Error('Failed to resend OTP.');
+      
       }
 
       await this._OtpService.storeOtp(email, otp, existingUserData as IUser);
 
       return true;
     } catch (error) {
-      console.error('Error in resendOtp:', error);
       throw new Error('Failed to resend OTP.');
     }
   }
@@ -285,7 +283,7 @@ export class AuthService implements IAuthService {
 
       if (user) {
         const otp = this._OtpService.generateOtp(normalizedEmail);
-        console.log('OTP for forgot password: ', otp);
+       
 
         const userData: IUser = { ...user, otp } as unknown as IUser;
 
@@ -300,7 +298,7 @@ export class AuthService implements IAuthService {
         return;
       } else {
         const otp = this._OtpService.generateOtp(email);
-        console.log('OTP for registration: ', otp);
+       
 
         const userData: IUser = { email: email, otp } as unknown as IUser;
 
@@ -319,7 +317,7 @@ export class AuthService implements IAuthService {
 
   async resetPassword(email: string, password: string): Promise<boolean> {
     try {
-      console.log(email, password);
+   
 
       if (!email || !password) {
         throw new Error('Email and Password are required');
@@ -331,7 +329,7 @@ export class AuthService implements IAuthService {
         email,
         passwordHash,
       );
-      console.log(user);
+   
 
       if (!user) throw new Error('User not found');
 
@@ -463,7 +461,6 @@ export class AuthService implements IAuthService {
   }
 
   async blockUser(userId: string): Promise<IUser | null> {
-    console.log(userId, 'for block');
 
     const blockedUser = await this._UserRepository.updateById(userId, {
       isBlocked: true,

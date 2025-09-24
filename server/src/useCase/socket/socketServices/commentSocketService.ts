@@ -2,7 +2,7 @@ import { Socket } from 'socket.io';
 import { ICommentSocketService } from './Interface/ICommentSocketService';
 import { ICommentRepository } from '../../../data/interfaces/ICommentRepository';
 import { IUserRepository } from '../../../data/interfaces/IUserRepository';
-import { NotificationService } from '../../notificationService';
+import { NotificationService } from '../../notificationServiceUsecase';
 import { INotificationService } from '../../interfaces/InotificationService';
 import { IPostRepository } from '../../../data/interfaces/IPostRepository';
 import { Server } from 'socket.io';
@@ -43,9 +43,6 @@ export class CommentSocketService implements ICommentSocketService {
     try {
       const { userId, postId, content, parentId } = data;
 
-      console.log(
-        `Comment added by ${userId} on Post ${postId}, Parent: ${parentId || 'None'}`,
-      );
 
       if (
         !mongoose.Types.ObjectId.isValid(userId) ||
@@ -83,10 +80,6 @@ const commentData = {
           const commentAuthor = await this._UserRepository.findById(userId);
           if (!commentAuthor) throw new Error('User not found.');
 
-          console.log(
-            'Parent Comment Owner ID:',
-            parentComment.userId.toString(),
-          );
 
           const message = `${commentAuthor.fullname} replied to your comment.`;
           await this._NotificationService.sendNotification(
@@ -103,8 +96,6 @@ const commentData = {
 
         const postOwner: IPost | null =
           await this._PostRepository.getPost(postId);
-
-        console.log('Post Owner ID:', postOwner?.userId?._id.toString());
 
         if (postOwner && postOwner.userId._id.toString() !== userId) {
           const commentAuthor = await this._UserRepository.findById(userId);
@@ -127,7 +118,7 @@ const commentData = {
   }
 
   async deleteComment(socket: Socket, commentId: string) {
-    console.log(commentId, '>>>>>>>');
+ 
     try {
       if (!commentId)
         throw new Error('Invalid request. Comment ID is required.');
@@ -141,10 +132,10 @@ const commentData = {
       let postId = res?.postId;
 
       if (parentId) {
-        console.log('replay');
+   
         this._Io.emit('delete_reply', { commentId, postId, parentId });
       } else {
-        console.log('comment');
+     
         this._Io.emit('delete_comment', { commentId, postId });
       }
     } catch (error) {
@@ -154,7 +145,7 @@ const commentData = {
 
   async likeComment(socket: Socket, userId: string, commentId: string) {
     try {
-      console.log(userId, 'to', commentId, '>>>>>>>>>>>>>>>>>>>>>');
+   
 
       if (!userId || !commentId)
         throw new Error(
@@ -169,7 +160,6 @@ const commentData = {
       if (!updatedComment) throw new Error('Failed to like comment.');
 
       // Debugging Log
-      console.log('Updated Likes Array:', updatedComment.likes);
 
       // Emit to all users (including sender)
       const likesArray = Array.isArray(updatedComment.likes)
@@ -203,12 +193,7 @@ const commentData = {
 
   async unLikeComment(socket: Socket, userId: string, commentId: string) {
     try {
-      // console.log(
-      //   userId,
-      //   'removing like from',
-      //   commentId,
-      //   '>>>>>>>>>>>>>>>>>>>>>',
-      // );
+
       if (!userId || !commentId)
         throw new Error(
           'Invalid request. User ID and Comment ID are required.',
@@ -227,7 +212,7 @@ const commentData = {
         likes: updatedComment.likes || [],
       });
     } catch (error) {
-      console.log(error, '>>>>>>>>>>>>123');
+
       this.handleError(socket, error, 'unLikeCommentError');
     }
   }

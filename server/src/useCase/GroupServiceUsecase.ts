@@ -20,7 +20,6 @@ export class GroupService implements IGroupService {
 
   async createGroup(data: Partial<Group>): Promise<Group> {
     try {
-      // console.log(data, 'data');
       const group = await this._GroupRepository.create(data);
       this._Io.emit('group-created', { group }); 
       return group;
@@ -36,7 +35,7 @@ export class GroupService implements IGroupService {
   async getUserGroups(userId: string): Promise<Group[]> {
     console.log(userId, 'userId');
    let res = await this._GroupRepository.getGroupsByUserId(userId);
-  // console.log(res,">>>>>");
+
     return res;
   }
 
@@ -58,7 +57,7 @@ export class GroupService implements IGroupService {
 async getGroupMessages(groupId: string, limit: number = 20): Promise<MessageDTO[]> {
   try {
     const messages = await this._MessageRepository.getRecentMessages(groupId, limit);
-    // console.log(messages, 'messages>>>>>>>>>>>>>>><<<<<<<<<<<<');
+  
     return messages;
   } catch (error) {
     console.error('Failed to fetch group messages:', error);

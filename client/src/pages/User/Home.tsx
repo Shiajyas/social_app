@@ -12,39 +12,39 @@ import { socket } from '@/utils/Socket';
 
 
 
+
 const HomeLayout: React.FC = () => {
   const { unreadCount } = useNotificationStore();
   const { user } = useAuthStore();
   const userId = user?._id || null;
   const location = useLocation();
 
-  let commuityTab = false;
-  if (location.pathname.includes('/community')) commuityTab = true;
+  let communityTab = location.pathname.includes('/community');
 
-  // ✅ Load selectedItem from localStorage or default to "Home"
+  // Selected tab
   const [selectedItem, setSelectedItem] = useState(localStorage.getItem('selectedItem') || 'Home');
 
-useEffect(() => {
-  if (!userId) return;
+  // Toggle right sidebar on small screens
+  const [showRightSidebar, setShowRightSidebar] = useState(false);
 
-  const updateChatSocketIdHandler = () => {
-    socket.emit('updateChatSocketId', { userId: user?._id });
-  };
-
-  // socket.connect();
-  socket.emit('joinUser', userId);
-  socket.on('updateChatSocketId', updateChatSocketIdHandler);
-
-  return () => {
-    socket.emit('leaveUser', userId);
-    socket.off('updateChatSocketId', updateChatSocketIdHandler);
-    // socket.disconnect();
-  };
-}, [userId]);
-
-  // ✅ Update selectedItem when the route changes & save to localStorage
   useEffect(() => {
-    let newSelectedItem = 'Home'; // Default to Home
+    if (!userId) return;
+
+    const updateChatSocketIdHandler = () => {
+      socket.emit('updateChatSocketId', { userId: user?._id });
+    };
+
+    socket.emit('joinUser', userId);
+    socket.on('updateChatSocketId', updateChatSocketIdHandler);
+
+    return () => {
+      socket.emit('leaveUser', userId);
+      socket.off('updateChatSocketId', updateChatSocketIdHandler);
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    let newSelectedItem = 'Home';
     if (location.pathname.includes('/messages')) newSelectedItem = 'Messages';
     else if (location.pathname.includes('/notifications')) newSelectedItem = 'Notifications';
     else if (location.pathname.includes('/profile')) newSelectedItem = 'Profile';
@@ -54,60 +54,92 @@ useEffect(() => {
     localStorage.setItem('selectedItem', newSelectedItem);
   }, [location.pathname]);
 
-  // ✅ Determine if current route needs full height (chat/community)
-  const needsFullHeight = location.pathname.includes('/messages') || 
-                          location.pathname.includes('/community');
+  const needsFullHeight = location.pathname.includes('/messages') || communityTab;
 
   return (
-    <div className="w-full h-screen flex flex-col border overflow-hidden">
-      <Header unreadCount={unreadCount} />
+<div className="w-full h-screen flex flex-col">
+  <Header unreadCount={unreadCount} />
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar - Hidden on small screens */}
-        <div className="hidden lg:flex w-[260px] h-full">
-          <LeftSideBar
-            selectedItem={selectedItem}
-            setSelectedItem={setSelectedItem}
-            unreadNotifications={unreadCount}
-          />
+  <div className="flex flex-1 relative overflow-hidden">
+    {/* Left Sidebar */}
+    <div className="hidden lg:flex w-[260px] h-full">
+      <LeftSideBar
+        selectedItem={selectedItem}
+        setSelectedItem={setSelectedItem}
+        unreadNotifications={unreadCount}
+      />
+    </div>
+
+    {/* Main Content */}
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {needsFullHeight ? (
+        <div className="flex-1 overflow-hidden mt-2">
+          <Outlet />
         </div>
+      ) : (
+        <ScrollArea className="flex-1 mt-2 overflow-y-auto m-0">
+          <Outlet />
+        </ScrollArea>
+      )}
+    </div>
 
-        {/* Main Content - Full Width on small screens */}
-        <Card className="flex-1 w-full p-0 flex flex-col overflow-hidden border">
-          <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-            {/* ✅ Show Status only on Home Page */}
-            {selectedItem === 'Home' && (
-              <div className="flex items-center justify-between">
-                {/* <h2 className="text-2xl font-bold">Home</h2> */}
-              </div>
-            )}
+    {/* Right Sidebar for XL screens */}
+    {!communityTab && (
+      <div className="hidden xl:flex w-[300px] h-full">
+        <RightSideBar />
+      </div>
+    )}
 
-            {/* ✅ Conditional rendering based on route type */}
-            {needsFullHeight ? (
-              // For chats and community - direct outlet without ScrollArea
-              <div className="flex-1 overflow-hidden mt-2">
-                <Outlet />
-              </div>
-            ) : (
-              // For other routes - use ScrollArea
-              <ScrollArea className="flex-1 mt-2 overflow-y-auto m-0">
-                <Outlet />
-              </ScrollArea>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Right Sidebar - Hidden on small screens */}
-     {!commuityTab && (
-  <div className="hidden xl:flex w-[300px] h-full">
-    <RightSideBar />
-  </div>
-)}
-
+    {/* Slide-over Right Sidebar for small/medium screens */}
+{/* Slide-over Right Sidebar for small/medium screens */}
+{/* Slide-over Right Sidebar for small/medium screens */}
+{!communityTab && (
+  <>
+    <div
+      className={`fixed top-0 right-0 h-full w-72 bg-white dark:bg-gray-900 shadow-xl z-50 transform transition-transform duration-300 flex flex-col ${
+        showRightSidebar ? 'translate-x-0' : 'translate-x-full'
+      }`}
+    >
+      {/* Close button (instead of hamburger) */}
+      <div className="flex justify-end p-2">
+        <button
+          onClick={() => setShowRightSidebar(false)}
+          className="text-gray-600 dark:text-gray-300 hover:text-purple-600"
+        >
+          ✕
+        </button>
       </div>
 
-      <BottomNav selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto">
+        <RightSideBar isSlideOver hideFollowBtn /> {/* hide Follow btn */}
+      </div>
     </div>
+
+    {/* Overlay */}
+    {showRightSidebar && (
+      <div
+        onClick={() => setShowRightSidebar(false)}
+        className="fixed inset-0 bg-black bg-opacity-30 z-40"
+      />
+    )}
+
+    {/* Toggle button (hamburger) */}
+    <button
+      onClick={() => setShowRightSidebar(!showRightSidebar)}
+      className="fixed bottom-24 right-4 z-50 p-3 bg-purple-600 text-white rounded-full shadow-lg xl:hidden"
+    >
+      {showRightSidebar ? '✕' : '☰'}
+    </button>
+  </>
+)}
+
+
+  </div>
+
+  <BottomNav selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
+</div>
+
   );
 };
 

@@ -9,9 +9,7 @@ export class AdminSubscriptionController {
 
   getSubscriptionPlans = async (req: Request, res: Response): Promise<void> => {
     try {
-      console.log('getSubscriptionPlans>>>>>>>>>>>>>>>>>>>>>>>><<<<');
       const data = await this.subscriptionService.getSubscriptionPlans();
-      console.log(data, 'getSubscriptionPlans');
       res.status(HttpStatus.OK).json(data);
     } catch (error) {
       console.error('getSubscriptionPlans error:', error);
@@ -20,7 +18,7 @@ export class AdminSubscriptionController {
   };
 
   getPlans = async (req: Request, res: Response): Promise<void> => {
-    console.log(req.query,1236);
+  
     try {
       const {
         search = '',
@@ -37,7 +35,7 @@ export class AdminSubscriptionController {
         parseInt(limit as string),
       );
 
-      console.log(data, 'getPlans');
+    
 
       res.status(HttpStatus.OK).json(data);
     } catch (error) {
@@ -48,7 +46,7 @@ export class AdminSubscriptionController {
 
   // ✅ Fetch all plans without pagination
   getAllPlans = async (req: Request, res: Response): Promise<void> => {
-      console.log(req.query,1236);
+     
     try {
       const {
         search = '',
@@ -65,7 +63,7 @@ export class AdminSubscriptionController {
         parseInt(limit as string),
       );
 
-      console.log(data, 'getAllPlans');
+   
 
       res.status(HttpStatus.OK).json(data);
     } catch (error) {
@@ -90,7 +88,7 @@ export class AdminSubscriptionController {
   createOrUpdatePlan = async (req: Request, res: Response): Promise<void> => {
     try {
       const { name, amount, duration, description, _id :planId} = req.body;
-      // console.log( _id,">>>>");
+     
       const result = await this.subscriptionService.createOrUpdatePlan(name, amount, duration, description, planId);
       res.status(HttpStatus.OK).json(result);
     } catch (error) {

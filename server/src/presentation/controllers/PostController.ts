@@ -35,7 +35,7 @@ async createPost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
  
     // Convert hashtags string to array
     const hashtagsArray = hashtags ? hashtags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : [];
-  //  console.log(hashtagsArray, 'Hashtags Array >>>>>>>>');
+ 
   //  
     if (!req.user) {
       res.status(StatusCode.UNAUTHORIZED).json({ message: ResponseMessages.UNAUTHORIZED });
@@ -81,7 +81,7 @@ async createPost(req: AuthenticatedPostRequest, res: Response): Promise<void> {
         hashtags: string
       };
 
-      // console.log(req.body,">>>123");
+
 
           // Convert hashtags string to array
     const hashtagsArray = hashtags ? hashtags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : [];
@@ -261,17 +261,15 @@ async getPostComments(req: AuthenticatedPostRequest, res: Response): Promise<voi
 
 async generateHashtags(req: Request, res: Response) {
   try {
-    // console.log(req.body, 'req.body in generateHashtags');
+ 
     
     const { description, userId } = req.body;
-
-// console.log('Generating hashtags for description:', description, 'and userId:', userId);
 
     if(!description || !userId) {
       return res.status(StatusCode.BAD_REQUEST).json({ message: ResponseMessages.DESCRIOTION_REQUIRED});
     }
     const hashtags = await this._PostService.generateHashtagsFromAI(description,userId);
-    // console.log(hashtags, 'Generated hashtags >>>');
+   
     
     return res.status(StatusCode.OK).json({ hashtags });
   } catch (err) {
@@ -284,8 +282,7 @@ async generateHashtags(req: Request, res: Response) {
     try {
       let { hashtag } = req.params;
       hashtag = hashtag.replace(/:/g, '').trim(); // Remove '#' and trim whitespace
-      // console.log('Searching posts by hashtag:', hashtag);
-      
+
 
       if (!hashtag || typeof hashtag !== 'string') {
         res.status(StatusCode.BAD_REQUEST).json({ message: ResponseMessages.INVALID_HASHTAG });
@@ -293,8 +290,7 @@ async generateHashtags(req: Request, res: Response) {
       }
 
       const posts = await this._PostService.searchPostsByHashtags(hashtag);
-      // console.log('Found posts:', posts, 'for hashtag:', hashtag);
-      
+
       res.status(StatusCode.OK).json({
         message: ResponseMessages.SUCCESS,
         posts,
@@ -305,16 +301,5 @@ async generateHashtags(req: Request, res: Response) {
     }
   }
 
-  // async searchSamples(req: AuthenticatedPostRequest, res: Response): Promise<void> {
-  //   try {
-  //     const page = parseInt(req.query.page as string) || 1;
-  //     const limit = parseInt(req.query.limit as string) || 10;
-  
-  //     const posts = await this._PostService.searchSamples();
-  //     res.status(StatusCode.OK).json({ message: ResponseMessages.SUCCESS, posts });
-  //   } catch (error) {
-  //     res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: getErrorMessage(error) });
-  //   }
-  // }
 
 }

@@ -62,14 +62,14 @@ const newAdmin: Partial<IAdmin> = {
     user: IAdmin;
   }> {
     const admin = await this._adminRepo.findByEmail(email);
-    console.log(admin, 'admin');
+
     if (!admin) throw new Error('Admin not found');
 
     const isValid = await bcrypt.compare(password, admin.hashedPassword);
     if (!isValid) throw new Error('Invalid credentials');
 
     const adminId = admin._id?.toString();
-    console.log(adminId, 'adminId');
+ 
     if (!adminId) throw new Error('Admin ID is missing');
 
     const token = createAccessToken({

@@ -20,7 +20,6 @@ export class UserRepository implements IUserRepository {
 
   // Save a new user
   async save(user: IUser): Promise<IUser> {
-    console.log('userRepository save', user);
     
     const newUser = new User(user);
     const savedUser = await newUser.save();
@@ -36,7 +35,6 @@ export class UserRepository implements IUserRepository {
   // Find a user by email and role
   async findByEmailAndRole(email: string, role: string): Promise<IUser | null> {
     const user = await User.findOne({ email, role: role });
-    console.log(user, 3);
     return user ? (user.toObject() as IUser) : null;
   }
 
@@ -147,8 +145,6 @@ export class UserRepository implements IUserRepository {
       const userObjectId = new mongoose.Types.ObjectId(userId);
       const unfollowObjectId = new mongoose.Types.ObjectId(unfollowUserId);
 
-      console.log(`🔄 Attempting to unfollow: ${userId} -> ${unfollowUserId}`);
-
       // Fetch users
       const [user, unfollowUser] = await Promise.all([
         User.findById(userObjectId),
@@ -178,7 +174,7 @@ export class UserRepository implements IUserRepository {
       ]);
 
       if (!updatedUser || !updatedUnfollowUser) {
-        console.error('❌ Unfollow operation failed: Updates did not persist.');
+        console.error('Unfollow operation failed: Updates did not persist.');
         return false;
       }
 
@@ -189,7 +185,7 @@ export class UserRepository implements IUserRepository {
 
       return true;
     } catch (error) {
-      console.error('❌ Error in unfollow function:', error);
+      console.error(' Error in unfollow function:', error);
       return false;
     }
   }
@@ -231,7 +227,6 @@ export class UserRepository implements IUserRepository {
   }
 
   async searchUsers(query: string): Promise<IUser[]> {
-    console.log(query, 'searchquery user');
     return await User.find({
       $or: [
         { username: { $regex: query, $options: 'i' } },
@@ -255,8 +250,8 @@ export class UserRepository implements IUserRepository {
       });
 
     let user =  await User.findByIdAndUpdate(userId, { password: newPassword }, { new: true });
-    console.log(user, 'user');
-    
+
+
       return true;
     } catch (error) {
       console.error('Error changing password:', error);

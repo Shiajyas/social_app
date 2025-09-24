@@ -39,4 +39,5 @@ export interface IPostRepository {
   getLikedUsers(postId: string): Promise<any>
   countUserPostsInRange(userId: string, startDate: Date, endDate: Date): Promise<number> 
   searchPostsByHashtags(query: string): Promise<IPost[]>
+   userPostcount(userId: string): Promise<number> 
 }

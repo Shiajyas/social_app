@@ -9,7 +9,7 @@ export class GroupRepository implements IGroupRepository {
   }
 
   findByUserId(userId: string): Promise<IGroup[]> {
-    console.log(userId),"><><";
+
     return GroupModel.find({ members: userId }).sort({ updatedAt: -1 });
   }
 

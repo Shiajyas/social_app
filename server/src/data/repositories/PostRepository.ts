@@ -23,7 +23,6 @@ export class PostRepository implements IPostRepository {
       hashtags,
     });
 
-    // console.log(newPost, '>>>>>>>>>');
     
     return await newPost.save();
   }
@@ -115,7 +114,6 @@ export class PostRepository implements IPostRepository {
       }
 
       await Post.findOneAndDelete({ _id: postId, userId });
-      // console.log("success delete");
       return true;
     } catch (error) {
       console.log('delete post error', error);
@@ -254,5 +252,9 @@ export class PostRepository implements IPostRepository {
     return await Post.find({
       hashtags: { $regex: query, $options: 'i' },
     }).populate('userId', 'username ').limit(15);
+  }
+
+  async userPostcount(userId: string): Promise<number> {
+    return await Post.countDocuments({ userId });
   }
 }

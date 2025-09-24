@@ -7,7 +7,7 @@ import { upload } from '../../middleware/uploadMiddleware';
 import { PostController } from '../../controllers/PostController';
 
 
-import { PostService } from '../../../useCase/postOperations';
+import { PostService } from '../../../useCase/postOperationsUsecase';
 import { IPostService } from '../../../useCase/interfaces/IPostService';
 import { PostRepository } from '../../../data/repositories/PostRepository';
 import { IPostRepository } from '../../../data/interfaces/IPostRepository';

@@ -1,7 +1,7 @@
 import express from 'express';
 import { UserController } from '../../controllers/UserController';
 import userAuthMiddleware from '../../middleware/userAuthMiddleware';
-import { UserService } from '../../../useCase/UserService';
+import { UserService } from '../../../useCase/UserServiceUseCase';
 import { UserRepository } from '../../../data/repositories/UserRepository';
 import { PostRepository } from '../../../data/repositories/PostRepository';
 import SubscriptionUseCase from '../../../useCase/SubscriptionUseCase';
