@@ -170,7 +170,7 @@ return (
         animate={{ scale: 1, opacity: 1 }}
         className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 px-3 py-1 rounded-full font-semibold text-sm shadow-sm"
       >
-        Total: {reportCount}
+     
       </motion.div>
     </div>
 

@@ -124,7 +124,7 @@ const Header = () => {
             transition={{ duration: 0.3 }}
             className="font-medium"
           >
-            Reports: {reportCount}
+           
           </motion.span>
         </div>
 
