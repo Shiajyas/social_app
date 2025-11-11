@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 import { useUserAuth } from '../../hooks/useUserAuth';
-
+import { toast } from 'react-toastify';
 
 const themseOptions = [
   { value: 'fun-emoji', label: 'Fun Emoji' },
@@ -59,7 +59,9 @@ const retryAvatar = () => {
       await registerMutation.mutateAsync(payload);
       navigate('/verify-otp');
     } catch (error) {
+      toast.warning(error)
       console.error('Error during registration:', error);
+      
     }
   };
 

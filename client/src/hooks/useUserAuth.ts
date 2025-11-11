@@ -8,13 +8,24 @@ import { useAuthStore } from '@/appStore/AuthStore';
 import { socket } from '@/utils/Socket';
 
 
-const handleMutationError = (error: any, message: string) => {
-  console.error(error);
-  if (error.msg == 'Too many login attempts from this IP, please try again later.') {
-    toast.error(error.msg);
-  } else {
-    toast.error(message || 'An error occurred.');
-  }
+const handleMutationError = (error: any, fallbackMessage?: string) => {
+  console.error("Full error object:", error);
+
+  // Extract the real message (covers axios, fetch, custom, etc.)
+  const message =
+    error?.response?.data?.message ||    // axios typical
+    error?.response?.data?.error ||      // backend 'error' field
+    error?.response?.data?.msg ||        // 'msg' field
+    (Array.isArray(error?.response?.data?.errors)
+      ? error.response.data.errors.join(", ")
+      : null) ||                         // multiple validation errors
+    error?.message ||                    // general Error object
+    error?.msg ||                        // custom msg
+    fallbackMessage ||                   // developer fallback
+    "Something went wrong!";             // absolute fallback
+
+  // Show specific toast
+  toast.error(message);
 };
 
 // Default function to manage success for mutations
@@ -122,7 +133,9 @@ export const useUserAuth = () => {
       toast.success('Registration successful! Please verify your OTP.');
     },
     onError: (error: any) => {
-      handleMutationError(error, 'An error occurred during registration.');
+      console.log(error);
+      
+      handleMutationError(error, error);
     },
   });
 
