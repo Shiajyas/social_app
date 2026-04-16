@@ -57,7 +57,7 @@ export class App {
         cookie: {
           httpOnly: true,
           secure: false,
-          sameSite: "none",
+          sameSite: "lax",
           maxAge: 24 * 60 * 60 * 1000,
         },
       })
