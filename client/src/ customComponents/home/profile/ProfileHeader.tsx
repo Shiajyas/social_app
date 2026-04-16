@@ -447,3 +447,354 @@ const handleSaveChanges = async () => {
 };
 
 export default ProfileHeader;
+
+
+
+// import { useState, useEffect, ChangeEvent, useReducer } from 'react';
+// import { Button } from '@/components/ui/button';
+// import { Separator } from '@/components/ui/separator';
+// import { Input } from '@/components/ui/input';
+// import { Textarea } from '@/components/ui/textarea';
+// import { Card, CardContent } from '@/components/ui/card';
+// import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+// import { useMutation, useQueryClient } from '@tanstack/react-query';
+// import { userService } from '@/services/userService';
+// import FollowBtn from '@/ customComponents/FollowBtn';
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from '@/components/ui/select';
+// import { Loader2 } from 'lucide-react';
+// import { useNavigate } from 'react-router-dom';
+// import { motion, AnimatePresence } from 'framer-motion';
+// import { toast } from 'react-toastify';
+// import { useAuthStore } from '@/appStore/AuthStore';
+
+// /* ------------------------------------------------------------------ */
+// /* Types */
+// /* ------------------------------------------------------------------ */
+
+// interface ProfileHeaderProps {
+//   user:
+//     | {
+//         fullname: string;
+//         username: string;
+//         email?: string;
+//         bio?: string;
+//         avatar?: string;
+//         gender?: string;
+//         mobile?: string;
+//         address?: string;
+//         website?: string;
+//         following?: [];
+//         followers?: [];
+//       }
+//     | undefined;
+//   userId: string;
+//   refetch: () => void;
+//   parentUserId: string;
+// }
+
+// type PasswordRule = { label: string; isValid: boolean };
+
+// interface PasswordState {
+//   data: {
+//     current: string;
+//     new: string;
+//     confirm: string;
+//   };
+//   rules: PasswordRule[];
+//   error: string;
+//   loading: boolean;
+// }
+
+// type PasswordAction =
+//   | { type: 'SET_FIELD'; field: keyof PasswordState['data']; value: string }
+//   | { type: 'SET_RULES'; rules: PasswordRule[] }
+//   | { type: 'SET_ERROR'; error: string }
+//   | { type: 'SET_LOADING'; loading: boolean }
+//   | { type: 'RESET' };
+
+// /* ------------------------------------------------------------------ */
+// /* Password Reducer */
+// /* ------------------------------------------------------------------ */
+
+// const initialPasswordRules: PasswordRule[] = [
+//   { label: 'At least 6 characters', isValid: false },
+//   { label: 'One uppercase letter', isValid: false },
+//   { label: 'One lowercase letter', isValid: false },
+//   { label: 'One number', isValid: false },
+//   { label: 'One special character (!@#$%^&*)', isValid: false },
+// ];
+
+// const initialPasswordState: PasswordState = {
+//   data: { current: '', new: '', confirm: '' },
+//   rules: initialPasswordRules,
+//   error: '',
+//   loading: false,
+// };
+
+// function passwordReducer(
+//   state: PasswordState,
+//   action: PasswordAction
+// ): PasswordState {
+//   switch (action.type) {
+//     case 'SET_FIELD':
+//       return {
+//         ...state,
+//         data: { ...state.data, [action.field]: action.value },
+//       };
+//     case 'SET_RULES':
+//       return { ...state, rules: action.rules };
+//     case 'SET_ERROR':
+//       return { ...state, error: action.error };
+//     case 'SET_LOADING':
+//       return { ...state, loading: action.loading };
+//     case 'RESET':
+//       return initialPasswordState;
+//     default:
+//       return state;
+//   }
+// }
+
+// /* ------------------------------------------------------------------ */
+// /* Component */
+// /* ------------------------------------------------------------------ */
+
+// const ProfileHeader: React.FC<ProfileHeaderProps> = ({
+//   user,
+//   userId,
+//   refetch,
+//   parentUserId,
+// }) => {
+//   const navigate = useNavigate();
+//   const queryClient = useQueryClient();
+//   const { updateUserFields, user: authUser } = useAuthStore();
+
+//   const [editing, setEditing] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+//   const [errors, setErrors] = useState<Record<string, string>>({});
+//   const [isFollowing, setIsFollowing] = useState(false);
+
+//   /* ---------------- Password useReducer ---------------- */
+
+//   const [passwordState, dispatchPassword] = useReducer(
+//     passwordReducer,
+//     initialPasswordState
+//   );
+
+//   const validatePassword = (password: string) => {
+//     dispatchPassword({
+//       type: 'SET_RULES',
+//       rules: [
+//         { label: 'At least 6 characters', isValid: password.length >= 6 },
+//         { label: 'One uppercase letter', isValid: /[A-Z]/.test(password) },
+//         { label: 'One lowercase letter', isValid: /[a-z]/.test(password) },
+//         { label: 'One number', isValid: /\d/.test(password) },
+//         {
+//           label: 'One special character (!@#$%^&*)',
+//           isValid: /[!@#$%^&*]/.test(password),
+//         },
+//       ],
+//     });
+//   };
+
+//   const handlePasswordChange = async () => {
+//     const { current, new: newPass, confirm } = passwordState.data;
+
+//     if (!current || !newPass || !confirm) {
+//       dispatchPassword({
+//         type: 'SET_ERROR',
+//         error: 'All fields are required.',
+//       });
+//       return;
+//     }
+
+//     if (newPass !== confirm) {
+//       dispatchPassword({
+//         type: 'SET_ERROR',
+//         error: 'New passwords do not match.',
+//       });
+//       return;
+//     }
+
+//     dispatchPassword({ type: 'SET_ERROR', error: '' });
+//     dispatchPassword({ type: 'SET_LOADING', loading: true });
+
+//     try {
+//       await userService.changePassword(userId, current, newPass);
+//       toast.success('Password updated successfully!');
+//       dispatchPassword({ type: 'RESET' });
+//     } catch (err: any) {
+//       toast.error(err.response?.data?.message || 'Old password is incorrect.');
+//     } finally {
+//       dispatchPassword({ type: 'SET_LOADING', loading: false });
+//     }
+//   };
+
+//   /* ---------------- Other logic (unchanged) ---------------- */
+
+//   const [profileData, setProfileData] = useState({
+//     fullname: user?.fullname || '',
+//     username: user?.username || '',
+//     bio: user?.bio || '',
+//     email: user?.email || '',
+//     gender: user?.gender || 'male',
+//     mobile: user?.mobile || '',
+//     address: user?.address || '',
+//     website: user?.website || '',
+//     avatar: user?.avatar || '',
+//   });
+
+//   useEffect(() => {
+//     const followingStatus = (user?.followers ?? []).includes(authUser?._id);
+//     setIsFollowing(followingStatus);
+//   }, [user, authUser]);
+
+//   useEffect(() => {
+//     if (user) {
+//       setProfileData({
+//         fullname: user.fullname || '',
+//         username: user.username || '',
+//         bio: user.bio || '',
+//         email: user.email || '',
+//         gender: user.gender || 'male',
+//         mobile: user.mobile || '',
+//         address: user.address || '',
+//         website: user.website || '',
+//         avatar: user.avatar || '',
+//       });
+//     }
+//   }, [user]);
+
+//   const validateForm = () => {
+//     const newErrors: Record<string, string> = {};
+//     if (!profileData.fullname.trim())
+//       newErrors.fullname = 'Full name is required.';
+//     if (!profileData.username.trim())
+//       newErrors.username = 'Username is required.';
+//     setErrors(newErrors);
+//     return Object.keys(newErrors).length === 0;
+//   };
+
+//   const updateProfile = useMutation({
+//     mutationFn: async () => {
+//       setLoading(true);
+//       const formData = new FormData();
+//       Object.entries(profileData).forEach(([k, v]) =>
+//         formData.append(k, v as string)
+//       );
+//       if (avatarFile) formData.append('avatar', avatarFile);
+//       return userService.updateUserProfile(userId, formData);
+//     },
+//     onSuccess: (data) => {
+//       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+//       updateUserFields({
+//         avatar: data.user.avatar,
+//         username: data.user.username,
+//         fullname: data.user.fullname,
+//       });
+//       setEditing(false);
+//       setLoading(false);
+//     },
+//     onError: () => setLoading(false),
+//   });
+
+//   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+//     if (e.target.files?.[0]) {
+//       setAvatarFile(e.target.files[0]);
+//       setProfileData((p) => ({
+//         ...p,
+//         avatar: URL.createObjectURL(e.target.files[0]),
+//       }));
+//     }
+//   };
+
+//   /* ---------------- JSX ---------------- */
+
+//   return (
+//     <Card className="max-w-3xl mx-auto">
+//       <CardContent className="p-6">
+//         {/* header */}
+//         {/* ...unchanged UI above... */}
+
+//         {/* 🔹 Change Password */}
+//         <div className="mt-6 border-t pt-4">
+//           <h3 className="text-lg font-semibold">Change Password</h3>
+
+//           <Input
+//             type="password"
+//             placeholder="Current Password"
+//             value={passwordState.data.current}
+//             onChange={(e) =>
+//               dispatchPassword({
+//                 type: 'SET_FIELD',
+//                 field: 'current',
+//                 value: e.target.value,
+//               })
+//             }
+//           />
+
+//           <Input
+//             type="password"
+//             placeholder="New Password"
+//             value={passwordState.data.new}
+//             onChange={(e) => {
+//               dispatchPassword({
+//                 type: 'SET_FIELD',
+//                 field: 'new',
+//                 value: e.target.value,
+//               });
+//               validatePassword(e.target.value);
+//             }}
+//           />
+
+//           <div className="text-sm space-y-1">
+//             {passwordState.rules.map((r, i) => (
+//               <div
+//                 key={i}
+//                 className={r.isValid ? 'text-green-500' : 'text-gray-400'}
+//               >
+//                 {r.isValid ? '✅' : '⚪'} {r.label}
+//               </div>
+//             ))}
+//           </div>
+
+//           <Input
+//             type="password"
+//             placeholder="Confirm New Password"
+//             value={passwordState.data.confirm}
+//             onChange={(e) =>
+//               dispatchPassword({
+//                 type: 'SET_FIELD',
+//                 field: 'confirm',
+//                 value: e.target.value,
+//               })
+//             }
+//           />
+
+//           {passwordState.error && (
+//             <p className="text-red-500 text-sm">{passwordState.error}</p>
+//           )}
+
+//           <Button
+//             onClick={handlePasswordChange}
+//             disabled={passwordState.loading}
+//           >
+//             {passwordState.loading ? (
+//               <Loader2 className="animate-spin" />
+//             ) : (
+//               'Update Password'
+//             )}
+//           </Button>
+//         </div>
+//       </CardContent>
+//     </Card>
+//   );
+// };
+
+// export default ProfileHeader;

@@ -24,7 +24,7 @@ interface GroupData {
 
 interface Props {
   groupData?: GroupData;
-  onClose?: () => void;
+  onClose?: () => void; 
 }
 
 const GroupDetails: React.FC<Props> = ({ groupData, onClose }) => {
