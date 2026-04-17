@@ -11,9 +11,9 @@ export  const GroupWelcomePage = () => {
 
       {/* Animated cartoon image */}
       <img
-        src="https://www.animatedimages.org/data/media/209/animated-cat-image-0072.gif"
+        src="/logo2.svg"
         alt="Welcome Doodle"
-        className="w-full max-w-sm md:max-w-md mb-8 animate-bounce"
+        className="max-w-sm md:max-w-md mb-8 animate-bounce"
       />
 
       {/* Heading */}
