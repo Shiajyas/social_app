@@ -152,124 +152,133 @@ const handleMediaCaptured = (file: File, previewUrl: string) => {
   };
 
 return (
-  <div className="w-full max-w-2xl mx-auto px-6 py-6 sm:px-8 sm:py-8 bg-white dark:bg-gray-900 text-black dark:text-white rounded-2xl shadow-lg space-y-4">
+  <div className="w-full min-h-screen bg-gray-100 dark:bg-gray-900 flex justify-center px-2 sm:px-4 py-4">
 
-  {/* Back Button */}
-    <button
-      onClick={() => navigate(-1)}
-      className="mb-4 flex items-center text-sm font-medium rounded-md text-black hover:bg-purple-100 dark:text-white dark:bg-gray-900 px-2 py-1"
-    >
-      {!preview && <MoveLeft className="w-4 h-4 mr-2" />}
-    </button>
+    <div className="w-full max-w-md sm:max-w-lg bg-white dark:bg-gray-900 rounded-xl shadow-lg p-3 sm:p-5 space-y-4">
 
-    {/* Media Upload Section */}
-    <div className=" flex flex-col w-full  bg-gray-50 dark:bg-gray-800 p-3 sm:p-4 rounded-lg mb-4">
-      {!preview ? (
-        <MediaCapture
-          onMediaCaptured={handleMediaCaptured}
-          isPaidUser={isPaidUser}
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+        >
+          <MoveLeft className="w-5 h-5" />
+        </button>
+        <h2 className="text-base sm:text-lg font-semibold">Create Post</h2>
+      </div>
+
+      {/* Media Section */}
+      <div className="w-full bg-gray-50 dark:bg-gray-800 rounded-lg p-2 sm:p-3">
+        {!preview ? (
+          <div className="w-full overflow-hidden rounded-lg">
+            <MediaCapture
+              onMediaCaptured={handleMediaCaptured}
+              isPaidUser={isPaidUser}
+            />
+          </div>
+        ) : (
+          <div className="w-full max-h-[300px] overflow-hidden rounded-lg">
+            <MediaPreview previewUrl={preview} onRemove={handleRemoveMedia} />
+          </div>
+        )}
+
+        {errors.media && (
+          <p className="text-red-500 text-xs mt-1">{errors.media}</p>
+        )}
+
+        {!isPaidUser && (
+          <p className="text-xs text-yellow-600 mt-2">
+            🎥 Upgrade for full video uploads
+          </p>
+        )}
+      </div>
+
+      {/* Description */}
+      <div>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="What's on your mind?"
+          className="w-full p-2 sm:p-3 text-sm rounded-lg border dark:bg-gray-800 resize-none"
+          rows={3}
         />
-      ) : (
-        <MediaPreview previewUrl={preview} onRemove={handleRemoveMedia} />
+        <div className="text-right text-xs text-gray-400">
+          {description.length}/200
+        </div>
+      </div>
+
+      {/* Hashtag Button */}
+      {description.trim() && (
+        <button
+          onClick={handleGenerateHashtags}
+          disabled={isTagging}
+          className="w-full py-2 text-sm bg-indigo-600 text-white rounded-lg"
+        >
+          {isTagging ? 'Generating...' : 'Generate Hashtags'}
+        </button>
       )}
-      {errors.media && (
-        <p className="text-red-500 text-sm mt-2">{errors.media}</p>
-      )}
-      {!isPaidUser && (
-        <div className="mt-2 text-xs text-yellow-700">
-          🎥 Only <strong>paid users</strong> can record and upload full-length videos.
-          <br />
-          <span
-            className="text-indigo-600 underline cursor-pointer hover:text-indigo-800"
-            onClick={() => navigate(`/home/profile/${userId}`)}
-          >
-            Upgrade your plan to unlock full video uploads →
-          </span>
+
+      {/* Tags */}
+      {generatedTags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {generatedTags.map((tag) => (
+            <div
+              key={tag}
+              className="flex items-center px-2 py-1 text-xs rounded-full bg-purple-200 dark:bg-purple-700"
+            >
+              {tag}
+              <button
+                onClick={() => handleRemoveTag(tag)}
+                className="ml-1 text-red-500"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
         </div>
       )}
-    </div>
 
-    {/* Description Field */}
-    <textarea
-      value={description}
-      onChange={(e) => setDescription(e.target.value)}
-      placeholder="What's on your mind?"
-      className="w-full p-3 rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 resize-none mb-4 text-sm sm:text-base"
-      rows={3}
-    />
-
-    {/* Hashtag Generator */}
-    {description.trim() && (
-      <button
-        onClick={handleGenerateHashtags}
-        disabled={isTagging}
-        className="mb-3 px-4 py-2 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700 transition w-full sm:w-auto"
-      >
-        {isTagging ? 'Generating...' : 'Generate Hashtags'}
-      </button>
-    )}
-
-    {/* Tag Display */}
-    {generatedTags.length > 0 && (
-      <div className="flex flex-wrap gap-2 mb-4">
-        {generatedTags.map((tag) => (
-          <div
-            key={tag}
-            className="flex items-center px-3 py-1 text-xs rounded-full bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-white"
-          >
-            <span>{tag}</span>
-            <button
-              onClick={() => handleRemoveTag(tag)}
-              className="ml-2 text-red-500 hover:text-red-700 font-bold"
-              aria-label={`Remove ${tag}`}
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-      </div>
-    )}
-
-    {/* Moderation Warning */}
-    {moderationWarning && (
-      <p className="text-yellow-600 text-sm font-semibold mb-4">{moderationWarning}</p>
-    )}
-
-    {/* Visibility Dropdown */}
-    <select
-      value={visibility}
-      onChange={(e) => setVisibility(e.target.value as 'public' | 'private')}
-      className="w-full p-3 mb-4 rounded-lg border bg-white dark:bg-gray-800 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 text-sm"
-    >
-      <option value="public">Public</option>
-      <option value="private">Private</option>
-    </select>
-
-    {/* Upload Button */}
-    <button
-      onClick={handleUpload}
-      disabled={status === 'pending'}
-      className={`w-full py-3 px-6 rounded-xl font-semibold text-white text-lg flex items-center justify-center gap-3 transition-all duration-300 backdrop-blur-md ${
-        status === 'pending'
-          ? 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed'
-          : 'bg-gradient-to-br from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg'
-      }`}
-    >
-      {status === 'pending' ? (
-        <>
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span>Uploading...</span>
-        </>
-      ) : (
-        <>
-          <Upload className="h-5 w-5" />
-          <span>Share Post</span>
-        </>
+      {/* Warning */}
+      {moderationWarning && (
+        <p className="text-yellow-500 text-xs">{moderationWarning}</p>
       )}
-    </button>
+
+      {/* Visibility */}
+      <select
+        value={visibility}
+        onChange={(e) => setVisibility(e.target.value as 'public' | 'private')}
+        className="w-full p-2 text-sm rounded-lg border dark:bg-gray-800"
+      >
+        <option value="public">Public</option>
+        <option value="private">Private</option>
+      </select>
+
+      {/* Upload */}
+      <button
+        onClick={handleUpload}
+        disabled={!media || status === 'pending'}
+        className={`w-full py-3 rounded-lg text-white flex items-center justify-center gap-2 ${
+          status === 'pending'
+            ? 'bg-gray-400'
+            : 'bg-gradient-to-r from-purple-600 to-indigo-600'
+        }`}
+      >
+        {status === 'pending' ? (
+          <>
+            <Loader2 className="animate-spin w-4 h-4" />
+            Uploading...
+          </>
+        ) : (
+          <>
+            <Upload className="w-4 h-4" />
+            Share
+          </>
+        )}
+      </button>
+
+    </div>
   </div>
 );
-
 };
 
 export default PostUpload;
